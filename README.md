@@ -59,7 +59,7 @@ File                   | Location                                              |
 | `conductor_protocol.md`      | `~/.gemini/antigravity/rules/`  | Always-on: directory structure, context loading, guardrails, interaction standards |
 | `conductor_antigravity.md`   | `~/.gemini/antigravity/rules/`  | Always-on: Antigravity platform UI adapter (`ask_question`, artifact rendering) |
 | `conductor_adr_preflight.md` | `~/.gemini/antigravity/rules/`  | On-demand: ADR preflight interceptor for brownfield projects |
-| `conductor_cdd_protocols.md` | `~/.gemini/antigravity/rules/`  | On-demand: Drift scan, invariant capture, per-directory context |
+| `conductor_cdd_protocols.md` | `~/.gemini/antigravity/rules/`  | On-demand: Drift scan, ADR capture, per-directory context |
 
 ## Installation
 
@@ -160,4 +160,4 @@ appropriate command based on your prompt.
 
 ## Version
 
-Current: **v0.12.0**
+Current: **v0.13.0**

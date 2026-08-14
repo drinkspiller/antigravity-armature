@@ -73,10 +73,6 @@ Evaluate the changed code against the following criteria:
 -   **ADR compliance:** For each ADR in `{PROJECT_ROOT}/conductor/adr/` that was
     created or modified during this track (or is active in the modified
     modules), verify that the implementation adheres to the recorded decision.
--   **Invariant compliance:** For each invariant in
-    `{PROJECT_ROOT}/conductor/invariants.md` whose scope includes files changed
-    in this track, verify that the implementation honors the behavioral
-    contract.
 -   **Style compliance:** Are `product-guidelines.md` and
     `code_styleguides/*.md` rules followed?
 -   **Correctness & safety:** Check for bugs, race conditions, null risks, and
@@ -103,7 +99,6 @@ Use the following strict output format for the report:
 ## Verification Checks
 - Intent vs Spec: [Pass/Fail]
 - ADR Compliance: [Pass/Fail]
-- Invariant Compliance: [Pass/Fail]
 - Style Compliance: [Pass/Fail]
 - Correctness & Safety: [Pass/Fail]
 - Testing: [Pass/Fail]
@@ -142,23 +137,11 @@ divergences between the implementation and an active ADR:
     -   **Acknowledge as tech debt**: Record the divergence in the review report
         under 'Medium / Low' findings, tagged as `[Tech Debt]`.
 
-**Invariant Compliance Resolution**: If the analysis checklist identified any
-divergences between the implementation and an active invariant:
-
--   For each divergence, call `ask_question` with a randomized prompt:
-    *   "Invariant {ID} says '{rule}', but the code diverges: {desc}.
-        Intentional?"
-    *   "The implementation violates {ID}: expected '{expected}' but found
-        '{actual}' in {file}."
-    *   *Options*: `["Fix the code", "Update the invariant", "Acknowledge as
-        tech debt"]`
--   Handle the selection using the same protocol as ADR compliance resolution.
-
-**Invariant Capture from Findings**: If the review flags a correctness or safety
-issue that implies a behavioral invariant (e.g., "race condition: X must
-complete before Y", "null check required before Z"), and the fix establishes an
-ordering or initialization constraint, follow the Invariant Capture Protocol in
-`conductor_cdd_protocols.md` §10 after the fix is applied.
+**ADR Capture from Findings**: If the review flags a correctness or safety
+issue that implies a non-obvious architectural decision or behavioral contract
+(e.g., "race condition: X must complete before Y", "null check required before Z"),
+and the fix establishes an ordering or initialization constraint, follow the ADR
+Capture Protocol in `conductor_cdd_protocols.md` §10 after the fix is applied.
 
 Based on the findings, present an overall recommendation via a structured choice
 (`ask_question`): - If Critical/High issues exist: "I recommend fixing before

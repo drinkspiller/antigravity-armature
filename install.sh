@@ -53,7 +53,7 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
-VERSION="0.12.0"
+VERSION="0.13.0"
 
 # --- Resolve source directory (relative to this script) ---
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

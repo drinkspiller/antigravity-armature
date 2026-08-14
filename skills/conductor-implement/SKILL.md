@@ -54,10 +54,10 @@ tasks sequentially, synchronizing documentation, and managing track cleanup.
         -   If the directory is simple (straightforward UI components, basic utilities, CRUD wrappers), skip prompting entirely.
     -   **Lifecycle Execution**: Defer to the lifecycle defined in `workflow.md`
         (e.g., TDD Red/Green/Refactor).
-    -   **Invariant Capture**: When writing a guard, assertion, initialization
+    -   **ADR Capture**: When writing a guard, assertion, initialization
         constraint, or call-ordering check, evaluate whether it enforces a
-        behavioral contract that extends beyond this track. If so, follow the
-        Invariant Capture Protocol in `conductor_cdd_protocols.md` §10.
+        load-bearing architectural rule that extends beyond this track. If so, follow the
+        ADR Capture Protocol in `conductor_cdd_protocols.md` §10.
     -   **Mark Complete**: Once completed, update the task to `[x]` in `plan.md`
         and append the commit SHA.
 4.  **Phase Checkpointing**: When the last task in a phase is completed:
@@ -72,7 +72,7 @@ tasks sequentially, synchronizing documentation, and managing track cleanup.
         true`: "These new exports appeared in Phase N. Add any to the glossary?"
         For each accepted symbol, append a definition to
         `{PROJECT_ROOT}/conductor/terms.md`. Update the cache file.
-    -   **Per-Directory Context Update**: For directories touched in this phase, check whether their context file (`GEMINI.md`, `AGENTS.md`, `AGENT.md`, or `CLAUDE.md`) `## Conductor Context` section needs updates (new Key Types, new scoped invariants). Propose updates between the START and END boundary comments.
+    -   **Per-Directory Context Update**: For directories touched in this phase, check whether their context file (`GEMINI.md`, `AGENTS.md`, `AGENT.md`, or `CLAUDE.md`) `## Conductor Context` section needs updates (new Key Types, new local rules). Propose updates between the START and END boundary comments.
     -   Write a manual verification plan as an artifact (use
         `write_to_file` with `IsArtifact: true`, save to
         `{ARTIFACT_DIR}/conductor_implement_phase_N_verification.md`,
@@ -112,13 +112,7 @@ complete).
     -   "The glossary drifted. Here's what changed — apply?"
     -   "terms.md needs a refresh after this track. Review the diff?"
     -   *Options*: `["Apply", "Edit first", "Skip"]`
-7.  **Update `invariants.md`**: Review invariants captured during the track.
-    Propose consolidation (merging duplicates, refining scope annotations,
-    adjusting categories). Use `ask_question` with a randomized prompt:
-    -   "Invariants evolved during this track. Review the updates?"
-    -   "Some invariants need tightening after implementation. Take a look?"
-    -   *Options*: `["Apply", "Edit first", "Skip"]`
-8.  Commit all approved documentation changes as a separate commit with the
+7.  Commit all approved documentation changes as a separate commit with the
     message: `docs(conductor): Synchronize docs for track '<description>'` using
     VCS commands.
 
