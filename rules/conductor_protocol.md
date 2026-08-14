@@ -12,7 +12,7 @@ task-specific logic.
 ## 0. Conductor Directory
 
 The conductor directory lives at `{PROJECT_ROOT}/conductor/` — the root of the
-user's project repository (NOT the Jetski brain/artifacts directory). All
+user's project repository (NOT internal agent scratch directories). All
 conductor artifacts are project-level files committed to version control.
 
 ```
@@ -98,7 +98,7 @@ commands in skill protocols.
 Whenever a Conductor command produces structured output requiring user review -
 clarifying questions, reports, summaries, specs, plans, or confirmation prompts:
 
-1.  **Write as a Jetski artifact** using `write_to_file` with `IsArtifact: true`
+1.  **Write as an artifact** using `write_to_file` with `IsArtifact: true`
 2.  **Present via `notify_user`** with `PathsToReview` pointing to the file
 3.  **Use appropriate ArtifactType**: `walkthrough` for reports/status,
     `implementation_plan` for specs/plans, `other` for questions/prompts

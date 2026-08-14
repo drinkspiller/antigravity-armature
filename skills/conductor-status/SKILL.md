@@ -38,8 +38,8 @@ persona: Conductor Observer
     -   Extract the current phase and task (marked `[~]`), the next pending task
         (marked `[ ]`), and any explicitly noted blockers.
 
-4.  **Generate the Enhanced Status Summary:** Write the status summary as a
-    Jetski artifact (`conductor_status.md`, `ArtifactType: walkthrough` using
+4.  **Generate the Enhanced Status Summary:** Write the status summary as an
+    artifact (`conductor_status.md`, `ArtifactType: walkthrough` using
     `write_to_file` with `IsArtifact: true`) and present via `notify_user` with
     `PathsToReview`.
 

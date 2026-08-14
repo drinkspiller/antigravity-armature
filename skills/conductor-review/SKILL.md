@@ -90,7 +90,7 @@ Evaluate the changed code against the following criteria:
 
 #### 3.1 Report & Decision
 
-Generate a strict review report as a Jetski artifact (save to
+Generate a strict review report as an artifact (save to
 `{PROJECT_ROOT}/conductor/tracks/<track_name>/review.md` if reviewing a track,
 using `write_to_file` with `IsArtifact: true`, `ArtifactType: walkthrough`).
 

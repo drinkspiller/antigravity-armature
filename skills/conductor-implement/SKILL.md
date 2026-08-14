@@ -73,7 +73,7 @@ tasks sequentially, synchronizing documentation, and managing track cleanup.
         For each accepted symbol, append a definition to
         `{PROJECT_ROOT}/conductor/terms.md`. Update the cache file.
     -   **Per-Directory Context Update**: For directories touched in this phase, check whether their context file (`GEMINI.md`, `AGENTS.md`, `AGENT.md`, or `CLAUDE.md`) `## Conductor Context` section needs updates (new Key Types, new scoped invariants). Propose updates between the START and END boundary comments.
-    -   Write a manual verification plan as a Jetski artifact (use
+    -   Write a manual verification plan as an artifact (use
         `write_to_file` with `IsArtifact: true`, save to
         `{ARTIFACT_DIR}/conductor_implement_phase_N_verification.md`,
         `ArtifactType: walkthrough`). Detail specific, actionable steps (e.g.,

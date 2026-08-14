@@ -7,8 +7,8 @@ Gemini CLI extension that enables Context-Driven Development. It manages the
 full lifecycle of software development tracks: context setup, specification,
 planning, implementation, and review.
 
-This installer creates **Antigravity Skills** that bring Conductor's
-capabilities to Antigravity.
+This installer packages **Antigravity Skills** (with rules and setup assets) that
+bring Conductor's capabilities to Antigravity.
 
 ## Motivation
 
@@ -17,7 +17,7 @@ knowledge on the developer's machine. The intelligence accumulated during
 development **doesn't travel with the code and is invisible to teammates**.
 
 Conductor takes a different approach: **context is a managed artifact that lives
-alongside your code.** Specs, plans, and progress live along side the project
+alongside your code.** Specs, plans, and progress live alongside the project
 source in a `conductor/` directory as self-updating, curated knowledge
 artifacts. Context travels with the codebase and can be shared by the whole
 team.
@@ -35,18 +35,31 @@ context that the whole team can use.
 
 ## What Gets Installed
 
-File                     | Location                             | Purpose
------------------------- | ------------------------------------ | -------
-`SKILL.md`               | `~/.gemini/antigravity/skills/conductor/` | Core skill definition (commands, context loading, track lifecycle)
-`SKILL.md`               | `~/.gemini/antigravity/skills/conductor_setup/` | `/conductor_setup` — Initialize project context
-`SKILL.md`               | `~/.gemini/antigravity/skills/conductor_newTrack/` | `/conductor_newTrack` — Start a new feature or bug fix
-`SKILL.md`               | `~/.gemini/antigravity/skills/conductor_implement/` | `/conductor_implement` — Execute plan tasks sequentially
-`SKILL.md`               | `~/.gemini/antigravity/skills/conductor_status/` | `/conductor_status` — View project progress
-`SKILL.md`               | `~/.gemini/antigravity/skills/conductor_review/` | `/conductor_review` — Review work against spec
-`SKILL.md`               | `~/.gemini/antigravity/skills/conductor_revert/` | `/conductor_revert` — Undo work via VCS-aware revert
-`SKILL.md`               | `~/.gemini/antigravity/skills/conductor_chat/` | `/conductor_chat` — Context-primed freeform agent
-`workflow_template.md`   | `~/.gemini/antigravity/skills/conductor/templates/` | Bundled workflow template copied to projects during `/conductor_setup`
-`.conductor_version`     | `~/.gemini/antigravity/skills/conductor/` | Version stamp for update detection
+### Plugin Manifest & Skills
+
+File                   | Location                                              | Purpose
+---------------------- | ----------------------------------------------------- | -------
+`plugin.json`          | `~/.gemini/antigravity/`                              | Plugin package manifest (name, version, metadata)
+`marketplace.json`     | `~/.gemini/antigravity/.claude-plugin/`               | Claude Code plugin manifest
+`conductor-setup/`     | `~/.gemini/antigravity/skills/conductor-setup/`       | `/conductor-setup` — Initialize project context (persona: Conductor Architect)
+`workflow_template.md` | `~/.gemini/antigravity/skills/conductor-setup/assets/`| Bundled project workflow template copied during `/conductor-setup`
+`adr_template.md`      | `~/.gemini/antigravity/skills/conductor-setup/assets/`| Bundled project ADR template copied during `/conductor-setup`
+`.conductor_version`   | `~/.gemini/antigravity/skills/conductor-setup/`       | Version stamp for update detection
+`conductor-new-track/` | `~/.gemini/antigravity/skills/conductor-new-track/`   | `/conductor-new-track` — Start a new feature or bug fix (persona: Conductor Planner)
+`conductor-implement/` | `~/.gemini/antigravity/skills/conductor-implement/`   | `/conductor-implement` — Execute plan tasks sequentially (persona: Conductor Implementer)
+`conductor-status/`    | `~/.gemini/antigravity/skills/conductor-status/`      | `/conductor-status` — View project progress (persona: Conductor Observer)
+`conductor-review/`    | `~/.gemini/antigravity/skills/conductor-review/`      | `/conductor-review` — Review work against spec (persona: Principal Software Engineer)
+`conductor-revert/`    | `~/.gemini/antigravity/skills/conductor-revert/`      | `/conductor-revert` — Undo work via VCS-aware revert (persona: Conductor Surgeon)
+`conductor-chat/`      | `~/.gemini/antigravity/skills/conductor-chat/`        | `/conductor-chat` — Ceremony-free context mode (persona: Conductor Guide)
+
+### Rules (MVC Architecture)
+
+| File                         | Location                        | Purpose           |
+| ---------------------------- | ------------------------------- | ----------------- |
+| `conductor_protocol.md`      | `~/.gemini/antigravity/rules/`  | Always-on: directory structure, context loading, guardrails, interaction standards |
+| `conductor_antigravity.md`   | `~/.gemini/antigravity/rules/`  | Always-on: Antigravity platform UI adapter (`ask_question`, artifact rendering) |
+| `conductor_adr_preflight.md` | `~/.gemini/antigravity/rules/`  | On-demand: ADR preflight interceptor for brownfield projects |
+| `conductor_cdd_protocols.md` | `~/.gemini/antigravity/rules/`  | On-demand: Drift scan, invariant capture, per-directory context |
 
 ## Installation
 
@@ -147,4 +160,4 @@ appropriate command based on your prompt.
 
 ## Version
 
-Current: **v0.11.1**
+Current: **v0.12.0**

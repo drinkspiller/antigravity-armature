@@ -63,9 +63,9 @@ Once the target is selected, gather the commits to revert from VCS history.
 
 ### 4. Final Execution Plan
 
-Before executing the revert, present a plan to the user using a Jetski artifact.
+Before executing the revert, present a plan to the user using an artifact.
 
-1.  **Preview the Revert:** Write a revert preview as a Jetski artifact (using
+1.  **Preview the Revert:** Write a revert preview as an artifact (using
     `write_to_file` with `IsArtifact: true`, `ArtifactType: other`). Save it to
     a logical artifact path (e.g.,
     `{PROJECT_ROOT}/conductor/artifacts/revert_preview.md`). The artifact should

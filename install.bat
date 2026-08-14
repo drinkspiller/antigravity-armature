@@ -4,7 +4,7 @@ setlocal EnableDelayedExpansion
 :: Antigravity Conductor Skills & Rules Installer (Windows)
 :: =============================================================================
 
-set "VERSION=0.11.1"
+set "VERSION=0.12.0"
 set "FLAGS_dry_run=0"
 set "FLAGS_force=0"
 set "FLAGS_uninstall=0"
@@ -143,7 +143,7 @@ for %%S in (conductor-setup conductor-new-track conductor-implement conductor-st
         )
     )
 )
-for %%R in (conductor_protocol.md conductor_jetski.md conductor_adr_preflight.md conductor_cdd_protocols.md) do (
+for %%R in (conductor_protocol.md conductor_antigravity.md conductor_adr_preflight.md conductor_cdd_protocols.md) do (
     if exist "%TARGET_RULES_ROOT%\%%R" (
         if "%FLAGS_dry_run%"=="1" (
             echo Would remove: %TARGET_RULES_ROOT%\%%R
