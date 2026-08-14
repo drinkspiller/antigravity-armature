@@ -67,7 +67,7 @@ phased plan.
         -   If all three criteria are met, immediately prompt using `ask_question`: "This decision looks worth recording. Create an ADR?" (`["Yes", "No", "Skip all ADR prompts for this track"]`).
         -   If approved, scan `{PROJECT_ROOT}/conductor/adr/` for the next sequence number (`NNNN`) and write `{PROJECT_ROOT}/conductor/adr/NNNN-slug.md` using `adr_template.md`.
     -   **Inline Glossary Elicitation (`terms.md`)**: If a question or decision introduces/refines a domain term not in `terms.md`, offer to add it inline via `ask_question` (`["Yes, with definition", "Yes, I'll write the definition", "No"]`).
-    -   **Inline Invariant Elicitation**: If a decision implies a behavioral constraint (ordering requirement, initialization guard, call-sequence dependency), offer to capture it following the Invariant Capture Protocol in `conductor_cdd_protocols.md` §10.
+    -   **Inline ADR Elicitation**: If a decision implies a load-bearing behavioral contract or architectural rule (ordering requirement, initialization guard, call-sequence dependency), offer to capture it following the ADR Capture Protocol in `conductor_cdd_protocols.md` §10.
     -   **Termination**: End the grill session when the user signals done ("done", "let's move on") or when natural convergence is reached and you propose ending via `ask_question`: "I think we've covered the key areas. Ready to draft the spec?" (`["Yes, draft the spec", "Not yet — I want to discuss [topic]"]`).
     -   All resolved decisions must be recorded in the track spec under `## Design Decisions`.
 
@@ -153,10 +153,10 @@ phased plan.
         user's per-challenge decisions: update the spec for items the user chose
         to address, and note acknowledged risks for items the user chose to
         accept.
-    -   **Invariant Sweep**: For each challenge the user chose to address (e.g.,
+    -   **ADR Capture Sweep**: For each challenge the user chose to address (e.g.,
         adding an initialization guard, enforcing call ordering), evaluate
-        whether the fix establishes a behavioral invariant that extends beyond
-        this track. If so, follow the Invariant Capture Protocol defined in
+        whether the fix establishes an architectural decision that extends beyond
+        this track. If so, follow the ADR Capture Protocol defined in
         `conductor_cdd_protocols.md` §10.
 
 11. **Final Spec Confirmation:**

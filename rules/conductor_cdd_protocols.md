@@ -1,94 +1,80 @@
-# CDD Protocols (Drift Scan, Invariant Capture, Per-Directory Context)
+# CDD Protocols (Drift Scan, ADR Capture, Per-Directory Context)
 
 > Loaded on demand by Conductor skills. Not an always-on rule.
 
 ## 9. Pre-Execution Drift Scan
 
-After completing context loading (items 1–8), and before executing the invoked
+After completing context loading (items 1–7), and before executing the invoked
 skill's primary protocol, perform a lightweight drift check:
 
 1.  **Diff stat:** Run a VCS diff stat (`git diff --stat` / `hg diff --stat`)
     against the last Conductor checkpoint commit (or HEAD if no checkpoint
     exists). This yields the list of files with uncommitted or recent changes.
-2.  **Scope matching:** For each changed file, scan the loaded ADRs and
-    `invariants.md` (if it exists) for scope annotations that reference the
-    changed file or its parent directory.
+2.  **Scope matching:** For each changed file, scan the loaded ADRs in
+    `conductor/adr/*.md` and directory context files for scope annotations that
+    reference the changed file or its parent directory.
 3.  **Targeted read:** For each scope match, read the changed file and the
-    matching ADR decision statement or invariant rule. Check for surface-level
+    matching ADR decision statement or confirmation rule. Check for surface-level
     contradictions (e.g., ADR says "use WebSocket for mutations" but the file
     adds a direct REST call).
 4.  **Resolution:** If drift is detected:
-    -   Present a `> [!WARNING]` callout naming the ADR/invariant, the file, and
+    -   Present a `> [!WARNING]` callout naming the ADR/rule, the file, and
         the contradiction.
     -   Use `ask_question` with a randomized prompt:
         *   "Drift detected against {source}. How to handle?"
         *   "The code diverges from {source}. What's the call?"
-        *   *Options*: `["Fix the code now", "Update the ADR/invariant",
+        *   *Options*: `["Fix the code now", "Update the ADR",
             "Acknowledge as tech debt and proceed", "Show me the details"]`
     -   Handle the selection:
         -   **Fix the code now**: Apply a targeted fix before proceeding with
             the originally invoked command.
-        -   **Update the ADR/invariant**: Draft an update to the relevant file
+        -   **Update the ADR**: Draft an update or amendment to the relevant ADR
             and enter a Draft Review Loop.
         -   **Acknowledge as tech debt**: Log the divergence in the active
             track's `spec.md` under a `## Tech Debt` section (create if absent)
             and proceed.
-        -   **Show me the details**: Display the full ADR/invariant text and the
+        -   **Show me the details**: Display the full ADR text and the
             relevant diff, then re-present the resolution options.
 5.  **No drift:** If no scope matches are found or no contradictions are
     detected, proceed silently — no output overhead.
 
-## 10. Invariant Capture Protocol
+## 10. ADR Capture Protocol
 
-Invariants are behavioral contracts (ordering constraints, null-check
-requirements, data-flow rules, initialization guards) that implementations must
-honor. They live in `{PROJECT_ROOT}/conductor/invariants.md`.
-
-### File Format
-
-```markdown
-# Invariants
-
-## {Category}
-- **{CAT}-{NNN}**: {Invariant statement}. _Source: {ADR-NNNN | track
-  {name} | user-stated}. Scope: `{file/directory paths}`_
-```
-
-Categories are free-form (e.g., Auth & Session, Data Flow, Initialization,
-Concurrency). The agent creates categories as needed.
+Architectural decisions and non-negotiable behavioral contracts (ordering
+constraints, null-check requirements, state guards, initialization rules)
+must be recorded in `{PROJECT_ROOT}/conductor/adr/NNNN-slug.md`.
 
 ### Capture Triggers
 
-Invariant capture can fire at five points in the Conductor lifecycle:
+ADR capture can fire at five points in the Conductor lifecycle:
 
 1.  **During spec generation** (`/conductor_newTrack` Step 10 — Devil's
-    Advocate): when a challenge reveals an ordering or initialization
+    Advocate): when a challenge reveals an architectural trade-off or ordering
     assumption.
-2.  **During design decisions** (`/conductor_newTrack` Step 6): when a decision
-    implies a behavioral constraint.
+2.  **During design decisions** (`/conductor_newTrack` Step 6): when an interview
+    decision establishes a project-wide pattern or technology choice.
 3.  **During implementation** (`/conductor_implement` Step 3): when the agent
-    writes a guard, assertion, or initialization constraint.
+    writes a guard, assertion, or safety constraint that extends beyond the
+    active track.
 4.  **During review** (`/conductor_review` § 2.4): when a correctness finding
-    implies an invariant.
-5.  **User-initiated**: when the user explicitly states a constraint.
+    implies an architectural rule or race condition fix.
+5.  **User-initiated**: when the user explicitly states a non-negotiable rule.
 
 ### Capture Interaction
 
 At each trigger point, the agent follows this protocol:
 
-1.  Identify the invariant candidate (ordering constraint, null guard,
-    initialization requirement, data-flow rule).
+1.  Identify the architectural decision or behavioral contract (ordering
+    constraint, state guard, initialization requirement).
 2.  Present via `ask_question` with a randomized prompt:
-    *   "This looks like a behavioral invariant: '{description}'. Record it?"
-    *   "A constraint worth preserving: '{description}'. Capture it?"
-    *   "This pattern seems load-bearing beyond this track. Pin it down?"
-    *   *Options*: `["Yes", "Yes, but rephrase it", "No — track-specific only"]`
+    *   "This establishes an architectural rule: '{description}'. Record an ADR?"
+    *   "A load-bearing constraint worth preserving: '{description}'. Capture it as an ADR?"
+    *   *Options*: `["Yes — draft an ADR", "Yes, but rephrase it", "No — track-specific only"]`
 3.  If accepted:
-    -   Determine the category (infer from context or ask if ambiguous).
-    -   Scan `{PROJECT_ROOT}/conductor/invariants.md` for the highest existing
-        sequence number in that category and increment by one.
-    -   Append the invariant entry with ID, statement, source, and scope.
-    -   If `invariants.md` does not exist, create it with the standard header.
+    -   Find the next sequential number (e.g., `0003-slug.md`).
+    -   Draft the ADR following standard MADR format (`Status`, `Context`,
+        `Decision`, `Consequences`, `Confirmation`).
+    -   Save to `{PROJECT_ROOT}/conductor/adr/NNNN-slug.md`.
 
 ## 11. Per-Directory Context Protocol
 
@@ -108,8 +94,11 @@ delimited by boundary comments:
 ### Purpose
 {1-2 sentences describing the directory's role}
 
-### Invariants
-{Invariants from conductor/invariants.md scoped to this directory}
+### Local Rules
+{Directory-scoped rules, handler conventions, and failure handling policies}
+
+### Relevant ADRs
+- [ADR-NNNN: Title](file:///conductor/adr/NNNN-slug.md)
 
 ### Key Types
 {Primary exported types, classes, and functions}
@@ -133,7 +122,7 @@ case-insensitively for existing agent context files: `GEMINI.md`, `CLAUDE.md`,
 -   **Creation & Architectural Justification**: Do NOT automatically prompt to
     create a context file based on arbitrary file counts. Only prompt if there
     is a concrete architectural justification (multiple interacting services,
-    complex stateful controllers, subtle local invariants, or domain gotchas).
+    complex stateful controllers, subtle local rules, or domain gotchas).
     If multiple files exist without a context section or if creating a new file
     from scratch, prompt the user via `ask_question` to select their preferred
     filename (`GEMINI.md`, `AGENTS.md`, `AGENT.md`, `CLAUDE.md`).
@@ -143,14 +132,14 @@ case-insensitively for existing agent context files: `GEMINI.md`, `CLAUDE.md`,
 
 ### Loading
 
-See context loading item 9 in `conductor_protocol.md` §0a. The agent reads the
+See context loading item 8 in `conductor_protocol.md` §0a. The agent reads the
 nearest context file (`GEMINI.md`, `CLAUDE.md`, `AGENTS.md`, or `AGENT.md`)
 containing a `## Conductor Context` section in the parent directory chain of
 each file the current task touches. Innermost directory wins.
 
 ### Updates
 
-At phase checkpoints, if the agent added new exports or discovered new
-invariants in a directory, propose appending them to the directory's context
-file `## Conductor Context` section. Only modify content between the START and
-END boundary comments.
+At phase checkpoints, if the agent added new exports or discovered new local
+rules in a directory, propose appending them to the directory's context file
+`## Conductor Context` section. Only modify content between the START and END
+boundary comments.

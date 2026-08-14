@@ -23,7 +23,6 @@ conductor/
 ├── tech-stack.md             # Technical choices & frameworks
 ├── workflow.md               # Task workflow, coding principles, commands
 ├── terms.md                  # Domain glossary & ubiquitous language
-├── invariants.md             # Behavioral contracts & ordering rules
 ├── .api_surface_cache.json   # AST-extracted symbol snapshot (gitignored)
 ├── setup_state.json          # Setup progress tracking
 ├── code_styleguides/         # Language-specific style guides
@@ -49,15 +48,14 @@ these files (in order of priority):
 3.  `conductor/tech-stack.md` — Technical decisions
 4.  `conductor/workflow.md` — Task workflow & coding practices
 5.  `conductor/terms.md` — Domain glossary & ubiquitous language
-6.  `conductor/invariants.md` — Behavioral contracts & ordering rules
-7.  `conductor/tracks.md` — Current track registry
-8.  `conductor/adr/*.md` — Active architecture decision records
-9.  **Per-directory context:** For each source file the current task will touch,
+6.  `conductor/tracks.md` — Current track registry
+7.  `conductor/adr/*.md` — Active architecture decision records
+8.  **Per-directory context:** For each source file the current task will touch,
     check the parent directory chain case-insensitively for context files
     (`GEMINI.md`, `CLAUDE.md`, `AGENTS.md`, or `AGENT.md`) containing a `##
     Conductor Context` section. Load the nearest one (innermost directory wins).
-10. **Drift scan:** Run a VCS diff stat against the last checkpoint commit.
-    Cross-reference changed files against ADR scopes and invariant scopes. Flag
+9.  **Drift scan:** Run a VCS diff stat against the last checkpoint commit.
+    Cross-reference changed files against ADR scopes and local rules. Flag
     contradictions before proceeding (see `conductor_cdd_protocols.md` §9).
 
 Platform-specific behavior (VCS commands, path conventions) is injected by
@@ -125,10 +123,10 @@ first. Do NOT create empty commits.
 
 -   **Never modify conductor files outside the active track** — only update
     files in `conductor/tracks/<active_track_id>/` and `conductor/tracks.md`
-    during implementation. **Exceptions:** `conductor/invariants.md`,
+    during implementation. **Exceptions:** `conductor/adr/*.md`,
     `conductor/terms.md`, `conductor/.api_surface_cache.json`, and source-tree
-    `GEMINI.md` files may be updated at phase checkpoints or when invariant
-    capture triggers fire.
+    `GEMINI.md` files may be updated at phase checkpoints or when ADR capture
+    triggers fire.
 -   **Always confirm before overwriting user-approved specs or plans.**
 -   **Ask before destructive operations** — do not delete tracks, revert
     commits, or remove artifacts without explicit user confirmation.
@@ -181,18 +179,14 @@ requires `product-guidelines.md`), but the base set above is the minimum gate.
 If any are missing, halt execution with: *"Conductor context is incomplete.
 Please run `/conductor_setup` first."*
 
-`conductor/invariants.md` is optional. Projects function without it; it is
-created lazily during track work when the first invariant is captured.
-
-## 9. CDD Protocols (Drift Scan, Invariant Capture, Per-Directory Context)
+## 9. CDD Protocols (Drift Scan, ADR Capture, Per-Directory Context)
 
 Full protocols in `conductor_cdd_protocols.md` (loaded on demand by skills).
 Covers:
 
 -   **§9 Pre-Execution Drift Scan**: Cross-reference uncommitted changes against
-    ADR/invariant scopes; flag contradictions before the skill proceeds.
--   **§10 Invariant Capture Protocol**: File format, capture triggers (5
-    lifecycle points), and capture interaction flow for
-    `conductor/invariants.md`.
--   **§11 Per-Directory GEMINI.md Context**: Section format, creation triggers,
-    loading priorities, and update rules for `## Conductor Context` sections.
+    ADR scopes and local rules; flag contradictions before the skill proceeds.
+-   **§10 ADR Capture Protocol**: Triggers and interaction flow for capturing
+    unwritten architectural decisions and behavioral contracts in `conductor/adr/`.
+-   **§11 Per-Directory GEMINI.md Context**: Section format (`### Local Rules` +
+    `### Relevant ADRs`), creation triggers, loading priorities, and update rules.

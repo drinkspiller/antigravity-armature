@@ -168,42 +168,19 @@ to `{PROJECT_ROOT}/conductor/terms.md` and update `setup_state.json`.
 
 --------------------------------------------------------------------------------
 
-### Artifact 9: `invariants.md`
+### Artifact 9: Per-Directory Context Enrichment (Brownfield Only)
 
-Use `ask_question` to present structured options: "Interactive", "Autogenerate",
-or "Skip for now".
-
--   **Interactive**: Guide the user through 2 key questions: "Are there ordering
-    constraints or call-sequence rules your team follows?" and "Are there 'never
-    do X' patterns that aren't written down but everyone knows?"
--   **Autogenerate (Brownfield only)**: Perform a read-only scan of the codebase
-    for guard patterns (`if (!x) throw`, assertions, initialization checks,
-    comments containing "must", "always", "never", "before", "after"). Propose
-    candidate invariants with categories inferred from context.
--   **Skip for now**: Proceed without creating invariants. The file is created
-    lazily during track work when the first invariant is captured (see
-    `conductor_cdd_protocols.md` §10).
-
-Draft the document following the invariant format rules (category headers,
-`{CAT}-{NNN}` IDs, source attribution, scope annotations). Enter the Draft
-Review Loop ("Approve" or "Suggest changes"). Upon approval, write it to
-`{PROJECT_ROOT}/conductor/invariants.md` and update `setup_state.json`.
-
---------------------------------------------------------------------------------
-
-### Artifact 10: Per-Directory Context Enrichment (Brownfield Only)
-
-This step is offered for brownfield project directories with concrete architectural justification (e.g., multiple interacting services, complex stateful controllers, subtle local invariants, or domain gotchas). Simple directories (straightforward UI components, basic utilities, CRUD wrappers) are skipped.
+This step is offered for brownfield project directories with concrete architectural justification (e.g., multiple interacting services, complex stateful controllers, subtle local rules, or domain gotchas). Simple directories (straightforward UI components, basic utilities, CRUD wrappers) are skipped.
 
 1.  Scan the project source tree for complex directories with architectural justification.
 2.  For each candidate directory, check case-insensitively for existing agent context files: `GEMINI.md`, `CLAUDE.md`, `AGENTS.md`, or `AGENT.md`.
     -   If any of these files exist and contain a `## Conductor Context` section, use that file and do NOT prompt.
     -   If exactly one exists without `## Conductor Context`, append the section to that file.
     -   If multiple exist or none exist, present an `ask_question` prompt asking the user which filename (`GEMINI.md`, `AGENTS.md`, `AGENT.md`, `CLAUDE.md`) they prefer for that directory.
-3.  Present candidate directories using `ask_question` with `is_multi_select: true`: "These directories have complex architecture or local invariants. Enrich their context files?"
+3.  Present candidate directories using `ask_question` with `is_multi_select: true`: "These directories have complex architecture or local rules. Enrich their context files?"
 4.  For each selected directory:
     -   Create or update the chosen context file with the `## Conductor Context` section.
-    -   Populate the section with: Purpose (inferred from file contents and directory name), Invariants (scoped from `invariants.md` if it exists), Key Types (extracted via AST scan), and Term Overrides (if the directory uses terms differently from `terms.md`).
+    -   Populate the section with: Purpose (inferred from file contents and directory name), Local Rules (directory-scoped policies and conventions), Relevant ADRs (relative links to applicable ADR files in `conductor/adr/`), Key Types (extracted via AST scan), and Term Overrides (if the directory uses terms differently from `terms.md`).
     -   Wrap the section in boundary comments:
         `<!-- Conductor Context: START (manual edits go above this line) -->`
         and `<!-- Conductor Context: END (manual edits go below this line) -->`.

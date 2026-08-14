@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.13.0] - 2026-08-14
+
+### Changed
+
+-   **Subsumed Invariants into ADRs and Local Rules**: Eliminated `conductor/invariants.md` to prevent fragmentation across architectural decisions and invariant rules.
+-   **MADR Schema Alignment**: Behavioral contracts, ordering constraints, and safety guards are now recorded directly as Architecture Decision Records in `conductor/adr/*.md` using standard MADR structure (`## Decision` and `## Confirmation` verification tasks).
+-   **Per-Directory Context Scoping**: Local conventions and failure handling rules are recorded in `## Conductor Context` (`### Local Rules` and `### Relevant ADRs`) within directory-level agent context files (`GEMINI.md`, `CLAUDE.md`, `AGENTS.md`, or `AGENT.md`).
+-   **Protocol & Skill Harmonization**: Rebranded §10 in `conductor_cdd_protocols.md` to **ADR Capture Protocol**, and updated `/conductor-setup`, `/conductor-new-track`, `/conductor-implement`, and `/conductor-review` to verify ADRs and local rules directly.
+
 ## [0.12.0] - 2026-08-14
 
 ### Changed
