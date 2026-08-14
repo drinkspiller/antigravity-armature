@@ -5,7 +5,7 @@ description: Standard visual rules for rendering interactive GUI dialog modals (
 
 # Conductor Antigravity UX Adapter (View Layer)
 
-These operational standards govern the user interface and conversational experience when Conductor skills are executed inside the Antigravity or Jetski host environments.
+These operational standards govern the user interface and conversational experience when Conductor skills are executed inside the Antigravity host environment.
 
 ## Interactive Interview Rendering
 

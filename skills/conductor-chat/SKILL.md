@@ -122,7 +122,7 @@ After context is loaded, determine the next action:
 
 ### No Ceremony
 
--   Do NOT create Jetski artifacts for the loading process.
+-   Do NOT create artifacts for the loading process.
 -   Do NOT ask structured choice questions after loading (no `ask_question`
     calls for approval gates, mode selection, or confirmation).
 -   Do NOT create new tracks, specs, or plans.

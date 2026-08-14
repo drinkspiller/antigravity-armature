@@ -6,11 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.0] - 2026-08-14
+
+### Changed
+
+-   **Terminology Scrubbing**: Scrubbed lingering internal references and standardized artifact phrasing across all skill files and rules.
+-   **Installer Fixes**: Fixed Windows uninstaller (`install.bat`) rule cleanup loop and updated version references to `v0.12.0`.
+-   **Documentation**: Updated `README.md` to align the "What Gets Installed" table with current kebab-case skill paths and rules.
+
 ## [0.11.1] - 2026-07-20
 
 ### Added
 
--   **Agent Plugin Manifests**: Root `plugin.json` (v0.11.1) and `.claude-plugin/marketplace.json` for agent plugin auto-discovery across `agy` (Antigravity CLI), Claude Code, and Jetski.
+-   **Agent Plugin Manifests**: Root `plugin.json` (v0.11.1) and `.claude-plugin/marketplace.json` for agent plugin auto-discovery across `agy` (Antigravity CLI) and Claude Code.
 
 ### Changed
 

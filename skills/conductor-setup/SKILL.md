@@ -43,7 +43,7 @@ project).
     steps below. Generate one artifact at a time.
 
     -   Present structured choices to the user using `ask_question` or write
-        clarifying questions as a Jetski artifact (`write_to_file` with
+        clarifying questions as an artifact (`write_to_file` with
         `IsArtifact: true` and `ArtifactType: other`).
     -   **Draft Review Loop**: After drafting an artifact, present it for review
         using `ask_question` with options: "Approve" or "Suggest changes". Loop
