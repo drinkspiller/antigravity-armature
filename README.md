@@ -160,4 +160,4 @@ appropriate command based on your prompt.
 
 ## Version
 
-Current: **v0.13.0**
+Current: **v0.13.1**

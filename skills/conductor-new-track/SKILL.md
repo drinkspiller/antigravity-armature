@@ -7,7 +7,14 @@ persona: Conductor Planner
 # /conductor-new-track — Create a New Track
 
 **Purpose:** Start a new feature or bug fix track with a specification and
-phased plan.
+phased plan through a rigorous, interactive interview.
+
+## Mandatory Execution Guardrails
+
+- **Strict Interactive Discipline:** You MUST NEVER generate track artifacts (`spec.md`, `plan.md`) or write code in a single autonomous turn. Every track requires step-by-step user alignment.
+- **Synchronous Turn-Ending Barrier:** You MUST invoke `ask_question` and end your turn at Step 5 (Grill Protocol), Step 8 (Gap Analysis), Step 10 (Devil's Advocate), Step 11 (Spec Approval), and Step 12 (Plan Approval). Do not proceed to subsequent steps until the user responds.
+- **Compound Prompt Shielding:** If the user invokes `/conductor-new-track` alongside other instructions (e.g., `/diagnose`, `Fix`, or implementation tasks), you MUST complete all interactive track creation milestones before starting downstream execution.
+- **No Autonomous Skipping:** The presence of extensive context (e.g., chat logs, design docs, bug descriptions, or codebase reconnaissance) informs your questions and recommendations, but NEVER excuses skipping the interactive interview.
 
 ## Protocol
 
@@ -22,8 +29,7 @@ phased plan.
 2.  **Get Description & Infer Type:**
 
     -   If a description was provided in the initial prompt, use it.
-    -   If no description was provided, ask: "What feature or bug would you like
-        to work on? Describe it in 1-2 sentences."
+    -   If no description was provided, ask via `ask_question`: "What feature or bug would you like to work on? Describe it in 1-2 sentences."
     -   Analyze the description to infer the track type (Feature vs. Bug/Chore).
         Do NOT ask the user to classify the type.
 
@@ -50,7 +56,7 @@ phased plan.
         files/directories to understand existing patterns, interfaces, and
         constraints.
     -   Use findings to inform the spec questions in the next step — questions
-        should reference specific codebase context, not be generic.
+        must reference specific codebase context.
 
 5.  **Interactive Spec & Design Elicitation (Grill Protocol):**
 
@@ -59,8 +65,9 @@ phased plan.
     -   **Domain Loading**: Silently load context by reading `{PROJECT_ROOT}/conductor/product.md` (for glossary/product context), `{PROJECT_ROOT}/conductor/tech-stack.md` (for technical constraints), and scanning existing `*/spec.md` files.
     -   **Questioning Strategy**: Interview the user one question at a time across all spec sections (Problem Statement, Functional Requirements, Non-Functional Requirements, Scope Boundaries, Acceptance Criteria).
         -   Use `ask_question` with your recommended answer listed first (`(Recommended)`) alongside 2–4 other plausible options.
-        -   If a question can be answered by exploring the codebase, explore the codebase instead of asking.
+        -   Codebase reconnaissance informs your questions and recommendations, but NEVER replaces user dialogue.
         -   Follow branches where complexity, ambiguity, or trade-offs emerge.
+        -   **MANDATORY:** End your turn after each `ask_question` call to wait for the user's answer.
     -   **Domain Enforcement**: Actively challenge glossary conflicts against `product.md`, sharpen fuzzy language (avoiding 'we'/'us' in documentation), and cross-reference stated behavior against the codebase.
     -   **Inline Design Decision & ADR Elicitation**: As architectural trade-offs emerge during questioning:
         -   Evaluate the 3-part gate: (1) Hard to reverse, (2) Surprising without context, (3) Real trade-off.
@@ -99,9 +106,8 @@ phased plan.
     -   Then, for **each individual gap**, call `ask_question` with a short
         question and options **tailored to that specific finding**. Do NOT
         combine all gaps into a single question. Each question should offer
-        meaningful choices relevant to the nature of that gap (e.g., for an
-        error handling gap: "Add retry + error toast", "Add error toast only",
-        "Skip — handle during implementation", "Discuss further").
+        meaningful choices relevant to the nature of that gap.
+    -   **MANDATORY:** End your turn at each `ask_question` call.
     -   After all individual gap questions have been answered, incorporate the
         user's per-gap decisions into the spec.
     -   **Opportunities Selection:** If `## Opportunities for Consideration`
@@ -144,11 +150,8 @@ phased plan.
         response first (with full context, code references, and reasoning).
     -   Then, for **each individual challenge**, call `ask_question` with the
         challenge as the question and options **tailored to that specific
-        concern**. Do NOT combine all challenges into a single question. Each
-        question should offer actionable responses relevant to the nature of
-        that challenge (e.g., for a race condition concern: "Add initialization
-        guard to the spec", "Acceptable risk — document the limitation", "Needs
-        investigation before deciding").
+        concern**. Do NOT combine all challenges into a single question.
+    -   **MANDATORY:** End your turn at each `ask_question` call.
     -   After all individual challenge questions have been answered, apply the
         user's per-challenge decisions: update the spec for items the user chose
         to address, and note acknowledged risks for items the user chose to
@@ -168,6 +171,7 @@ phased plan.
     -   **Present options** using the `ask_question` tool: "Approve" (Proceed to
         planning), "Revise" (Suggest manual edits). Do not proceed until
         approved.
+    -   **MANDATORY:** End your turn and wait for explicit user approval before proceeding to plan generation.
 
 12. **Interactive Plan Generation:**
 
@@ -189,6 +193,7 @@ phased plan.
     -   **Present options** using the `ask_question` tool: "Approve" (Proceed to
         track creation), "Revise" (Suggest changes). Do not proceed until
         approved.
+    -   **MANDATORY:** End your turn and wait for explicit user approval before finalizing artifacts or starting implementation.
 
 13. **Generate Remaining Track Artifacts:**
 

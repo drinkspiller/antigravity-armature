@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.13.1] - 2026-08-17
+
+### Fixed
+
+-   **Enforce Mandatory Interactive Gating in `conductor-new-track`**: Added
+    unyielding synchronous turn-ending stop barriers at Steps 5 (Grill
+    interview), 8 (Gap analysis), 10 (Devil's advocate), 11 (Spec approval), and
+    12 (Plan approval).
+-   **Eliminated Autonomous Skip Loophole**: Removed the permissive clause
+    allowing agents to bypass user dialogue when codebase context is available.
+-   **Compound Prompt Shielding**: Added explicit guardrails preventing agents
+    from prematurely executing downstream commands (e.g., `/diagnose` or `Fix`)
+    before completing all interactive track creation milestones.
+
 ## [0.13.0] - 2026-08-14
 
 ### Changed
