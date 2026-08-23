@@ -1192,7 +1192,8 @@ def main():
 
   # Generate markdown and interactive HTML reports
   generate_markdown_report(final_payload, args.report, history_dir=args.history_dir)
-  generate_html_report(final_payload, args.html_report, history_dir=args.history_dir)
+  if args.html_report:
+    generate_html_report(final_payload, args.html_report, history_dir=args.history_dir)
 
   # Save dated historical snapshot unless disabled
   if not args.no_snapshot and args.history_dir:

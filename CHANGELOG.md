@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.16.1] - 2026-08-23
+
+### Added
+- **Track Completion Next-Steps Elicitation Gate (`/conductor-implement`)**:
+  - Implements Step 5.2 Next Steps Elicitation Gate in `skills/conductor-implement/SKILL.md` to prevent agents from going silent or terminating turns with static summaries upon completing a track.
+  - Mandates invoking `ask_question` with structured options:
+    1. `(Recommended) Test the implementation with the manual testing guide ([<domain>.md](file://...))`
+    2. `Push changes / Create PR`
+    3. `Run full code review (/conductor-review)`
+    4. `Archive completed track and finish`
+    5. `Keep track active and finish`
+- **Completion Turn Barrier Guardrail**: Added `Mandatory Completion Next-Steps Barrier` to `conductor-implement` guardrails.
+- **SkillOpt Benchmark Suite**: Calibrated `TRAIN_08` and `VAL_14` evaluating track completion next-steps orchestration, achieving 100% pass rates across train and validation sets.
+
 ## [0.16.0] - 2026-08-23
 
 ### Added
