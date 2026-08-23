@@ -49,7 +49,6 @@ Conductor is benchmarked against alternative Spec-Driven Development (SDD) and C
 Full reports and test documentation:
 - [Evaluation suite guide](evals/README.md)
 - [Live benchmark Markdown report](evals/cdd_sdd_benchmark/cdd_sdd_live_benchmark_results.md)
-- [Interactive HTML report](evals/cdd_sdd_benchmark/cdd_sdd_live_benchmark_results.html)
 
 ## What Gets Installed
 
