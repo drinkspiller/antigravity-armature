@@ -50,6 +50,7 @@ persona: Conductor Observer
     -   **Current Date/Time:** <current timestamp>
     -   **Project Status:** High-level assessment ("On Track", "Behind
         Schedule", "Blocked") based on tasks and blockers
+    -   **Fixpoint Health:** Current drift health status (e.g., "✅ Fixpoint Reached (0 drift)" or "⚠️ Drift Detected (N issue(s) — run `/conductor-drift`)")
     -   **Current Phase and Task:** The specific phase/task marked `[~]` in the
         active track
     -   **Next Action Needed:** The next `[ ]` pending task

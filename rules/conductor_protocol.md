@@ -151,6 +151,11 @@ first. Do NOT create empty commits.
     exact setup, database mutation, and reset commands, but the agent must NEVER
     execute mutative database, environment reset, or teardown commands
     autonomously during phase checkpoints.
+-   **Fixpoint and Drift Auditing** — A feature or track achieves completion only
+    when the Fixpoint Auditor reports a "Fixpoint Reached" state. At phase
+    checkpoints, track closeout, and pre-submit release gates, the agent audits
+    code, ADRs, manual testing runbooks, API surfaces, and packaging manifests
+    for divergence.
 
 ## 6. ADR & Glossary Preflight Interceptor
 

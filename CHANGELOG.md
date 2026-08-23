@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.15.0] - 2026-08-23
+
+### Added
+- **Conductor Fixpoint Auditor (`/conductor-drift`)**: Dedicated command skill (`skills/conductor-drift/SKILL.md`) natively auditing divergence across project documentation, ADRs, domain manual testing runbooks, API surfaces (`.api_surface_cache.json`), and packaging manifests.
+- **3-Tier Audit Architecture**:
+  - *Phase 1 (Docs & Specs)*: Audits cross-document consistency, ADR schemas/sequences, domain runbook scenarios, and specification completeness.
+  - *Phase 2 (Code & Interfaces)*: Compares public exports against `.api_surface_cache.json` and audits per-directory `## Conductor Context` boundary integrity.
+  - *Phase 3 (Meta & Packaging)*: Audits `install.sh`, `install.bat`, `plugin.json`, `marketplace.json`, and `README.md` for installer array completeness and version stamp fixpoints.
+- **Automated Lifecycle Drift Hooks**:
+  - *Incremental Checkpoints*: Fast incremental diff scans at phase checkpoints in `/conductor-implement` Step 3.
+  - *Track Completion Gate*: Mandatory Fixpoint verification in `/conductor-implement` Step 4 before archiving.
+  - *Review Gate*: Added `Fixpoint Audit: [Pass/Fail]` to `/conductor-review` checklist and `review.md`.
+  - *Ambient Health Banner*: 1-line passive Fixpoint health summary in `/conductor-status` and `/conductor-chat`.
+- **29-Scenario SkillOpt Benchmark Suite**: Expanded `evals/skillopt/` with 29 multi-skill evaluation tasks (16 training, 13 validation) and enhanced candidate retry resilience in `run_optimizer.py`.
+
 ## [0.14.0] - 2026-08-23
 
 ### Added

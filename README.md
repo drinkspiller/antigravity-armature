@@ -52,6 +52,7 @@ File                   | Location                                              |
 `conductor-review/`    | `~/.gemini/antigravity/skills/conductor-review/`      | `/conductor-review` — Review work against spec (persona: Principal Software Engineer)
 `conductor-revert/`    | `~/.gemini/antigravity/skills/conductor-revert/`      | `/conductor-revert` — Undo work via VCS-aware revert (persona: Conductor Surgeon)
 `conductor-chat/`      | `~/.gemini/antigravity/skills/conductor-chat/`        | `/conductor-chat` — Ceremony-free context mode (persona: Conductor Guide)
+`conductor-drift/`     | `~/.gemini/antigravity/skills/conductor-drift/`       | `/conductor-drift` — Audit and reconcile drift across docs, code, and packaging (persona: Conductor Fixpoint Auditor)
 
 ### Rules (MVC Architecture)
 

@@ -93,7 +93,8 @@ Conduct a rigorous, one-question-at-a-time interview with the user to build a de
 
 ### 7. Structured Gap Analysis (7 Mandatory Categories)
 
--   Run a structured gap check against ALL 7 mandatory categories: Error handling, Edge cases, Backwards compatibility, Security (PII, auth, input validation), Performance (scale, bundle size), Accessibility, and Testing strategy.
+-   Run a structured gap check against ALL 7 mandatory categories: 1. Error handling, 2. Edge cases, 3. Backwards compatibility, 4. Security (PII, auth, input validation), 5. Performance (scale, bundle size), 6. Accessibility, and 7. Testing strategy.
+-   **Interruption Resilience**: If resuming after a user question, architectural detour, or asset tangent, do NOT jump directly to spec finalization. Explicitly assess and present findings across all 7 categories.
 -   **Testing Strategy Classification**: Under Testing strategy, classify
     the track's manual testing depth:
     -   *Interactive / Stateful / Route / API Tracks*: Require a full
@@ -228,3 +229,11 @@ Conduct a rigorous, one-question-at-a-time interview with the user to build a de
 
 Display: "✅ Track `<track_id>` created! Run
 `/conductor-implement` to start working through the plan."
+
+## Guardrails
+
+-   **Compound Directive Shielding**: If the user prompt includes compound instructions (e.g., "create a track and implement it immediately in foo.ts"), do NOT start implementation or write code. Strictly limit scope to track planning and state that implementation must wait until the plan is approved.
+-   **Turn-Ending Barriers**: Enforce strict synchronous pauses at Steps 5, 7, 9, 10, and 11 via `ask_question`. Never batch questions or skip ahead.
+-   **Pre-Materialization Barrier**: Hold `spec.md` in memory during Step 6. Never write `spec.md` to disk until all Gap Analysis and Devil's Advocate barriers are complete.
+-   **Structured 7-Category Gap Analysis**: Always evaluate all 7 dimensions (Error handling, Edge cases, Backwards compatibility, Security, Performance, Accessibility, Testing strategy) even when resuming from conversational interruptions.
+

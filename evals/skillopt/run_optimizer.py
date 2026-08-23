@@ -80,12 +80,24 @@ def call_gemini(
         candidates = res_json.get("candidates", [])
         if candidates:
           first = candidates[0]
-          if "content" in first:
+          if "content" in first and "parts" in first["content"]:
             parts = first["content"].get("parts", [])
-            return "".join(p.get("text", "") for p in parts)
-          else:
-            finish_reason = first.get("finishReason", "UNKNOWN")
-            print(f"  [API Warning] {model} finished with reason: {finish_reason}", file=sys.stderr, flush=True)
+            txt = "".join(p.get("text", "") for p in parts)
+            if txt:
+              return txt
+          finish_reason = first.get("finishReason", "UNKNOWN")
+          print(
+              f"  [API Warning] {model} finished with reason: {finish_reason}"
+              f" (attempt {attempt}/{max_retries})",
+              file=sys.stderr,
+              flush=True,
+          )
+          if attempt < max_retries:
+            time.sleep(2 * attempt)
+            continue
+        if attempt < max_retries:
+          time.sleep(2 * attempt)
+          continue
         return ""
     except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError) as e:
       print(
