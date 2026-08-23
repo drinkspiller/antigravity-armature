@@ -177,6 +177,22 @@ with **natural language** instead of workflow commands. For example:
 Antigravity will automatically read the Conductor skill and execute the
 appropriate command based on your prompt.
 
+## Evaluation & Live Benchmark Results
+
+Antigravity Conductor is continuously evaluated against industry agent development frameworks using the live CDD & SDD benchmark suite (`evals/cdd_sdd_benchmark/`):
+
+| Framework | Paradigm | Composite Score | Pass Rate | Avg Tokens | Rank |
+| :--- | :--- | :---: | :---: | :---: | :---: |
+| **Conductor (Antigravity OSS) (this)** | Context-Driven Development (CDD) | **88 / 100** | **87.5% (28/32)** | 2018 | **#1 (Winner)** |
+| **BMAD Method** | Multi-Agent Agile SDD | **63 / 100** | **62.5% (20/32)** | 3508 | #2 |
+| **OpenSpec** | Lightweight SDD | **59 / 100** | **59.4% (19/32)** | 1810 | #3 |
+| **GitHub Spec Kit** | Spec-Driven Development (SDD) | **53 / 100** | **53.1% (17/32)** | 3690 | #4 |
+| **Conductor (Canonical Gemini CLI Extension)** | Context-Driven Development (CDD) | **50 / 100** | **50.0% (16/32)** | 2135 | #5 |
+| **Memory Bank (Cline / Roo Code)** | Stateful Agent Memory | **47 / 100** | **46.9% (15/32)** | 2392 | #6 |
+
+*Evaluated across 8 complex engineering scenarios using `gemini-3.7-flash` and meta-judged with `gemini-3.1-pro-preview`. Full details in [`evals/cdd_sdd_benchmark/cdd_sdd_live_benchmark_results.md`](evals/cdd_sdd_benchmark/cdd_sdd_live_benchmark_results.md).*
+
 ## Version
 
-Current: **v0.13.1**
+Current: **v0.16.1**
+
