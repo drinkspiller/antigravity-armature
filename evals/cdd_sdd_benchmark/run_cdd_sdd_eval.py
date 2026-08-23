@@ -471,7 +471,9 @@ Respond with valid JSON formatted strictly as:
 
 
 def generate_markdown_report(
-    results: Dict[str, Any], output_path: str
+    results: Dict[str, Any],
+    output_path: str,
+    history_dir: Optional[str] = None,
 ) -> None:
   """Generates a comprehensive Markdown report of the live benchmark run."""
   summary = results.get("summary", {})
@@ -610,6 +612,33 @@ def generate_markdown_report(
             f" {ev.get('reason')}\n"
         )
       md += "\n"
+
+  if history_dir and os.path.exists(history_dir):
+    history_runs = []
+    try:
+      for f in sorted(os.listdir(history_dir)):
+        if f.startswith("eval_results_") and f.endswith(".json"):
+          fpath = os.path.join(history_dir, f)
+          with open(fpath, "r", encoding="utf-8") as hf:
+            hdata = json.load(hf)
+            history_runs.append({
+                "timestamp": hdata.get("timestamp", f),
+                "target_model": hdata.get("target_model", "-"),
+                "judge_model": hdata.get("judge_model", "-"),
+                "winner": hdata.get("meta_analysis", {}).get("winner", "-"),
+                "summary": hdata.get("summary", {}),
+            })
+    except Exception as e:
+      print(f"  [History Load Warning] {e}")
+
+    if history_runs:
+      md += "\n---\n\n## Historical Run Comparison\n\n"
+      md += "| Timestamp | Target Model | Judge Model | Winner | Pass Rates |\n"
+      md += "| :--- | :---: | :---: | :--- | :--- |\n"
+      for h in history_runs:
+        h_summary = h.get("summary", {})
+        h_scores = " | ".join(f"{k}: {v.get('pass_rate', 0)}%" for k, v in list(h_summary.items())[:3])
+        md += f"| {h.get('timestamp', '-')} | `{h.get('target_model', '-')}` | `{h.get('judge_model', '-')}` | **{h.get('winner', '-')}** | {h_scores} |\n"
 
   with open(output_path, "w", encoding="utf-8") as f:
     f.write(md)
@@ -1162,7 +1191,7 @@ def main():
   )
 
   # Generate markdown and interactive HTML reports
-  generate_markdown_report(final_payload, args.report)
+  generate_markdown_report(final_payload, args.report, history_dir=args.history_dir)
   generate_html_report(final_payload, args.html_report, history_dir=args.history_dir)
 
   # Save dated historical snapshot unless disabled
