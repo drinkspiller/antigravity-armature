@@ -121,20 +121,29 @@ evals/
         └── val.jsonl         # 15 held-out validation tasks
 ```
 
-### Track 1: Framework benchmark (`cdd_sdd_benchmark/`)
-Compares six open-source frameworks across 8 scenarios and 32 criteria:
-1. `conductor_oss`: Open-source Conductor implementation (`drinkspiller/antigravity-conductor`).
-2. `canonical_conductor`: Upstream canonical Gemini CLI extension (`gemini-cli-extensions/conductor`).
-3. `bmad_method`: Multi-agent agile framework.
-4. `memory_bank`: Persistent stateful memory architecture.
-5. `github_spec_kit`: Standardized spec-first pipeline.
-6. `openspec`: Lightweight living specification framework.
+### Track 1: Framework benchmark (`cdd_sdd_benchmark/`) — Conductor vs. Competitors
 
-### Track 2: SkillOpt optimizer (`skillopt/`)
-Iteratively refines Conductor's operational instructions:
-- `tasks/train.jsonl` (19 tasks): Edge-case discovery, ceremony scaling, proto evolution, and state safety.
-- `tasks/val.jsonl` (15 tasks): Held-out regression verification ensuring changes generalize without regressions.
-- `run_optimizer.py`: Runs baseline rollouts, evaluates failures, proposes candidate rule diffs, and validates improvements against the full suite.
+Puts Conductor against 5 rival paradigms (BMAD, Memory Bank, Spec Kit, OpenSpec, and Canonical Conductor) across 8 real-world engineering scenarios. An independent LLM Meta-Judge grades each framework on detour recovery, ceremony scaling, and safety, outputting comparative scorecards and Markdown leaderboards. `conductor_oss` (this) ranked #1 with an 87.5% pass rate.
+
+1.  `conductor_oss` (this): Open-source Conductor implementation
+    (`drinkspiller/antigravity-conductor`).
+2.  `canonical_conductor`: Upstream canonical Gemini CLI extension
+    (`gemini-cli-extensions/conductor`).
+3.  `bmad_method`: Multi-agent agile framework.
+4.  `memory_bank`: Persistent stateful memory architecture.
+5.  `github_spec_kit`: Standardized spec-first pipeline.
+6.  `openspec`: Lightweight living specification framework.
+
+### Track 2: SkillOpt optimizer (`skillopt/`) — Conductor vs. Itself
+
+An automated mutation loop that tunes Conductor's own operational instructions. It runs 19 training tasks and 15 held-out validation tasks to find prompt edge cases, eliminate token bloat, and verify fixes before releasing new versions.
+
+-   `tasks/train.jsonl` (19 tasks): Edge-case discovery, ceremony scaling, proto
+    evolution, and state safety.
+-   `tasks/val.jsonl` (15 tasks): Held-out regression verification ensuring
+    changes generalize without regressions.
+-   `run_optimizer.py`: Runs baseline rollouts, evaluates failures, proposes
+    candidate rule diffs, and validates improvements against the full suite.
 
 ---
 
