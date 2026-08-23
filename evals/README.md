@@ -111,8 +111,7 @@ evals/
 │   ├── configs/frameworks.json # Prompts & virtual contexts for evaluated frameworks
 │   ├── eval_results.json     # Current consolidated rollout traces and scores
 │   ├── cdd_sdd_live_benchmark_results.md   # Latest Markdown scorecard & report
-│   ├── cdd_sdd_live_benchmark_results.html # Standalone interactive HTML visual report
-│   └── history/              # Timestamped historical snapshot archives (JSON & HTML)
+│   └── history/              # Timestamped historical snapshot archives (JSON)
 └── skillopt/                 # Track 2: Prompt optimization & validation loop
     ├── README.md             # Optimizer usage and validation gates
     ├── run_optimizer.py      # Automated prompt mutation engine
@@ -168,9 +167,8 @@ When running a single framework (`--framework=<key>`) or a single scenario (`--s
 ### Dated snapshots & history
 The runner dates each execution in the payload (`timestamp`) and archives snapshots into `evals/cdd_sdd_benchmark/history/`:
 - `eval_results_YYYYMMDD_HHMMSS.json`
-- `cdd_sdd_benchmark_YYYYMMDD_HHMMSS.html`
 
-The HTML visual report reads this history directory to render interactive multi-run comparison timelines, showing score trends over time and across model releases.
+The Markdown report parses this history directory to render the Historical Run Comparison table across previous evaluations.
 
 ### Automated network failover
 Target rollouts use `gemini-3.7-flash` with automatic failover to `gemini-3.5-flash` on transient rate limits (HTTP 503/429), ensuring uninterrupted benchmark runs.
@@ -201,9 +199,9 @@ Dry-run schema and connectivity check:
 python3 evals/cdd_sdd_benchmark/run_cdd_sdd_eval.py --dry_run
 ```
 
-Generate standalone HTML visual report:
+Generate optional standalone HTML visual report:
 ```bash
-python3 evals/cdd_sdd_benchmark/run_cdd_sdd_eval.py
+python3 evals/cdd_sdd_benchmark/run_cdd_sdd_eval.py --html_report=evals/cdd_sdd_benchmark/cdd_sdd_live_benchmark_results.html
 ```
 
 ### Running the SkillOpt optimizer
