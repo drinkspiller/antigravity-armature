@@ -4,7 +4,7 @@ This directory contains the automated evaluation harnesses used to test, benchma
 
 ---
 
-## Why We Run Evaluations
+## Evaluation Rationale
 
 AI coding agents often look functional on simple demonstrations, but degrade when faced with real-world software engineering friction:
 - **Premature Execution**: Writing code or materializing files before understanding constraints, data contracts, or architecture boundaries.
@@ -22,52 +22,81 @@ The evaluation suite subjects frameworks to these exact friction points under li
 The benchmark suites evaluate eight core software engineering capabilities:
 
 ### 1. Specification Hardening & Anti-Premature Execution
-- **What is tested**: Whether the assistant holds specifications in memory during discovery, gap analysis, and adversarial review rather than prematurely writing unhardened files to disk.
-- **Why it matters**: Materializing draft files to disk too early commits the agent to bad assumptions before edge cases and interface contracts are settled.
+Whether the assistant holds specifications in memory during discovery, gap analysis, and adversarial review rather than prematurely writing unhardened files to disk. Materializing draft files to disk too early commits the agent to bad assumptions before edge cases and interface contracts are settled.
 
 ### 2. Conversational Detour & Interruption Resilience
-- **What is tested**: How the assistant handles an orthogonal technical query (e.g. WCAG contrast compliance in dark mode) in the middle of a specification interview, and whether it resumes at the exact uncompleted question without skipping remaining gap categories.
-- **Why it matters**: Real developer conversations are rarely linear; agents must handle interruptions without losing track context or corrupting interview state.
+How the assistant handles an orthogonal technical query (such as WCAG contrast compliance in dark mode) in the middle of a specification interview, and whether it resumes at the exact uncompleted question without skipping remaining gap categories.
 
 ### 3. Micro-Task Efficiency & Ceremony Scaling
-- **What is tested**: Whether the assistant scales down process ceremony for surgical fixes (<5 lines of changed code, zero architectural ripple), proposing minimal targeted diffs with compact token usage (<1500 tokens) instead of multi-page PRDs.
-- **Why it matters**: Process frameworks that treat every single-line CSS fix like a major distributed systems migration impose massive token costs and slow down developers.
+Whether the assistant scales down process ceremony for surgical fixes (<5 lines of changed code, zero architectural ripple), proposing minimal targeted diffs with compact token usage (<1500 tokens) instead of multi-page PRDs.
 
 ### 4. Out-of-Band Code/Doc Drift Detection
-- **What is tested**: Whether the assistant inspects uncommitted workspace diffs against active Architecture Decision Records (ADRs) and domain glossaries (`terms.md`), flags contradictions, and enforces zero-drift fixpoints.
-- **Why it matters**: Code and documentation diverge quickly; agents must actively govern alignment between behavioral contracts and actual code.
+Whether the assistant inspects uncommitted workspace diffs against active Architecture Decision Records (ADRs) and domain glossaries (`terms.md`), flags contradictions, and enforces zero-drift fixpoints.
 
 ### 5. Multi-Phase State Safety & Destructive Command Guardrails
-- **What is tested**: Whether the assistant adheres to a documentation-only policy during database migrations and environment resets, logging the commands in runbooks while strictly refusing to execute destructive SQL drops autonomously.
-- **Why it matters**: Autonomous destructive actions can wipe out local databases, emulator state, or testing fixtures without developer oversight.
+Whether the assistant adheres to a documentation-only policy during database migrations and environment resets, logging commands in runbooks while strictly refusing to execute destructive SQL drops autonomously.
 
 ### 6. Proto Schema Evolution & Wire-Format Edge Cases
-- **What is tested**: Whether the assistant identifies subtle serialization traps (e.g., proto3 default zero-values losing distinction between unset fields and default values in partial update patches) and poses adversarial challenges requiring `FieldMask` or `optional` presence before planning.
-- **Why it matters**: Wire-format bugs frequently lead to silent data corruption in production backend services.
+Whether the assistant identifies subtle serialization traps (such as proto3 default zero-values losing distinction between unset fields and default values in partial update patches) and poses adversarial challenges requiring `FieldMask` or `optional` presence before planning.
 
 ### 7. Additive Manual Testing Runbook Verification
-- **What is tested**: Whether the assistant treats living domain runbooks (`conductor/manual_testing/<domain>.md`) as strictly additive to automated CI unit and integration test suites, auditing both concurrently at phase checkpoints.
-- **Why it matters**: Automated tests verify unit logic, while manual runbooks verify user-facing workflows, setup scripts, and environment fixtures.
+Whether the assistant treats living domain runbooks (`conductor/manual_testing/<domain>.md`) as strictly additive to automated CI unit and integration test suites, auditing both concurrently at phase checkpoints.
 
 ### 8. 3-Tier Fixpoint Drift Auditing
-- **What is tested**: Full-workspace verification across documentation consistency (Phase 1), AST-extracted public API symbol surfaces (Phase 2), and packaging manifests/installer arrays (Phase 3).
-- **Why it matters**: Guarantees that code, symbols, documentation, and installation scripts reach a verified, coherent state before code submission.
+Full-workspace verification across documentation consistency (Phase 1), AST-extracted public API symbol surfaces (Phase 2), and packaging manifests/installer arrays (Phase 3).
 
 ---
 
-## Open-Source SDD Evals vs. Custom Conductor Evaluators
+## Standard SDD Evals
 
-The evaluation suite balances industry-standard benchmarks with custom Conductor evaluators:
+### Specification Lifecycle
+Traditional SDD pipelines (GitHub Spec Kit, BMAD Method, OpenSpec) require formal Constitution $\rightarrow$ Spec $\rightarrow$ Plan $\rightarrow$ Tasks artifacts for every track.
 
-| Capability Area | Open-Source / Industry SDD Baselines | Custom Conductor Evaluators |
-| :--- | :--- | :--- |
-| **Specification Lifecycle** | Traditional SDD pipelines (GitHub Spec Kit, BMAD Method, OpenSpec) requiring formal Constitution $\rightarrow$ Spec $\rightarrow$ Plan $\rightarrow$ Tasks artifacts. | **Pre-Materialization Hardening Barrier**: In-memory draft holding with strict multi-dimension gap analysis before writing to disk. |
-| **Process Overhead** | Fixed ceremony: Multi-page PRDs, C4 architecture diagrams, and role-based handoffs (PM $\rightarrow$ Architect $\rightarrow$ Scrum Master $\rightarrow$ Dev). | **Dynamic Ceremony Scaling**: Automatic bypass of PRDs on micro-hotfixes (<5 lines), optimizing token efficiency. |
-| **Conversational Flow** | Single-prompt static task evaluation or basic prompt response. | **Detour Resilience & Deep Branch Traversal**: Replaying interruptions and evaluating resumption at exact uncompleted sub-branches. |
-| **Documentation & Drift** | Periodic markdown memory file updates (Memory Bank `activeContext.md`, `progress.md`). | **3-Tier Fixpoint Auditor**: Dynamic AST API surface extraction, ADR scope cross-referencing, and packaging manifest checks. |
-| **Execution Safety** | Often executes whatever script the user requests, including destructive drops. | **Documentation-Only Fixture Safety Policy**: Hard rule requiring interactive user confirmation before mutative operations. |
-| **Schema Hardening** | Basic proto compilation and endpoint mapping checks. | **Adversarial Schema Probing**: Active Devil's Advocate challenges on proto3 zero-value overwrites and wire breaks. |
-| **Prompt Tuning** | Manual prompt editing and qualitative review. | **SkillOpt Optimizer (`evals/skillopt/`)**: Automated iterative mutation loop against 19 training and 15 validation tasks. |
+### Process Overhead
+Fixed ceremony requiring multi-page PRDs, C4 architecture diagrams, and role-based handoffs across Product Manager, Architect, Scrum Master, and Developer roles.
+
+### Conversational Flow
+Single-prompt static task evaluations or linear turn evaluations that do not account for conversational detours or deep branch exploration.
+
+### Drift Governance
+Periodic manual or markdown memory file updates (such as Memory Bank `activeContext.md` and `progress.md`) without automated structural diff verification.
+
+### Execution Safety
+Unrestricted tool execution patterns that permit running destructive scripts and database drops if requested in the prompt.
+
+### Schema Hardening
+Basic schema compilation and endpoint mapping checks without probing zero-value presence evolution.
+
+### Prompt Tuning
+Manual prompt adjustments based on qualitative inspection.
+
+---
+
+## Custom Evals
+
+### Pre-Materialization Hardening Barrier
+Evaluates whether the assistant holds specifications in memory during multi-dimensional gap analysis and adversarial devil's advocate reviews, refusing to write unhardened files to disk until all decision branches reach terminal leaves and are approved.
+
+### Dynamic Ceremony Scaling
+Measures token efficiency and process scaling on surgical fixes (<5 lines of code, zero architectural ripple), verifying the agent bypasses heavy PRD barriers and outputs targeted diffs directly with compact token usage.
+
+### Detour Resilience & Deep Branch Traversal
+Simulates real-world conversational interruptions (such as orthogonal design or accessibility queries) and verifies the assistant resumes at the exact uncompleted sub-branch without skipping remaining gap categories.
+
+### 3-Tier Fixpoint Drift Auditor
+Audits cross-document consistency (Phase 1), AST-extracted public API symbol surfaces against `terms.md` (Phase 2), and packaging manifests / installer arrays (Phase 3) to achieve zero-drift fixpoint verification.
+
+### Documentation-Only Fixture Safety Policy
+Enforces a strict safety barrier ensuring database migrations, resets, and environment teardown commands are documented in runbooks while forbidding autonomous execution of destructive commands.
+
+### Adversarial Schema Probing
+Actively challenges proto3 zero-default value collisions during partial update / PATCH migrations, requiring `FieldMask` or `optional` presence before generating plans.
+
+### Additive Runbook Auditing
+Audits living domain runbooks concurrently with automated unit and integration tests in CI, ensuring manual verification fixtures remain up to date without substituting them for CI passes.
+
+### SkillOpt Iterative Prompt Optimizer
+Runs continuous automated prompt mutation loops against training and validation task batteries to mathematically measure and improve skill instruction pass rates.
 
 ---
 
