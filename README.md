@@ -44,6 +44,7 @@ File                   | Location                                              |
 `conductor-setup/`     | `~/.gemini/antigravity/skills/conductor-setup/`       | `/conductor-setup` — Initialize project context (persona: Conductor Architect)
 `workflow_template.md` | `~/.gemini/antigravity/skills/conductor-setup/assets/`| Bundled project workflow template copied during `/conductor-setup`
 `adr_template.md`      | `~/.gemini/antigravity/skills/conductor-setup/assets/`| Bundled project ADR template copied during `/conductor-setup`
+`manual_testing_template.md` | `~/.gemini/antigravity/skills/conductor-setup/assets/`| Bundled domain manual testing runbook template copied during `/conductor-setup`
 `.conductor_version`   | `~/.gemini/antigravity/skills/conductor-setup/`       | Version stamp for update detection
 `conductor-new-track/` | `~/.gemini/antigravity/skills/conductor-new-track/`   | `/conductor-new-track` — Start a new feature or bug fix (persona: Conductor Planner)
 `conductor-implement/` | `~/.gemini/antigravity/skills/conductor-implement/`   | `/conductor-implement` — Execute plan tasks sequentially (persona: Conductor Implementer)

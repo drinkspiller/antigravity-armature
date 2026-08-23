@@ -77,8 +77,13 @@ Evaluate the changed code against the following criteria:
     `code_styleguides/*.md` rules followed?
 -   **Correctness & safety:** Check for bugs, race conditions, null risks, and
     perform a security scan for hardcoded secrets or PII.
--   **Testing:** Check for new tests covering the changes. Attempt to run the
-    test suite automatically via the project's build tool.
+-   **Automated testing:** Check for new automated tests covering the changes.
+    Attempt to run the test suite automatically via the project's build tool.
+-   **Manual testing runbook:** Explicitly audit each changed route, navigation
+    guard, persona transition, and error handler against
+    `{PROJECT_ROOT}/conductor/tracks/<track_name>/manual_testing.md`. Verify
+    that every newly introduced route and state transition has reproducible manual
+    test scenarios with exact setup syntax and persona expectations.
 -   **Skill-specific checks:** Apply specialized guidelines from relevant
     installed skills.
 
@@ -101,7 +106,8 @@ Use the following strict output format for the report:
 - ADR Compliance: [Pass/Fail]
 - Style Compliance: [Pass/Fail]
 - Correctness & Safety: [Pass/Fail]
-- Testing: [Pass/Fail]
+- Automated Testing: [Pass/Fail]
+- Manual Testing Runbook: [Pass/Fail]
 
 ## Findings
 *(Categorize as Critical, High, Medium, or Low severity. Include the file path, context, and a code diff suggestion for fixing. If an ADR compliance divergence was accepted as tech debt, document it here with a 'Tech Debt' tag.)*

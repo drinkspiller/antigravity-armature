@@ -196,5 +196,4 @@ This step is offered for brownfield project directories with concrete architectu
 2.  **Summarize Actions**: Display a summary of all actions taken and list all
     created files.
 3.  **Closing**: Present the final message: "✅ Conductor setup complete! Run
-    `/conductor_newTrack` to start your first feature or bug fix track." x
-    track."
+    `/conductor_newTrack` to start your first feature or bug fix track."
