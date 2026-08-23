@@ -49,6 +49,10 @@ DEFAULT_OUTPUT_JSON = os.path.join(SCRIPT_DIR, "eval_results.json")
 DEFAULT_REPORT_MD = os.path.join(
     SCRIPT_DIR, "cdd_sdd_live_benchmark_results.md"
 )
+DEFAULT_REPORT_HTML = os.path.join(
+    SCRIPT_DIR, "cdd_sdd_live_benchmark_results.html"
+)
+DEFAULT_HISTORY_DIR = os.path.join(SCRIPT_DIR, "history")
 
 # ANSI Color codes for clean terminal output
 GREEN = "\033[92m"
@@ -402,6 +406,11 @@ Review the empirical data from the live evaluation runs across the benchmark sce
   prompt += """
 ### Evaluation Requirements:
 Analyze the empirical performance of each framework and provide:
+Tone and Style Requirements:
+- Write in direct, factual, plain-language engineering prose.
+- Do NOT use marketing fluff, promotional language, or AI superlatives (avoid 'exceptional', 'premier', 'triumph', 'unparalleled', 'robust', 'seamlessly', 'tapestry', 'landscape', 'delve').
+- Keep justifications concise and grounded in observed scenario data.
+
 1. Multi-Dimensional Performance Analysis across 5 core pillars:
    - Specification Gating & Exploration Rigor (Problem exploration, backward compatibility, devil's advocate probing)
    - Conversational & Detour Resilience (Milestone memory retention, pre-materialization hardening, resumption without amnesia)
@@ -484,8 +493,11 @@ def generate_markdown_report(
 | :--- | :--- | :---: | :---: | :---: | :---: |
 """
   for fw_key, data in summary.items():
+    display_name = data['name']
+    if fw_key == "conductor_oss" and "(this)" not in display_name:
+      display_name += " (this)"
     md += (
-        f"| **{data['name']}** | {data['paradigm']} | **{data['total_passed']}"
+        f"| **{display_name}** | {data['paradigm']} | **{data['total_passed']}"
         f" / {data['total_criteria']}** | **{data['pass_rate']}%** |"
         f" {data['avg_tokens']} tokens | {data['scenarios_run']} | \n"
     )
@@ -519,8 +531,11 @@ def generate_markdown_report(
         score = score_data.get("score", "-")
         strength = score_data.get("key_strength", "-")
         weakness = score_data.get("primary_weakness", "-")
+        display_fw_name = fw_name
+        if any(k in fw_name.lower() for k in ["conductor (antigravity", "conductor_oss"]) and "(this)" not in display_fw_name:
+          display_fw_name += " (this)"
         md += (
-            f"| **#{rank}** | **{fw_name}** | **{score} / 100** | {strength} |"
+            f"| **#{rank}** | **{display_fw_name}** | **{score} / 100** | {strength} |"
             f" {weakness} |\n"
         )
 
@@ -604,6 +619,303 @@ def generate_markdown_report(
   )
 
 
+
+def generate_html_report(
+    results: Dict[str, Any], output_path: str, history_dir: Optional[str] = None
+) -> None:
+  """Generates an interactive, standalone HTML visual report with historical run comparisons."""
+  summary = results.get("summary", {})
+  detailed = results.get("detailed_results", {})
+  timestamp = results.get("timestamp", datetime.datetime.now().isoformat())
+  target_model = results.get("target_model", TARGET_MODEL)
+  judge_model = results.get("judge_model", JUDGE_MODEL)
+  meta_analysis = results.get("meta_analysis", {})
+  winner = meta_analysis.get("winner", "N/A")
+  justification = meta_analysis.get("justification", "")
+  composite_scores = meta_analysis.get("composite_scores", {})
+  pillar_breakdown = meta_analysis.get("pillar_breakdown", {})
+
+  history_runs = []
+  if history_dir and os.path.exists(history_dir):
+    try:
+      for f in sorted(os.listdir(history_dir)):
+        if f.startswith("eval_results_") and f.endswith(".json"):
+          fpath = os.path.join(history_dir, f)
+          with open(fpath, "r", encoding="utf-8") as hf:
+            hdata = json.load(hf)
+            history_runs.append({
+                "filename": f,
+                "timestamp": hdata.get("timestamp", f),
+                "target_model": hdata.get("target_model", "-"),
+                "judge_model": hdata.get("judge_model", "-"),
+                "winner": hdata.get("meta_analysis", {}).get("winner", "-"),
+                "summary": hdata.get("summary", {}),
+            })
+    except Exception as e:
+      print(f"  [History Load Warning] {e}")
+
+  # Build Scorecard rows
+  sorted_scores = sorted(
+      composite_scores.items(),
+      key=lambda x: x[1].get("rank", 99) if isinstance(x[1], dict) else 99,
+  )
+  scorecard_rows = ""
+  for fw_key, score_data in sorted_scores:
+    fw_info = summary.get(fw_key, {})
+    fw_name = fw_info.get("name", fw_key)
+    if fw_key == "conductor_oss" and "(this)" not in fw_name:
+      fw_name += " (this)" 
+    paradigm = fw_info.get("paradigm", "-")
+    pass_rate = fw_info.get("pass_rate", 0.0)
+    total_passed = fw_info.get("total_passed", 0)
+    total_criteria = fw_info.get("total_criteria", 0)
+    avg_tokens = fw_info.get("avg_tokens", 0)
+    rank = score_data.get("rank", "-") if isinstance(score_data, dict) else "-"
+    score = score_data.get("score", "-") if isinstance(score_data, dict) else "-"
+    strength = score_data.get("key_strength", "-") if isinstance(score_data, dict) else "-"
+    weakness = score_data.get("primary_weakness", "-") if isinstance(score_data, dict) else "-"
+
+    rank_badge_class = "gold" if rank == 1 else ("silver" if rank == 2 else ("bronze" if rank == 3 else "default"))
+    bar_color = "#3fb950" if pass_rate >= 80 else ("#d29922" if pass_rate >= 50 else "#f85149")
+
+    scorecard_rows += f"""
+        <tr>
+          <td><span class="rank-badge {rank_badge_class}">#{rank}</span></td>
+          <td>
+            <strong>{fw_name}</strong>
+            <div class="meta-sub">{paradigm}</div>
+          </td>
+          <td>
+            <div class="score-container">
+              <span class="score-val">{score}</span>
+              <div class="progress-bar"><div class="progress-fill" style="width: {score}%; background-color: {bar_color};"></div></div>
+            </div>
+          </td>
+          <td>
+            <span class="status-pill" style="background-color: {bar_color}22; color: {bar_color}; border: 1px solid {bar_color}66;">
+              {total_passed}/{total_criteria} ({pass_rate}%)
+            </span>
+          </td>
+          <td>{avg_tokens:,}</td>
+          <td class="small-text"><strong>+</strong> {strength}<br><span style="color:#f85149"><strong>-</strong> {weakness}</span></td>
+        </tr>
+    """
+
+  # Scenario Columns
+  scen_ids = []
+  for fw_data in detailed.values():
+    for sid in fw_data.get("scenarios", {}):
+      if sid not in scen_ids:
+        scen_ids.append(sid)
+
+  scen_header_th = "".join(f"<th>{sid.replace('SCEN_', 'S_')}</th>" for sid in scen_ids)
+  scen_matrix_rows = ""
+  for fw_key, fw_data in detailed.items():
+    scen_matrix_rows += f"<tr><td><strong>{fw_data.get('name', fw_key)}</strong></td>"
+    for sid in scen_ids:
+      if sid in fw_data.get("scenarios", {}):
+        scen_res = fw_data["scenarios"][sid]
+        passed = scen_res.get("passed_count", 0)
+        tot = scen_res.get("total_criteria", 0)
+        score_val = scen_res.get("score", 0.0)
+        cell_color = "#3fb950" if passed == tot else ("#d29922" if passed > 0 else "#f85149")
+        scen_matrix_rows += f"""
+        <td>
+          <span class="matrix-pill" style="background-color: {cell_color}22; color: {cell_color}; border: 1px solid {cell_color}55;">
+            {passed}/{tot} ({int(score_val*100)}%)
+          </span>
+        </td>"""
+      else:
+        scen_matrix_rows += "<td><span class='meta-sub'>N/A</span></td>"
+    scen_matrix_rows += "</tr>"
+
+  # Pillar Breakdown Cards
+  pillar_cards = ""
+  for p_name, p_text in pillar_breakdown.items():
+    p_title = p_name.replace("_", " ").title()
+    pillar_cards += f"""
+    <div class="card pillar-card">
+      <h3>{p_title}</h3>
+      <p>{p_text}</p>
+    </div>
+    """
+
+  # History Table
+  history_html = ""
+  if history_runs:
+    history_rows = ""
+    for h in history_runs:
+      h_summary = h.get("summary", {})
+      h_scores = " | ".join(f"{k}: {v.get('pass_rate', 0)}%" for k, v in list(h_summary.items())[:3])
+      history_rows += f"""
+      <tr>
+        <td>{h.get('timestamp', '-')}</td>
+        <td><code>{h.get('target_model', '-')}</code></td>
+        <td><code>{h.get('judge_model', '-')}</code></td>
+        <td><span class="rank-badge gold">{h.get('winner', '-')}</span></td>
+        <td class="small-text">{h_scores}</td>
+      </tr>
+      """
+    history_html = f"""
+    <section class="section">
+      <h2>Historical Run Comparison</h2>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Target Model</th>
+              <th>Judge Model</th>
+              <th>Winner</th>
+              <th>Sample Pass Rates</th>
+            </tr>
+          </thead>
+          <tbody>
+            {history_rows}
+          </tbody>
+        </table>
+      </div>
+    </section>
+    """
+
+  html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conductor Live Evaluation Benchmark</title>
+  <style>
+    :root {{
+      --bg: #0d1117;
+      --card-bg: #161b22;
+      --border: #30363d;
+      --text: #c9d1d9;
+      --heading: #f0f6fc;
+      --accent: #58a6ff;
+      --success: #3fb950;
+      --warning: #d29922;
+      --danger: #f85149;
+    }}
+    * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+    body {{
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 2rem 1rem;
+    }}
+    .container {{ max-width: 1200px; margin: 0 auto; }}
+    header {{ margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1.5rem; }}
+    h1 {{ color: var(--heading); font-size: 2rem; margin-bottom: 0.5rem; }}
+    .badge-bar {{ display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.5rem; }}
+    .badge {{ background: var(--card-bg); border: 1px solid var(--border); padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.85rem; color: var(--heading); }}
+    .badge.highlight {{ border-color: var(--accent); color: var(--accent); }}
+    .winner-card {{ background: linear-gradient(135deg, rgba(88, 166, 255, 0.1) 0%, rgba(63, 185, 80, 0.1) 100%); border: 1px solid rgba(63, 185, 80, 0.4); border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem; }}
+    .winner-title {{ font-size: 1.3rem; color: var(--success); font-weight: bold; margin-bottom: 0.5rem; }}
+    .justification {{ font-size: 0.95rem; line-height: 1.6; color: var(--text); }}
+    .section {{ margin-bottom: 2.5rem; }}
+    h2 {{ color: var(--heading); font-size: 1.4rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }}
+    .table-wrapper {{ overflow-x: auto; background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; }}
+    table {{ width: 100%; border-collapse: collapse; text-align: left; }}
+    th, td {{ padding: 0.85rem 1rem; border-bottom: 1px solid var(--border); }}
+    th {{ background: #1c2128; color: var(--heading); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }}
+    tr:last-child td {{ border-bottom: none; }}
+    .rank-badge {{ display: inline-block; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: bold; font-size: 0.85rem; text-align: center; min-width: 32px; }}
+    .rank-badge.gold {{ background: #d2992233; color: #f2cc60; border: 1px solid #d2992288; }}
+    .rank-badge.silver {{ background: #8b949e33; color: #c9d1d9; border: 1px solid #8b949e88; }}
+    .rank-badge.bronze {{ background: #b0880033; color: #e3b341; border: 1px solid #b0880088; }}
+    .rank-badge.default {{ background: #21262d; color: #8b949e; }}
+    .score-container {{ display: flex; align-items: center; gap: 0.75rem; }}
+    .score-val {{ font-weight: bold; min-width: 28px; color: var(--heading); }}
+    .progress-bar {{ flex-grow: 1; height: 8px; background: #21262d; border-radius: 4px; overflow: hidden; min-width: 80px; }}
+    .progress-fill {{ height: 100%; border-radius: 4px; transition: width 0.3s ease; }}
+    .status-pill {{ padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.85rem; font-weight: 600; display: inline-block; }}
+    .matrix-pill {{ padding: 0.15rem 0.45rem; border-radius: 4px; font-size: 0.8rem; font-weight: 600; }}
+    .meta-sub {{ font-size: 0.8rem; color: #8b949e; margin-top: 0.2rem; }}
+    .small-text {{ font-size: 0.85rem; }}
+    .pillar-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-top: 1rem; }}
+    .card {{ background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; }}
+    .pillar-card h3 {{ font-size: 1.05rem; color: var(--accent); margin-bottom: 0.5rem; }}
+    .pillar-card p {{ font-size: 0.9rem; color: var(--text); line-height: 1.5; }}
+    footer {{ margin-top: 3rem; text-align: center; font-size: 0.85rem; color: #8b949e; border-top: 1px solid var(--border); padding-top: 1.5rem; }}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Conductor Live Evaluation Benchmark</h1>
+      <div class="badge-bar">
+        <span class="badge">Timestamp: {timestamp}</span>
+        <span class="badge highlight">Target: {target_model}</span>
+        <span class="badge highlight">Judge: {judge_model}</span>
+        <span class="badge">{len(summary)} Frameworks</span>
+        <span class="badge">{len(scen_ids)} Scenarios</span>
+      </div>
+    </header>
+
+    <div class="winner-card">
+      <div class="winner-title">Winner: {winner}</div>
+      <div class="justification">{justification}</div>
+    </div>
+
+    <section class="section">
+      <h2>Overall Leaderboard Scorecard</h2>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Framework & Paradigm</th>
+              <th>Composite Score</th>
+              <th>Pass Rate</th>
+              <th>Avg Tokens</th>
+              <th>Key Strengths & Weaknesses</th>
+            </tr>
+          </thead>
+          <tbody>
+            {scorecard_rows}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>5-Pillar Qualitative Breakdown</h2>
+      <div class="pillar-grid">
+        {pillar_cards}
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Scenario Matrix</h2>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Framework</th>
+              {scen_header_th}
+            </tr>
+          </thead>
+          <tbody>
+            {scen_matrix_rows}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    {history_html}
+
+    <footer>
+      Conductor Evaluation Suite &bull; Automated LLM Meta-Judge Execution
+    </footer>
+  </div>
+</body>
+</html>
+"""
+  with open(output_path, "w", encoding="utf-8") as f:
+    f.write(html)
+  print(f"{GREEN}[Report Exported]{RESET} HTML report written to: {output_path}")
+
 def main():
   parser = argparse.ArgumentParser(
       description="Run live CDD & SDD framework evaluations."
@@ -637,6 +949,21 @@ def main():
       "--report",
       default=DEFAULT_REPORT_MD,
       help=f"Markdown report output path (default: {DEFAULT_REPORT_MD})",
+  )
+  parser.add_argument(
+      "--html_report",
+      default=DEFAULT_REPORT_HTML,
+      help=f"HTML report output path (default: {DEFAULT_REPORT_HTML})",
+  )
+  parser.add_argument(
+      "--history_dir",
+      default=DEFAULT_HISTORY_DIR,
+      help=f"History directory for run snapshots (default: {DEFAULT_HISTORY_DIR})",
+  )
+  parser.add_argument(
+      "--no_snapshot",
+      action="store_true",
+      help="Disable saving dated snapshots in history directory",
   )
   parser.add_argument(
       "--artifact_dir",
@@ -834,8 +1161,25 @@ def main():
       f" saved to: {args.output}"
   )
 
-  # Generate markdown report with embedded LLM meta-analysis
+  # Generate markdown and interactive HTML reports
   generate_markdown_report(final_payload, args.report)
+  generate_html_report(final_payload, args.html_report, history_dir=args.history_dir)
+
+  # Save dated historical snapshot unless disabled
+  if not args.no_snapshot and args.history_dir:
+    try:
+      os.makedirs(args.history_dir, exist_ok=True)
+      now_slug = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+      snap_json = os.path.join(args.history_dir, f"eval_results_{now_slug}.json")
+      snap_html = os.path.join(args.history_dir, f"cdd_sdd_benchmark_{now_slug}.html")
+      with open(snap_json, "w", encoding="utf-8") as f:
+        json.dump(final_payload, f, indent=2)
+      import shutil
+      if os.path.exists(args.html_report):
+        shutil.copy2(args.html_report, snap_html)
+      print(f"{GREEN}[Snapshot Archived]{RESET} Historical snapshot saved: {snap_json}")
+    except Exception as e:
+      print(f"  [Snapshot Warning] Could not archive snapshot: {e}")
 
   if args.artifact_dir and os.path.exists(args.artifact_dir):
     try:
@@ -845,8 +1189,13 @@ def main():
       art_md = os.path.join(
           args.artifact_dir, "cdd_sdd_live_benchmark_results.md"
       )
+      art_html = os.path.join(
+          args.artifact_dir, "cdd_sdd_live_benchmark_results.html"
+      )
       shutil.copy2(args.output, art_json)
       shutil.copy2(args.report, art_md)
+      if os.path.exists(args.html_report):
+        shutil.copy2(args.html_report, art_html)
       print(
           f"{GREEN}[Artifact Synced]{RESET} Reports copied to conversation"
           f" artifact directory: {args.artifact_dir}"

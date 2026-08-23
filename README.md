@@ -33,6 +33,24 @@ By installing Conductor as an Antigravity Skill, you get both: Antigravity's vis
 powerful agentic coding tools and session-level knowledge, *plus* shared project
 context that the whole team can use.
 
+## Evaluation results & benchmark
+
+Conductor is benchmarked against alternative Spec-Driven Development (SDD) and Context-Driven Development (CDD) frameworks across 8 real-world engineering scenarios (32 test criteria) using live Gemini rollouts and LLM Meta-Judging.
+
+| Rank | Framework | Composite score | Pass rate | Key takeaway |
+| :---: | :--- | :---: | :---: | :--- |
+| **#1** | **Conductor (Antigravity OSS)** | **88 / 100** | **87.5%** (28/32) | Scales ceremony on small fixes, holds specs in memory during review, and catches out-of-band drift across documents and symbol exports. |
+| **#2** | **Conductor (Canonical Extension)** | **65 / 100** | **65.0%** (13/20) | Fast on surgical fixes; lacks multi-turn detour recovery. |
+| **#3** | **BMAD Method** | **50 / 100** | **50.0%** (10/20) | Clear role separation; high token overhead on minor fixes. |
+| **#4** | **Memory Bank (Cline / Roo Code)** | **50 / 100** | **50.0%** (10/20) | Fast single-prompt edits; misses pre-materialization gates. |
+| **#5** | **GitHub Spec Kit** | **45 / 100** | **45.0%** (9/20) | Handles interruptions well; heavy planning tax on small changes. |
+| **#6** | **OpenSpec** | **35 / 100** | **35.0%** (7/20) | Lightweight proposals; lacks destructive command safeguards. |
+
+Full reports and test documentation:
+- [Evaluation suite guide](evals/README.md)
+- [Live benchmark Markdown report](evals/cdd_sdd_benchmark/cdd_sdd_live_benchmark_results.md)
+- [Interactive HTML report](evals/cdd_sdd_benchmark/cdd_sdd_live_benchmark_results.html)
+
 ## What Gets Installed
 
 ### Plugin Manifest & Skills
