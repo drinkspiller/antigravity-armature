@@ -87,6 +87,10 @@ absence but do not halt):
 If `{PROJECT_ROOT}/conductor/code_styleguides/` exists, read all files in it.
 These inform code quality expectations.
 
+#### Tier 2c: Manual Testing Runbooks (loaded on demand)
+
+If the user's task touches files mapped to a specific domain (or active domain terms from `terms.md`), load `{PROJECT_ROOT}/conductor/manual_testing/<domain>.md` on demand.
+
 ### Step 3: Act on the User's Task
 
 After context is loaded, determine the next action:
@@ -97,6 +101,24 @@ After context is loaded, determine the next action:
     conductor context informs your work — use the product vision, tech-stack
     decisions, style guides, and active track knowledge to guide your actions.
 
+-   **Continuous Manual Testing Maintenance**: Whenever your implementation
+    introduces new functionality, new routes, flags, or changes existing behavior:
+    -   Update or append corresponding reproduction steps in
+        `{PROJECT_ROOT}/conductor/manual_testing/<domain>.md` (or the active track's
+        `manual_testing.md`).
+    -   Use structured scenario headers (`### Test <Domain>.<ID>: <Scenario Title>`)
+        with exact setup preconditions, actions, expected outcomes, and barrier checks.
+    -   **Documentation-Only Invariant**: Document the exact commands with precision,
+        but do NOT execute mutative database resets, state mutations, or environment
+        teardown commands autonomously.
+    -   **Artifact Generation & Chat Reference**: Write the updated domain manual
+        testing guide as an artifact (save to
+        `{ARTIFACT_DIR}/conductor_manual_testing_<domain>.md`, `IsArtifact: true`,
+        `ArtifactType: walkthrough`).
+    -   **Chat Link**: In your response to the user, explicitly state that the
+        manual testing artifact has been updated and provide a clickable markdown
+        link (e.g., `[conductor_manual_testing_<domain>.md](file://...)`).
+
 -   **If there is no accompanying prompt or prior context:** Announce that the
     project context is loaded and briefly state what you found (e.g., "Loaded
     conductor context for {product name}: {N} active tracks, tech stack is
@@ -105,18 +127,20 @@ After context is loaded, determine the next action:
 
 ## Guardrails
 
-### Read-Only Default
+### Read-Only Default & Permitted Updates
 
--   **Do NOT modify, create, or delete any files inside
-    `{PROJECT_ROOT}/conductor/` unless the user explicitly asks you to.** This
-    includes tracks, specs, plans, and all context files.
--   If your task requires changes that would normally trigger a conductor
-    workflow (e.g., creating a new track, updating a spec), inform the user and
-    suggest the appropriate conductor command instead of doing it yourself.
+-   **Permitted File Updates**: You are explicitly permitted to update
+    `{PROJECT_ROOT}/conductor/manual_testing/<domain>.md` as new features or
+    behavior changes are implemented.
+-   **Read-Only Files**: Do NOT modify `product.md`, `tech-stack.md`,
+    `product-guidelines.md`, `tracks.md`, or active track `spec.md`/`plan.md`
+    files unless the user explicitly asks you to.
+-   If your task requires creating a new track or major architectural pivot,
+    inform the user and suggest the appropriate conductor command (`/conductor-new-track`).
 
 ### Explicit Escape Hatch
 
--   If the user explicitly asks you to modify conductor files (e.g., "update the
+-   If the user explicitly asks you to modify other conductor files (e.g., "update the
     spec for track X" or "add a task to the plan"), you may do so. But announce
     what you're changing before making the edit.
 
@@ -140,13 +164,19 @@ conductor/
 ├── product-guidelines.md     # Tone, visual identity, UX patterns
 ├── tech-stack.md             # Technical choices & frameworks
 ├── workflow.md               # Task workflow, coding principles, commands
+├── terms.md                  # Domain glossary & ubiquitous language
+├── manual_testing/           # Living domain verification runbooks
+│   └── <domain>.md
 ├── setup_state.json          # Setup progress tracking
 ├── code_styleguides/         # Language-specific style guides
+├── adr/                      # Architecture Decision Records
+│   └── NNNN-slug.md
 ├── tracks.md                 # Registry of all tracks (features/bugs)
 ├── tracks/                   # Active track directories
 │   └── <track_id>/
 │       ├── spec.md           # Detailed specification
 │       ├── plan.md           # Phased implementation plan
+│       ├── manual_testing.md # Track manual verification runbook
 │       └── metadata.json     # Track metadata
 └── archive/                  # Completed track directories
 ```

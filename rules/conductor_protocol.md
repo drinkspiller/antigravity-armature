@@ -23,6 +23,8 @@ conductor/
 ├── tech-stack.md             # Technical choices & frameworks
 ├── workflow.md               # Task workflow, coding principles, commands
 ├── terms.md                  # Domain glossary & ubiquitous language
+├── manual_testing/           # Living domain verification runbooks
+│   └── <domain>.md
 ├── .api_surface_cache.json   # AST-extracted symbol snapshot (gitignored)
 ├── setup_state.json          # Setup progress tracking
 ├── code_styleguides/         # Language-specific style guides
@@ -34,6 +36,7 @@ conductor/
 │       ├── index.md          # Track context links
 │       ├── spec.md           # Detailed specification
 │       ├── plan.md           # Phased implementation plan
+│       ├── manual_testing.md # Track manual verification runbook
 │       └── metadata.json     # Track metadata
 └── archive/                  # Completed track directories
 ```
@@ -54,7 +57,11 @@ these files (in order of priority):
     check the parent directory chain case-insensitively for context files
     (`GEMINI.md`, `CLAUDE.md`, `AGENTS.md`, or `AGENT.md`) containing a `##
     Conductor Context` section. Load the nearest one (innermost directory wins).
-9.  **Drift scan:** Run a VCS diff stat against the last checkpoint commit.
+9.  **Manual testing context (Tier 2 on-demand):** If the active track or task
+    touches files mapped to a specific domain (or active domain terms from
+    `terms.md`), load `conductor/manual_testing/<domain>.md` on demand. Skip
+    unrelated domain runbooks to preserve context token budgets.
+10. **Drift scan:** Run a VCS diff stat against the last checkpoint commit.
     Cross-reference changed files against ADR scopes and local rules. Flag
     contradictions before proceeding (see `conductor_cdd_protocols.md` §9).
 
@@ -124,16 +131,26 @@ first. Do NOT create empty commits.
 -   **Never modify conductor files outside the active track** — only update
     files in `conductor/tracks/<active_track_id>/` and `conductor/tracks.md`
     during implementation. **Exceptions:** `conductor/adr/*.md`,
-    `conductor/terms.md`, `conductor/.api_surface_cache.json`, and source-tree
-    `GEMINI.md` files may be updated at phase checkpoints or when ADR capture
-    triggers fire.
+    `conductor/terms.md`, `conductor/manual_testing/*.md`,
+    `conductor/.api_surface_cache.json`, and source-tree context files
+    (`GEMINI.md`, `AGENTS.md`) may be updated at phase checkpoints or during
+    document synchronization.
 -   **Always confirm before overwriting user-approved specs or plans.**
 -   **Ask before destructive operations** — do not delete tracks, revert
     commits, or remove artifacts without explicit user confirmation.
 -   **Spec and plan approval gates** — always present specs and plans for
     explicit user approval before proceeding.
--   **Document sync is opt-in** — present proposed changes as diffs for user
-    approval.
+-   **Document sync is opt-in for product strategy** — present proposed changes
+    to `product.md` and `product-guidelines.md` as diffs for user approval.
+-   **Autonomous manual testing synchronization** — During track completion
+    (`/conductor-implement` Step 4), merging verified steady-state test
+    scenarios from `conductor/tracks/<track_id>/manual_testing.md` into
+    `conductor/manual_testing/<domain>.md` is fully autonomous and non-gated.
+    The agent applies the update directly without prompt confirmation.
+-   **Documentation-only fixture policy** — Manual testing runbooks must specify
+    exact setup, database mutation, and reset commands, but the agent must NEVER
+    execute mutative database, environment reset, or teardown commands
+    autonomously during phase checkpoints.
 
 ## 6. ADR & Glossary Preflight Interceptor
 

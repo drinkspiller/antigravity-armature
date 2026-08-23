@@ -53,7 +53,7 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
-VERSION="0.13.1"
+VERSION="0.14.0"
 
 # --- Resolve source directory (relative to this script) ---
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -100,6 +100,10 @@ validate_sources() {
     msg_error "Source not found: ${SOURCE_ASSETS_DIR}/workflow_template.md"
     ((missing++))
   fi
+  if [[ ! -f "${SOURCE_ASSETS_DIR}/manual_testing_template.md" ]]; then
+    msg_error "Source not found: ${SOURCE_ASSETS_DIR}/manual_testing_template.md"
+    ((missing++))
+  fi
   for sub_skill in "${SUB_SKILL_NAMES[@]}"; do
     if [[ ! -f "${SCRIPT_DIR}/skills/${sub_skill}/SKILL.md" ]]; then
       msg_error "Source not found: ${SCRIPT_DIR}/skills/${sub_skill}/SKILL.md"
@@ -138,6 +142,7 @@ build_target_list() {
   ALL_TARGET_FILES=(
     "${TARGET_ASSETS_DIR}/workflow_template.md"
     "${TARGET_ASSETS_DIR}/adr_template.md"
+    "${TARGET_ASSETS_DIR}/manual_testing_template.md"
     "${TARGET_SKILLS_ROOT}/conductor-setup/.conductor_version"
     "${TARGET_MANIFEST_ROOT}/plugin.json"
     "${TARGET_MANIFEST_ROOT}/.claude-plugin/marketplace.json"
@@ -343,6 +348,7 @@ section "📄 Installing Conductor Setup Assets"
 echo ""
 install_file "${SOURCE_ASSETS_DIR}/workflow_template.md" "${TARGET_ASSETS_DIR}/workflow_template.md"
 install_file "${SOURCE_ASSETS_DIR}/adr_template.md" "${TARGET_ASSETS_DIR}/adr_template.md"
+install_file "${SOURCE_ASSETS_DIR}/manual_testing_template.md" "${TARGET_ASSETS_DIR}/manual_testing_template.md"
 
 if [[ "${FLAGS_dry_run}" -eq "${FLAGS_TRUE}" ]]; then
   msg_info "${YELLOW}[dry-run]${NC} Would write version file: ${GREEN}.conductor_version${NC}"

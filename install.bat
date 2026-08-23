@@ -4,7 +4,7 @@ setlocal EnableDelayedExpansion
 :: Antigravity Conductor Skills & Rules Installer (Windows)
 :: =============================================================================
 
-set "VERSION=0.13.1"
+set "VERSION=0.14.0"
 set "FLAGS_dry_run=0"
 set "FLAGS_force=0"
 set "FLAGS_uninstall=0"
@@ -69,6 +69,7 @@ if "%FLAGS_uninstall%"=="1" goto :do_uninstall
 
 :: Validate sources
 if not exist "%SOURCE_ASSETS_DIR%\workflow_template.md" ( echo [ERROR] Missing %SOURCE_ASSETS_DIR%\workflow_template.md & exit /b 1 )
+if not exist "%SOURCE_ASSETS_DIR%\manual_testing_template.md" ( echo [ERROR] Missing %SOURCE_ASSETS_DIR%\manual_testing_template.md & exit /b 1 )
 for %%S in (conductor-setup conductor-new-track conductor-implement conductor-status conductor-review conductor-revert conductor-chat) do (
     if not exist "%SCRIPT_DIR%\skills\%%S\SKILL.md" ( echo [ERROR] Missing %SCRIPT_DIR%\skills\%%S\SKILL.md & exit /b 1 )
 )
@@ -92,6 +93,7 @@ echo.
 echo --- Installing Conductor Assets ---
 call :install_file "%SOURCE_ASSETS_DIR%\workflow_template.md" "%TARGET_ASSETS_DIR%\workflow_template.md"
 call :install_file "%SOURCE_ASSETS_DIR%\adr_template.md" "%TARGET_ASSETS_DIR%\adr_template.md"
+call :install_file "%SOURCE_ASSETS_DIR%\manual_testing_template.md" "%TARGET_ASSETS_DIR%\manual_testing_template.md"
 
 :: Version Stamp
 if "%FLAGS_dry_run%"=="1" (

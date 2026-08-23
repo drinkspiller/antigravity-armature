@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.14.0] - 2026-08-23
+
+### Added
+- **Manual Testing Guide Protocol**: Living, domain-organized manual testing runbooks stored at `conductor/manual_testing/<domain>.md` with environment prerequisites, CLI fixture setup, persona matrices, and error resilience.
+- **Tiered Testing Strategy Classification**: Structured testing classification in `/conductor-new-track` Step 7 Gap Analysis, requiring full runbooks for stateful/route tracks and lightweight smoke checks for utility chores.
+- **Specification `## Manual Verification Plan` Section**: Enforced dedicated manual testing section in all generated track specifications.
+- **Developer Test Tooling Injection**: Automated injection of fixture seeding and CLI reset tasks into `plan.md` alongside feature code.
+- **Autonomous Runbook Synchronization**: Fully automated synchronization of steady-state manual testing scenarios into `conductor/manual_testing/<domain>.md` upon track completion (`/conductor-implement` Step 4), generating walkthrough artifacts and clickable chat links.
+- **Continuous Runbook Maintenance**: `/conductor-chat` automatically updates domain manual testing guides and outputs walkthrough artifacts with chat links when new functionality or behavioral changes are introduced.
+- **Additive Manual Testing Review Audit**: Injected `Manual Testing Runbook: [Pass/Fail]` into `/conductor-review` checklist and `review.md`.
+- **SkillOpt Evaluation Suite**: Integrated evaluation test harness under `evals/skillopt/` (`run_optimizer.py`, `tasks/train.jsonl`, `tasks/val.jsonl`, and documentation).
+- **Setup Asset `manual_testing_template.md`**: Bundled canonical manual testing template in `skills/conductor-setup/assets/`.
+
+### Fixed
+- **Pre-Materialization Hardening Barrier & Detour Recovery**: Enforced in-memory draft retention until all gap analyses and devil's advocate challenges complete, with explicit resumption barriers after user detours in `/conductor-new-track`.
+- **Neutral Retrospective ADR Prompting**: Step 5 in `/conductor-implement` uses neutral retrospective wording rather than referencing "archiving" before track disposition is chosen.
+
 ## [0.13.1] - 2026-08-17
 
 ### Fixed

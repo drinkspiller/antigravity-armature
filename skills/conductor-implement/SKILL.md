@@ -50,13 +50,13 @@ tasks sequentially, synchronizing documentation, and managing track cleanup.
     -   **Per-Directory Context**: Before modifying files in a directory for the first time in this track, check case-insensitively for existing agent context files: `GEMINI.md`, `CLAUDE.md`, `AGENTS.md`, or `AGENT.md`.
         -   If any of these files exist and contain a `## Conductor Context` section, use that file without prompting.
         -   If exactly one exists without `## Conductor Context`, append the section to that file.
-        -   If multiple exist or none exist, and there is concrete architectural justification (multiple interacting services, complex stateful controllers, subtle local invariants, domain gotchas), prompt via `ask_question` asking the user which filename (`GEMINI.md`, `AGENTS.md`, `AGENT.md`, `CLAUDE.md`) they prefer.
+        -   If multiple exist or none exist, and there is concrete architectural justification (multiple interacting services, complex stateful controllers, subtle local rules, domain gotchas), prompt via `ask_question` asking the user which filename (`GEMINI.md`, `AGENTS.md`, `AGENT.md`, `CLAUDE.md`) they prefer.
         -   If the directory is simple (straightforward UI components, basic utilities, CRUD wrappers), skip prompting entirely.
     -   **Lifecycle Execution**: Defer to the lifecycle defined in `workflow.md`
         (e.g., TDD Red/Green/Refactor).
     -   **ADR Capture**: When writing a guard, assertion, initialization
         constraint, or call-ordering check, evaluate whether it enforces a
-        load-bearing architectural rule that extends beyond this track. If so, follow the
+        behavioral contract that extends beyond this track. If so, follow the
         ADR Capture Protocol in `conductor_cdd_protocols.md` §10.
     -   **Mark Complete**: Once completed, update the task to `[x]` in `plan.md`
         and append the commit SHA.
@@ -72,12 +72,20 @@ tasks sequentially, synchronizing documentation, and managing track cleanup.
         true`: "These new exports appeared in Phase N. Add any to the glossary?"
         For each accepted symbol, append a definition to
         `{PROJECT_ROOT}/conductor/terms.md`. Update the cache file.
-    -   **Per-Directory Context Update**: For directories touched in this phase, check whether their context file (`GEMINI.md`, `AGENTS.md`, `AGENT.md`, or `CLAUDE.md`) `## Conductor Context` section needs updates (new Key Types, new local rules). Propose updates between the START and END boundary comments.
+    -   **Per-Directory Context Update**: For directories touched in this phase, check whether their context file (`GEMINI.md`, `AGENTS.md`, `AGENT.md`, or `CLAUDE.md`) `## Conductor Context` section needs updates (new Key Types, new scoped local rules). Propose updates between the START and END boundary comments.
+    -   **Manual Testing Runbook Update**: Update the track's manual testing
+        guide at `{PROJECT_ROOT}/conductor/tracks/{Track
+        Name}/manual_testing.md` with exact reproduction workflows, URLs, CLI
+        commands, and expected visual outcomes for the completed phase.
+        -   **Documentation-Only Invariant**: Document the exact commands with
+            precision, but do NOT execute mutative database resets, state
+            mutations, or environment teardown commands autonomously.
     -   Write a manual verification plan as an artifact (use
         `write_to_file` with `IsArtifact: true`, save to
         `{ARTIFACT_DIR}/conductor_implement_phase_N_verification.md`,
         `ArtifactType: walkthrough`). Detail specific, actionable steps (e.g.,
-        URLs to visit, `curl` commands, expected visual outcomes).
+        URLs to visit, `curl` commands, expected visual outcomes) linking to
+        `manual_testing.md`.
     -   Present the verification artifact to the user via `notify_user` with
         `PathsToReview`. Use `ask_question` to confirm completion with a
         structured choice: "Phase complete. Does this meet your expectations?"
@@ -90,12 +98,14 @@ tasks sequentially, synchronizing documentation, and managing track cleanup.
 This step triggers **only** when the track reaches `[x]` status (all tasks
 complete).
 
-1.  Load the track's `spec.md` along with `{PROJECT_ROOT}/conductor/product.md`,
+1.  Load the track's `spec.md` and `manual_testing.md` along with
+    `{PROJECT_ROOT}/conductor/product.md`,
     `{PROJECT_ROOT}/conductor/tech-stack.md`,
     `{PROJECT_ROOT}/conductor/product-guidelines.md`, and
     `{PROJECT_ROOT}/conductor/terms.md`.
-2.  Analyze the `spec.md` and the final implementation code for new features,
-    architectural decisions, technical changes, or new domain-specific terms.
+2.  Analyze `spec.md`, `manual_testing.md`, and the final implementation code
+    for new features, architectural decisions, technical changes, domain terms,
+    and steady-state manual verification runbooks.
 3.  **Update `product.md`**: Propose diff-based changes to incorporate new
     features. Use `ask_question` to confirm with a structured choice: "Apply
     updates to product.md?" [Yes] / [No]
@@ -112,9 +122,32 @@ complete).
     -   "The glossary drifted. Here's what changed — apply?"
     -   "terms.md needs a refresh after this track. Review the diff?"
     -   *Options*: `["Apply", "Edit first", "Skip"]`
-7.  Commit all approved documentation changes as a separate commit with the
-    message: `docs(conductor): Synchronize docs for track '<description>'` using
-    VCS commands.
+7.  **Synchronize Manual Testing Runbook (Autonomous)**:
+    -   Extract all verified, steady-state manual testing procedures, persona
+        setup commands, and URL routes from
+        `{PROJECT_ROOT}/conductor/tracks/{Track Name}/manual_testing.md`.
+    -   Strip transient development flags and migration toggles that will not
+        exist in steady-state production.
+    -   Infer target domain(s) from touched components and `terms.md` (e.g.,
+        `{PROJECT_ROOT}/conductor/manual_testing/<domain>.md`).
+    -   Perform structured scenario reconciliation using `### Test
+        <Domain>.<ID>` headings: update existing scenarios with modified
+        assertions, append new scenarios under the appropriate persona heading,
+        and prune deprecated scenarios.
+    -   Ensure `{PROJECT_ROOT}/conductor/manual_testing/` exists and write the
+        domain runbook directly without an `ask_question` confirmation gate.
+    -   **Artifact Generation & Chat Reference**: Write the finalized domain
+        manual testing runbook as an artifact (use `write_to_file` with
+        `IsArtifact: true`, save to
+        `{ARTIFACT_DIR}/conductor_manual_testing_<domain>.md`, `ArtifactType:
+        walkthrough`).
+    -   **Chat Notification**: In your response to the user, explicitly announce
+        that the manual testing guide artifact has been created and provide a
+        clickable markdown link to the file (e.g.,
+        `[conductor_manual_testing_<domain>.md](file://...)`).
+8.  Commit all approved documentation changes and updated manual testing
+    runbooks as a separate commit with the message: `docs(conductor):
+    Synchronize docs for track '<description>'` using VCS commands.
 
 ### Step 5: Track Cleanup
 
@@ -130,8 +163,8 @@ Synchronization has been handled.
     -   Randomly select one of these three phrasings for the question:
         *   "Some decisions from this track weren't captured as ADRs. Looking
             back, should any of these be recorded?"
-        *   "Before archiving: any of these spec decisions deserve a permanent
-            record?"
+        *   "Retrospective check — should any of these spec decisions be
+            captured as permanent ADRs?"
         *   "Retrospective check — did any of these quiet decisions turn out to
             be load-bearing?"
     -   For each decision the user selects from the list:
