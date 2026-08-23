@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.16.0] - 2026-08-23
+
+### Added
+- **CDD & SDD Live Evaluation Benchmark Suite (`evals/cdd_sdd_benchmark/`)**:
+  - Standalone, zero-external-dependency live evaluation harness (`run_cdd_sdd_eval.py`) with 8-scenario, 32-criterion test suite comparing 7 industry frameworks (`jetski-conductor-dev`, `canonical_conductor`, `conductor_oss`, `bmad_method`, `memory_bank`, `github_spec_kit`, `openspec`).
+  - Automated LLM Meta-Judge synthesis via `gemini-3.1-pro-preview` generating composite scores (0–100), rank, winner declaration, and markdown report artifacts.
+  - Dynamic ceremony scaling rule for micro-hotfixes (<5 lines, zero ripple) bypassing heavy PRD barriers.
+  - Adversarial proto schema evolution challenge rule during Step 7 / Step 9 Gap Analysis for proto3 default zero-value collisions in partial updates.
+  - Additive manual testing runbook verification rule auditing living runbooks concurrently with automated unit/integration test suites.
+- **SkillOpt Optimization Benchmark Suite (`evals/skillopt/`)**:
+  - Extended training tasks `TRAIN_17`–`TRAIN_19` and validation tasks `VAL_14`–`VAL_15` covering micro-hotfix ceremony scaling, proto3 field presence evolution, and additive runbook auditing.
+
 ## [0.15.0] - 2026-08-23
 
 ### Added
