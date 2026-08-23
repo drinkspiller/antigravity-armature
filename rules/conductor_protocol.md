@@ -62,8 +62,9 @@ these files (in order of priority):
     `terms.md`), load `conductor/manual_testing/<domain>.md` on demand. Skip
     unrelated domain runbooks to preserve context token budgets.
 10. **Drift scan:** Run a VCS diff stat against the last checkpoint commit.
-    Cross-reference changed files against ADR scopes and local rules. Flag
-    contradictions before proceeding (see `conductor_cdd_protocols.md` §9).
+    Cross-reference changed files against ADR scopes, local rules, and manual
+    testing runbooks. Flag contradictions or invoke `/conductor-drift` before
+    proceeding (see `conductor_cdd_protocols.md` §9).
 
 Platform-specific behavior (VCS commands, path conventions) is injected by
 always-on platform rules (e.g., platform adapters). Do not hardcode VCS
@@ -147,8 +148,24 @@ first. Do NOT create empty commits.
     scenarios from `conductor/tracks/<track_id>/manual_testing.md` into
     `conductor/manual_testing/<domain>.md` is fully autonomous and non-gated.
     The agent applies the update directly without prompt confirmation.
+-   **Ceremony scaling on micro-tasks** — If a task is a surgical hotfix,
+    single-line bug fix, or minor attribute toggle (<5 lines of changed code
+    with zero architectural ripple), scale down ceremony: bypass multi-page
+    PRDs, heavy Grill interviews, and multi-turn planning barriers. Identify the
+    target component, propose the minimal targeted diff directly, and
+    synchronize domain runbooks/test specs without heavy ceremony.
+-   **Proto schema evolution probing** — During Step 7 Gap Analysis and Step 9
+    Devil's Advocate on protocol or protobuf migrations, explicitly challenge
+    proto schema evolution edge cases (e.g. proto3 default zero-values losing
+    distinction between unset and default fields in partial update patches,
+    wire-format breaks, and FieldMask requirements) before generating plans.
+-   **Additive manual testing verification** — Manual testing runbooks are
+    strictly additive to automated unit and integration tests. In phase
+    checkpoints, track closeouts, and review workflows, the agent must audit
+    both automated CI test passes and reproducible manual fixture runbooks
+    concurrently.
 -   **Documentation-only fixture policy** — Manual testing runbooks must specify
-    exact setup, database mutation, and reset commands, but the agent must NEVER
+    exact setup, SQL mutation, and reset commands, but the agent must NEVER
     execute mutative database, environment reset, or teardown commands
     autonomously during phase checkpoints.
 -   **Fixpoint and Drift Auditing** — A feature or track achieves completion only
