@@ -84,6 +84,9 @@ Evaluate the changed code against the following criteria:
     `{PROJECT_ROOT}/conductor/tracks/<track_name>/manual_testing.md`. Verify
     that every newly introduced route and state transition has reproducible manual
     test scenarios with exact setup syntax and persona expectations.
+-   **Fixpoint & drift audit:** Run the Fixpoint Auditor (`/conductor-drift` or
+    `/conductor-drift --check`) to verify zero documentation, spec, ADR, and
+    API surface drift across the workspace.
 -   **Skill-specific checks:** Apply specialized guidelines from relevant
     installed skills.
 
@@ -104,6 +107,7 @@ Use the following strict output format for the report:
 ## Verification Checks
 - Intent vs Spec: [Pass/Fail]
 - ADR Compliance: [Pass/Fail]
+- Fixpoint Audit: [Pass/Fail]
 - Style Compliance: [Pass/Fail]
 - Correctness & Safety: [Pass/Fail]
 - Automated Testing: [Pass/Fail]

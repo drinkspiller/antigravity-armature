@@ -53,13 +53,13 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
-VERSION="0.14.0"
+VERSION="0.15.0"
 
 # --- Resolve source directory (relative to this script) ---
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SOURCE_ASSETS_DIR="${SCRIPT_DIR}/skills/conductor-setup/assets"
 # Sub-skill names (each has its own directory under skills/)
-SUB_SKILL_NAMES=(conductor-setup conductor-new-track conductor-implement conductor-status conductor-review conductor-revert conductor-chat)
+SUB_SKILL_NAMES=(conductor-setup conductor-new-track conductor-implement conductor-status conductor-review conductor-revert conductor-chat conductor-drift)
 # Rules files (always-on rule files for MVC architecture)
 SOURCE_RULES_DIR="${SCRIPT_DIR}/rules"
 RULE_FILE_NAMES=(conductor_protocol.md conductor_antigravity.md conductor_adr_preflight.md conductor_cdd_protocols.md)

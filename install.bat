@@ -4,7 +4,7 @@ setlocal EnableDelayedExpansion
 :: Antigravity Conductor Skills & Rules Installer (Windows)
 :: =============================================================================
 
-set "VERSION=0.14.0"
+set "VERSION=0.15.0"
 set "FLAGS_dry_run=0"
 set "FLAGS_force=0"
 set "FLAGS_uninstall=0"
@@ -113,7 +113,7 @@ if exist "%SCRIPT_DIR%\.claude-plugin\marketplace.json" call :install_file "%SCR
 :: Sub-Skills
 echo.
 echo --- Installing Conductor Command Skills ---
-for %%S in (conductor-setup conductor-new-track conductor-implement conductor-status conductor-review conductor-revert conductor-chat) do (
+for %%S in (conductor-setup conductor-new-track conductor-implement conductor-status conductor-review conductor-revert conductor-chat conductor-drift) do (
     call :install_file "%SCRIPT_DIR%\skills\%%S\SKILL.md" "%TARGET_SKILLS_ROOT%\%%S\SKILL.md"
 )
 

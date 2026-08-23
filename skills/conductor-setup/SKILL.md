@@ -168,7 +168,22 @@ to `{PROJECT_ROOT}/conductor/terms.md` and update `setup_state.json`.
 
 --------------------------------------------------------------------------------
 
-### Artifact 9: Per-Directory Context Enrichment (Brownfield Only)
+### Artifact 8b: Living Manual Testing Runbooks (`manual_testing/`)
+
+Initialize `{PROJECT_ROOT}/conductor/manual_testing/`:
+- Copy the bundled `manual_testing_template.md` template into `{PROJECT_ROOT}/conductor/manual_testing/`.
+- For brownfield projects with identifiable functional domains (e.g., auth, billing, navigation), create initial domain runbooks (`conductor/manual_testing/<domain>.md`) seeded with baseline smoke scenarios.
+- Update `setup_state.json`.
+
+--------------------------------------------------------------------------------
+
+### Artifact 8c: Architecture Decision Records (`adr/`) & Preflight Sweep
+
+Initialize `{PROJECT_ROOT}/conductor/adr/`:
+- Copy the bundled `adr_template.md` template into `{PROJECT_ROOT}/conductor/adr/`.
+- **Brownfield ADR Preflight Sweep**: For brownfield projects, sweep existing project documentation (e.g. `docs/architecture.md`, `README.md`, `DESIGN.md`) for unrecorded architectural trade-offs, database choices, or security models.
+- If unformalized architectural decisions are detected, offer via `ask_question` to formalize them into initial ADR files (`conductor/adr/0001-slug.md`, `conductor/adr/0002-slug.md`, etc.) using standard MADR format.
+- Update `setup_state.json`.
 
 This step is offered for brownfield project directories with concrete architectural justification (e.g., multiple interacting services, complex stateful controllers, subtle local rules, or domain gotchas). Simple directories (straightforward UI components, basic utilities, CRUD wrappers) are skipped.
 

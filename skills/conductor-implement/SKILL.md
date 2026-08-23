@@ -80,6 +80,10 @@ tasks sequentially, synchronizing documentation, and managing track cleanup.
         -   **Documentation-Only Invariant**: Document the exact commands with
             precision, but do NOT execute mutative database resets, state
             mutations, or environment teardown commands autonomously.
+    -   **Incremental Drift Audit**: Perform an incremental drift check on files
+        modified during the active phase against touched ADRs and runbooks
+        (`/conductor-drift --scope=phase` or local diff scan).
+        Present any detected divergences and offer inline reconciliation.
     -   Write a manual verification plan as an artifact (use
         `write_to_file` with `IsArtifact: true`, save to
         `{ARTIFACT_DIR}/conductor_implement_phase_N_verification.md`,
@@ -145,7 +149,14 @@ complete).
         that the manual testing guide artifact has been created and provide a
         clickable markdown link to the file (e.g.,
         `[conductor_manual_testing_<domain>.md](file://...)`).
-8.  Commit all approved documentation changes and updated manual testing
+8.  **Fixpoint Verification Gate**:
+    -   Run the full 3-tier Fixpoint Audit (execute `/conductor-drift` or
+        `/conductor-drift --check`).
+    -   Confirm that documentation, ADRs, manual testing runbooks, API surfaces,
+        and active track specs report: `Fixpoint Reached. Zero drift detected.`
+    -   If drift is detected, resolve discrepancies interactively before
+        proceeding to cleanup.
+9.  Commit all approved documentation changes and updated manual testing
     runbooks as a separate commit with the message: `docs(conductor):
     Synchronize docs for track '<description>'` using VCS commands.
 
