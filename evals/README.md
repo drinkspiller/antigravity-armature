@@ -7,19 +7,73 @@ This directory contains the automated evaluation harnesses used to test, benchma
 ## Why We Run Evaluations
 
 AI coding agents often look functional on simple demonstrations, but degrade when faced with real-world software engineering friction:
-- Prematurely writing code before understanding constraints or interface contracts.
-- Getting distracted by conversational detours and abandoning active specifications.
-- Imposing excessive bureaucracy (multi-page PRDs and C4 diagrams) on 2-line styling fixes.
-- Autonomously executing destructive environment teardowns or database resets without user consent.
-- Silently ignoring schema evolution traps (such as proto3 default zero-values overwriting database state in partial update patches).
+- **Premature Execution**: Writing code or materializing files before understanding constraints, data contracts, or architecture boundaries.
+- **Context Amnesia & Detours**: Getting distracted by conversational questions and abandoning active specifications or jumping straight to implementation upon returning.
+- **Process Over-Ceremony**: Imposing excessive bureaucracy (multi-page PRDs, C4 diagrams, multi-agent role handoffs) on 2-line styling fixes.
+- **Autonomous Destructive Actions**: Running destructive environment teardowns, SQL drops, or database resets without explicit user confirmation.
+- **Silent Schema Evolution Traps**: Overlooking proto3 default zero-values (`""`, `0`, `false`) overwriting database fields in partial update patches.
 
-The evaluation suite tests how different agent frameworks respond to these exact failure modes under live conditions.
+The evaluation suite subjects frameworks to these exact friction points under live conditions to measure resilience, safety, and efficiency.
+
+---
+
+## High-Level Overview: What Is Tested
+
+The benchmark suites evaluate eight core software engineering capabilities:
+
+### 1. Specification Hardening & Anti-Premature Execution
+- **What is tested**: Whether the assistant holds specifications in memory during discovery, gap analysis, and adversarial review rather than prematurely writing unhardened files to disk.
+- **Why it matters**: Materializing draft files to disk too early commits the agent to bad assumptions before edge cases and interface contracts are settled.
+
+### 2. Conversational Detour & Interruption Resilience
+- **What is tested**: How the assistant handles an orthogonal technical query (e.g. WCAG contrast compliance in dark mode) in the middle of a specification interview, and whether it resumes at the exact uncompleted question without skipping remaining gap categories.
+- **Why it matters**: Real developer conversations are rarely linear; agents must handle interruptions without losing track context or corrupting interview state.
+
+### 3. Micro-Task Efficiency & Ceremony Scaling
+- **What is tested**: Whether the assistant scales down process ceremony for surgical fixes (<5 lines of changed code, zero architectural ripple), proposing minimal targeted diffs with compact token usage (<1500 tokens) instead of multi-page PRDs.
+- **Why it matters**: Process frameworks that treat every single-line CSS fix like a major distributed systems migration impose massive token costs and slow down developers.
+
+### 4. Out-of-Band Code/Doc Drift Detection
+- **What is tested**: Whether the assistant inspects uncommitted workspace diffs against active Architecture Decision Records (ADRs) and domain glossaries (`terms.md`), flags contradictions, and enforces zero-drift fixpoints.
+- **Why it matters**: Code and documentation diverge quickly; agents must actively govern alignment between behavioral contracts and actual code.
+
+### 5. Multi-Phase State Safety & Destructive Command Guardrails
+- **What is tested**: Whether the assistant adheres to a documentation-only policy during database migrations and environment resets, logging the commands in runbooks while strictly refusing to execute destructive SQL drops autonomously.
+- **Why it matters**: Autonomous destructive actions can wipe out local databases, emulator state, or testing fixtures without developer oversight.
+
+### 6. Proto Schema Evolution & Wire-Format Edge Cases
+- **What is tested**: Whether the assistant identifies subtle serialization traps (e.g., proto3 default zero-values losing distinction between unset fields and default values in partial update patches) and poses adversarial challenges requiring `FieldMask` or `optional` presence before planning.
+- **Why it matters**: Wire-format bugs frequently lead to silent data corruption in production backend services.
+
+### 7. Additive Manual Testing Runbook Verification
+- **What is tested**: Whether the assistant treats living domain runbooks (`conductor/manual_testing/<domain>.md`) as strictly additive to automated CI unit and integration test suites, auditing both concurrently at phase checkpoints.
+- **Why it matters**: Automated tests verify unit logic, while manual runbooks verify user-facing workflows, setup scripts, and environment fixtures.
+
+### 8. 3-Tier Fixpoint Drift Auditing
+- **What is tested**: Full-workspace verification across documentation consistency (Phase 1), AST-extracted public API symbol surfaces (Phase 2), and packaging manifests/installer arrays (Phase 3).
+- **Why it matters**: Guarantees that code, symbols, documentation, and installation scripts reach a verified, coherent state before code submission.
+
+---
+
+## Open-Source SDD Evals vs. Custom Conductor Evaluators
+
+The evaluation suite balances industry-standard benchmarks with custom Conductor evaluators:
+
+| Capability Area | Open-Source / Industry SDD Baselines | Custom Conductor Evaluators |
+| :--- | :--- | :--- |
+| **Specification Lifecycle** | Traditional SDD pipelines (GitHub Spec Kit, BMAD Method, OpenSpec) requiring formal Constitution $\rightarrow$ Spec $\rightarrow$ Plan $\rightarrow$ Tasks artifacts. | **Pre-Materialization Hardening Barrier**: In-memory draft holding with strict multi-dimension gap analysis before writing to disk. |
+| **Process Overhead** | Fixed ceremony: Multi-page PRDs, C4 architecture diagrams, and role-based handoffs (PM $\rightarrow$ Architect $\rightarrow$ Scrum Master $\rightarrow$ Dev). | **Dynamic Ceremony Scaling**: Automatic bypass of PRDs on micro-hotfixes (<5 lines), optimizing token efficiency. |
+| **Conversational Flow** | Single-prompt static task evaluation or basic prompt response. | **Detour Resilience & Deep Branch Traversal**: Replaying interruptions and evaluating resumption at exact uncompleted sub-branches. |
+| **Documentation & Drift** | Periodic markdown memory file updates (Memory Bank `activeContext.md`, `progress.md`). | **3-Tier Fixpoint Auditor**: Dynamic AST API surface extraction, ADR scope cross-referencing, and packaging manifest checks. |
+| **Execution Safety** | Often executes whatever script the user requests, including destructive drops. | **Documentation-Only Fixture Safety Policy**: Hard rule requiring interactive user confirmation before mutative operations. |
+| **Schema Hardening** | Basic proto compilation and endpoint mapping checks. | **Adversarial Schema Probing**: Active Devil's Advocate challenges on proto3 zero-value overwrites and wire breaks. |
+| **Prompt Tuning** | Manual prompt editing and qualitative review. | **SkillOpt Optimizer (`evals/skillopt/`)**: Automated iterative mutation loop against 19 training and 15 validation tasks. |
 
 ---
 
 ## The Two Evaluation Systems
 
-The suite is divided into two focused tracks:
+The directory is structured into two complementary tracks:
 
 ```
 evals/
@@ -40,54 +94,39 @@ evals/
 ```
 
 ### Track 1: Framework Comparative Benchmark (`cdd_sdd_benchmark/`)
-
-This track benchmarks **Context-Driven Development (CDD)** against **Spec-Driven Development (SDD)** and alternative industry frameworks:
-
+Compares six industry frameworks across 8 scenarios and 32 criteria:
 1. **`conductor_oss`**: Open-source Conductor implementation (`drinkspiller/antigravity-conductor`) with Deep Branch Resolution, 3-tier Fixpoint drift auditing, dynamic ceremony scaling, and additive manual runbook checks.
 2. **`canonical_conductor`**: Upstream canonical Gemini CLI extension (`gemini-cli-extensions/conductor`).
-3. **`bmad_method`**: Multi-agent enterprise agile framework (simulating PM, Architect, Scrum Master, and QA).
-4. **`memory_bank`**: Stateful markdown memory system (Cline / Roo Code pattern).
-5. **`github_spec_kit`**: Standardized Constitution -> Spec -> Plan -> Tasks pipeline.
-6. **`openspec`**: Lightweight living specification framework with slash-command change proposals.
-
-#### What Scenarios Are Tested?
-The benchmark rolls out 8 standardized scenarios testing 32 empirical criteria:
-- **Protocol & Schema Hardening**: Migrating REST endpoints to gRPC with backward-compatibility checks and adversarial schema probing.
-- **Detour Resilience**: Answering an orthogonal design query mid-interview without dropping track context or prematurely generating code.
-- **Micro-Hotfix Ceremony Scaling**: Delivering single-line UI fixes with compact token usage (<1500 tokens) rather than multi-page PRDs.
-- **Out-of-Band Drift Detection**: Flagging contradictions between uncommitted code diffs and architectural decision records (ADRs).
-- **Destructive State Safety**: Enforcing documentation-only command logging during database migrations instead of running destructive teardowns autonomously.
-- **Proto Schema Evolution**: Posing adversarial challenges on proto3 zero-default values in partial update patches before writing code.
-- **Additive Verification**: Auditing living manual testing runbooks concurrently with CI test passes rather than treating them as substitutes.
-
----
+3. **`bmad_method`**: Multi-agent agile framework.
+4. **`memory_bank`**: Persistent stateful memory architecture.
+5. **`github_spec_kit`**: Standardized spec-first pipeline.
+6. **`openspec`**: Lightweight living specification framework.
 
 ### Track 2: SkillOpt Prompt Optimizer (`skillopt/`)
-
-This track optimizes Conductor's own prompt instructions and operational rules.
-- **Training Suite (`tasks/train.jsonl`)**: 19 tasks focusing on edge-case probing, ceremony reduction, and safety guardrails.
-- **Validation Suite (`tasks/val.jsonl`)**: 15 held-out tasks verifying that improvements generalize without causing regressions across other skills.
-- **Optimizer Loop (`run_optimizer.py`)**: Runs baseline evaluations, generates candidate rule modifications using Gemini, validates candidates against regression suites, and selects winning rules that increase the overall pass rate.
+Iteratively refines Conductor's operational instructions:
+- **`tasks/train.jsonl`** (19 tasks): Edge-case discovery, ceremony scaling, proto evolution, and state safety.
+- **`tasks/val.jsonl`** (15 tasks): Held-out regression verification ensuring changes generalize without regressions.
+- **`run_optimizer.py`**: Executes baseline rollouts, evaluates failures, proposes candidate rule diffs, and validates improvements against the full suite.
 
 ---
 
 ## How the System Works Under the Hood
 
 ### Zero External Dependencies
-The evaluation runners are pure Python 3 scripts utilizing standard library modules (`urllib.request`, `json`, `argparse`, `os`). They connect directly to Gemini API endpoints without requiring heavyweight third-party SDKs.
+The evaluation runners are pure Python 3 scripts using standard library modules (`urllib.request`, `json`, `argparse`, `os`). They interact directly with Gemini REST endpoints (`generateContent`).
 
 ### Multi-Turn Agent Simulation
-Rather than testing single prompts in isolation, the harness simulates multi-turn conversations between a software engineer and the AI assistant:
-1. The assistant is initialized with the framework's system instructions and virtual project context files (e.g., `product.md`, `tech-stack.md`, `terms.md`, `adr/*.md`).
-2. The harness feeds the scenario's initial user request.
-3. If the scenario involves interruptions or clarifications, the harness exchanges subsequent turns dynamically based on assistant responses.
+The harness simulates full conversational interactions:
+1. Primes the assistant with system instructions and virtual project files (`product.md`, `tech-stack.md`, `terms.md`, `adr/*.md`).
+2. Delivers engineer prompts step-by-step.
+3. Dynamically handles follow-up turns, clarifications, and conversational interruptions.
 
 ### Two-Tier LLM Meta-Judging
-1. **Criterion-Level Judge (`gemini-3.1-pro-preview`)**: Evaluates the assistant's generated response against each criterion defined in the scenario, returning a boolean pass/fail status and an evidence-based explanation.
-2. **Executive Meta-Judge**: Synthesizes the full rollout matrix into composite scores across 5 core pillars (Spec Gating, Detour Resilience, Surgical Efficiency, Drift Governance, and Fixture Safety), ranks the frameworks, and produces a justified winner report.
+1. **Criterion Judge (`gemini-3.1-pro-preview`)**: Evaluates the assistant's generated response against each criterion in the scenario, returning boolean pass/fail status and evidence-based rationale.
+2. **Executive Meta-Judge**: Computes composite scores across five core pillars (Spec Gating, Detour Resilience, Surgical Efficiency, Drift Governance, and Fixture Safety), ranks the frameworks, and produces a justified winner report.
 
 ### Automated Network Failover
-Target requests default to `gemini-3.7-flash` and automatically fail over to `gemini-3.5-flash` if transient rate limits (HTTP 503/429) occur, ensuring complete benchmark runs.
+Target rollouts use `gemini-3.7-flash` with automatic failover to `gemini-3.5-flash` on transient rate limits (HTTP 503/429), ensuring uninterrupted benchmark runs.
 
 ---
 
