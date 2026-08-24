@@ -44,6 +44,9 @@ Execute the audit across the three tiers (or the requested scope) using native f
 3.  **Phase 2: Codebase & Implementation Fixpoint**:
     -   Compare public exported symbols against `.api_surface_cache.json` and `conductor/terms.md`. Flag untracked API symbols.
     -   Inspect source tree context files (`GEMINI.md`, `CLAUDE.md`, `AGENTS.md`, `AGENT.md`) for standard `START`/`END` boundary tags and valid ADR references.
+    -   **Fixture & Schema Conformance**: Audit test fixtures, reset utilities, seed scripts, and migration files against schema definitions (Protobuf, SQL DDL, ORM models, TypeScript interfaces) to verify enum values, field names, and column constraints. Flag invalid enum strings and missing schema fields.
+    -   **CLI Execution Constraints**: Verify that helper scripts wrapping database or service CLI tools respect process execution constraints (e.g., single-statement execution vs batch piping, authentication guards, timeouts).
+    -   **Contract & Mutation Invariant Audit**: Cross-reference API/RPC precondition checks and handler validation rules with active ADRs and track specifications to verify required payload invariants (e.g., required identity fields, non-empty collection payloads).
 4.  **Phase 3: Meta, Packaging & Release Manifest Fixpoint (Developer Mode)**:
     -   Verify all sub-skills in `skills/` are registered in `install.sh` (`SUB_SKILL_NAMES`), `install.bat`, and `README.md`.
     -   Verify rule files in `rules/` are in `RULE_FILE_NAMES` / `ALL_TARGET_FILES`.

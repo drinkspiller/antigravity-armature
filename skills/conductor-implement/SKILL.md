@@ -55,18 +55,28 @@ tasks sequentially, synchronizing documentation, and managing track cleanup.
 
 When all tasks in the track are complete (or when asked to finalize and synchronize documentation):
 
-1.  Evaluate what documentation must be updated from `spec.md`.
-2.  If terms changed: update `{PROJECT_ROOT}/conductor/terms.md` (present diff for approval).
-3.  If architectural pattern added: capture as ADR in `{PROJECT_ROOT}/conductor/adr/NNNN-slug.md`.
-4.  If tech stack / workflow altered: update `tech-stack.md` / `workflow.md`.
-5.  If product capabilities / UX guidelines changed: update `product.md` / `product-guidelines.md`.
-6.  **Living Manual Testing Runbook Synchronization (`manual_testing/<domain>.md`)**:
+1.  **Deterministic AST & Symbol Extraction for Ubiquitous Language (`terms.md`)**:
+    -   Proactively scan the workspace git diff, new interface exports, proto definitions, and entity models for newly introduced domain terminology and symbols.
+    -   Append newly identified definitions to `{PROJECT_ROOT}/conductor/terms.md` and present the updated glossary diff to the user.
+2.  **Autonomous ADR Reconciliation**:
+    -   Cross-reference newly introduced patterns or modifications against active ADRs in `{PROJECT_ROOT}/conductor/adr/`.
+    -   If an architectural trade-off was formalized, capture or update the relevant ADR.
+3.  **Structured Synchronization Output**:
+    -   Present document synchronization progress in distinct, structured sections:
+        *   `### Extracted Domain Terms`
+        *   `### ADR Updates & Alignment`
+        *   `### Living Runbook Synchronization`
+        *   `### Verification Audit`
+4.  **Tech Stack & Guidelines Sync**:
+    -   If tech stack / workflow altered: update `tech-stack.md` / `workflow.md`.
+    -   If product capabilities / UX guidelines changed: update `product.md` / `product-guidelines.md` (present diff for approval).
+5.  **Living Manual Testing Runbook Synchronization (`manual_testing/<domain>.md`)**:
     -   **Autonomous Sync Policy**: Extract verified steady-state test scenarios from `{PROJECT_ROOT}/conductor/tracks/<track_id>/manual_testing.md`.
     -   Reconcile into `{PROJECT_ROOT}/conductor/manual_testing/<domain>.md` using structured headings (`### Test <Domain>.<ID>`) without an `ask_question` confirmation gate.
     -   **Artifact Generation & Chat Reference**: Write the finalized domain manual testing runbook as a walkthrough artifact (`{ARTIFACT_DIR}/conductor_manual_testing_<domain>.md`, `ArtifactType: walkthrough`).
     -   **Chat Notification**: In your response to the user, you MUST explicitly state that the manual testing guide artifact has been created and provide a clickable markdown link to the file (e.g., `[conductor_manual_testing_<domain>.md](file://...)`).
-7.  **Fixpoint Verification Gate**: Run the full 3-tier Fixpoint Audit (`/conductor-drift --check`) to verify zero drift.
-8.  Commit documentation changes: `docs(conductor): Synchronize docs for track '<description>'`.
+6.  **Fixpoint Verification Gate**: Run the full 3-tier Fixpoint Audit (`/conductor-drift --check`) to verify zero drift.
+7.  Commit documentation changes: `docs(conductor): Synchronize docs for track '<description>'`.
 
 ### Step 5: Track Completion & Next Steps Orchestration
 
