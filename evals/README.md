@@ -71,27 +71,30 @@ variance.
 
 ## The 5 Core Evaluation Pillars
 
-The benchmark evaluates 10 distinct, non-redundant engineering scenarios across
-5 core pillars:
+The benchmark evaluates 30 distinct, non-redundant engineering scenarios (120 evaluation criteria) across
+5 core pillars (6 scenarios per pillar):
 
-1.  **Specification & Plan Gating (`SCEN_01`, `SCEN_06`, `SCEN_07`)**: Evaluates
+1.  **Specification & Plan Gating (`SCEN_01`–`SCEN_06`)**: Evaluates
     problem exploration, backward compatibility analysis, proto3 zero-value vs.
-    unset null handling, and explicit human review gates before code generation.
-2.  **Conversational Detour Resilience (`SCEN_02`)**: Assesses whether an agent
-    answers an orthogonal design inquiry (e.g., WCAG dark mode contrast) and
+    unset null handling, Apollo Federation schema merging, async event idempotency,
+    and explicit human review gates before code generation.
+2.  **Conversational Detour Resilience (`SCEN_07`–`SCEN_12`)**: Assesses whether an agent
+    answers orthogonal design inquiries (WCAG contrast, TLS 1.3 curves, deadlock prevention,
+    Redis cluster topology, CORS regex wildcards, token bucket algorithms) and
     cleanly resumes the active specification milestone without amnesia or
     premature file materialization.
-3.  **Surgical Velocity & Token Efficiency (`SCEN_03`, `SCEN_07`)**: Measures
-    process efficiency and coordination tax on micro-tasks (<5 lines of code),
-    ensuring targeted diff proposals under 1500 tokens without heavy ceremony.
-4.  **Code & Doc Drift Governance (`SCEN_04`, `SCEN_10`)**: Assesses
+3.  **Surgical Velocity & Token Efficiency (`SCEN_13`–`SCEN_18`)**: Measures
+    process efficiency and coordination tax on micro-tasks (≤5 lines of code: UI sorting,
+    env var renames, HTTP status code fixes, dependency bumps, metrics labels, SQL index reorders),
+    ensuring targeted diff proposals under 1000–1500 tokens without heavy ceremony.
+4.  **Code & Doc Drift Governance (`SCEN_19`–`SCEN_24`)**: Assesses
     pre-execution drift scans, contradiction flagging between uncommitted code
-    diffs and ADRs/glossaries, and post-implementation terminology
-    synchronization.
-5.  **State Safety & Execution Guardrails (`SCEN_05`, `SCEN_08`, `SCEN_09`)**:
-    Enforces documentation-only command policies, ensuring database teardowns
-    and migrations are recorded in runbooks while strictly refusing autonomous
-    destructive drops.
+    diffs and ADRs/glossaries, transaction isolation violations, API export breaking changes,
+    and post-implementation terminology synchronization.
+5.  **State Safety & Execution Guardrails (`SCEN_25`–`SCEN_30`)**:
+    Enforces documentation-only command policies, ensuring database teardowns,
+    secret rotations, Kubernetes cluster drains, and bulk data purges are recorded in runbooks
+    while strictly refusing autonomous destructive drops.
 
 --------------------------------------------------------------------------------
 
@@ -101,15 +104,15 @@ The benchmark evaluates 10 distinct, non-redundant engineering scenarios across
 evals/
 ├── README.md                 # Unified evaluation guide & methodology
 ├── cdd_sdd_benchmark/        # Track 1: Comparative framework benchmark & LLM meta-judge
-│   ├── run_cdd_sdd_eval.py   # Multi-turn runner, blinded judge, HTML visualizer, and scoring harness
-│   ├── tasks/scenarios.jsonl # 10 distinct engineering scenarios (40 test criteria)
+│   ├── run_cdd_sdd_eval.py   # Multi-turn runner, blinded judge, multi-judge ensemble, and scoring harness
+│   ├── tasks/scenarios.jsonl # 30 distinct engineering scenarios (120 test criteria)
 │   ├── configs/frameworks.json # Clean, authentic system instructions & virtual contexts
 │   ├── eval_results.json     # Current consolidated rollout traces, metrics, and CI bounds
 │   ├── cdd_sdd_live_benchmark_results.md   # Latest Markdown scorecard & report
 │   └── history/              # Timestamped historical snapshot archives (JSON/HTML)
 └── skillopt/                 # Track 2: Prompt optimization & validation loop
     ├── README.md             # Optimizer usage and validation gates
-    ├── run_optimizer.py      # Automated prompt mutation engine with anti-overfitting rules
+    ├── run_optimizer.py      # Automated prompt mutation engine with 20% edit clip & anti-overfitting rules
     └── tasks/
         ├── train.jsonl       # 16 prompt engineering training tasks
         └── val.jsonl         # 12 held-out validation tasks across distinct domains
@@ -121,7 +124,7 @@ evals/
 
 ### Running Track 1: Framework Comparative Benchmark
 
-Run the full evaluation battery across all 6 frameworks and 10 scenarios:
+Run the full evaluation battery across all 7 frameworks and 30 scenarios:
 
 ```bash
 python3 evals/cdd_sdd_benchmark/run_cdd_sdd_eval.py

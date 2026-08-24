@@ -35,16 +35,16 @@ context that the whole team can use.
 
 ## Evaluation results & benchmark
 
-Conductor is benchmarked against alternative Spec-Driven Development (SDD) and Context-Driven Development (CDD) frameworks across 10 real-world engineering scenarios (40 test criteria) using blinded LLM-as-Judge evaluation and deterministic token/safety bounds.
+Conductor is benchmarked against alternative Spec-Driven Development (SDD) and Context-Driven Development (CDD) frameworks across 30 real-world engineering scenarios (120 test criteria across 5 core pillars) using blinded LLM-as-Judge evaluation and deterministic token/safety bounds.
 
 | Framework | Paradigm | Criteria Passed | Pass Rate (95% CI) | Avg Tokens / Task | Scenarios |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| **BMAD Method** | Multi-Agent Agile SDD | **33 / 40** | **82.5%** (±11.8% (70.7%–94.3%)) | 2007 tokens | 10 |
-| **Conductor (Antigravity OSS) (this)** | Context-Driven Development (CDD) | **32 / 40** | **80.0%** (±12.4% (67.6%–92.4%)) | 1802 tokens | 10 |
-| **GitHub Spec Kit** | Spec-Driven Development (SDD) | **31 / 40** | **77.5%** (±12.9% (64.6%–90.4%)) | 2376 tokens | 10 |
-| **Conductor (Canonical Gemini CLI Extension)** | Context-Driven Development (CDD) | **24 / 40** | **60.0%** (±15.2% (44.8%–75.2%)) | 2265 tokens | 10 |
-| **OpenSpec** | Lightweight SDD | **16 / 40** | **40.0%** (±15.2% (24.8%–55.2%)) | 1132 tokens | 10 |
-| **Memory Bank (Cline / Roo Code)** | Stateful Agent Memory | **12 / 40** | **30.0%** (±14.2% (15.8%–44.2%)) | 1304 tokens | 10 |
+| **Conductor (Antigravity OSS) (this)** | Context-Driven Development (CDD) | **90 / 120** | **75.0%** (±7.7% (67.3%–82.7%)) | 2236 tokens | 30 |
+| **BMAD Method** | Multi-Agent Agile SDD | **81 / 120** | **67.5%** (±8.4% (59.1%–75.9%)) | 2591 tokens | 30 |
+| **GitHub Spec Kit** | Spec-Driven Development (SDD) | **75 / 120** | **62.5%** (±8.7% (53.8%–71.2%)) | 2797 tokens | 30 |
+| **Conductor (Canonical Gemini CLI Extension)** | Context-Driven Development (CDD) | **69 / 120** | **57.5%** (±8.8% (48.7%–66.3%)) | 2387 tokens | 30 |
+| **OpenSpec** | Lightweight SDD | **57 / 120** | **47.5%** (±8.9% (38.6%–56.4%)) | 1490 tokens | 30 |
+| **Memory Bank (Cline / Roo Code)** | Stateful Agent Memory | **47 / 120** | **39.2%** (±8.7% (30.4%–47.9%)) | 2312 tokens | 30 |
 
 Full reports and test documentation:
 - [Evaluation suite guide](evals/README.md)

@@ -312,10 +312,10 @@ def validate_syntax_and_clip(
   matcher = difflib.SequenceMatcher(None, seed_lines, cand_lines)
   ratio = matcher.ratio()
   diff_pct = (1.0 - ratio) * 100
-  if diff_pct > 30.0:
+  if diff_pct > 20.0:
     return (
         False,
-        f"Edit distance too large: {diff_pct:.1f}% modified (limit is 30%)",
+        f"Edit distance too large: {diff_pct:.1f}% modified (limit is 20%)",
     )
 
   return True, f"Valid (diff: {diff_pct:.1f}%)"

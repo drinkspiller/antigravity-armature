@@ -104,6 +104,9 @@ phased plan through a rigorous, unified decision-tree traversal interview.
             active milestone state, synthesize any decisions reached during the
             detour, and cleanly resume traversal without amnesia or skipping
             remaining open items.
+    -   **Non-Blocking Architectural Decomposition**:
+        -   For complex cross-layer features (e.g. backend service -> transport layer -> frontend consumer), do not block plan layout or spec materialization behind exhaustive grilling of all layer details.
+        -   Instead, generate the complete milestone graph (e.g., Backend Contracts -> Transport -> Frontend Consumer) in your initial proposal, attaching open design questions to the relevant plan phases rather than deferring plan generation until after questioning is complete.
     -   **Testing Strategy Classification**:
         Classify the track's manual testing depth as part of the unified interview:
         -   *Interactive / Stateful / Route / API Tracks*: Require a full `manual_testing.md` runbook with environment setup, CLI reset tooling, persona matrices, and sequential route test cases.

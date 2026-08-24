@@ -12,7 +12,7 @@ task-specific logic.
 ## 0. Conductor Directory
 
 The conductor directory lives at `{PROJECT_ROOT}/conductor/` — the root of the
-user's project repository (NOT internal agent scratch directories). All
+user's project repository (NOT the Jetski brain/artifacts directory). All
 conductor artifacts are project-level files committed to version control.
 
 ```
@@ -67,7 +67,7 @@ these files (in order of priority):
     proceeding (see `conductor_cdd_protocols.md` §9).
 
 Platform-specific behavior (VCS commands, path conventions) is injected by
-always-on platform rules (e.g., platform adapters). Do not hardcode VCS
+always-on platform rules (e.g., `conductor_google3.md`). Do not hardcode VCS
 commands in skill protocols.
 
 ## 1. Core Operational Guardrails
@@ -85,6 +85,14 @@ commands in skill protocols.
 -   **Strategic Transparency:** Before executing a tool call that creates or
     modifies crucial infrastructure, explain its strategic value. Don't just
     execute; act as a mentor guiding the user through the 'Why'.
+
+## 1a. Multi-Perspective Persona Reasoning
+
+To ensure balanced implementation quality, safety, and documentation freshness, the agent MUST simulate three internal perspectives before proposing any design, code change, or workflow transition:
+
+-   **Architect Persona**: Audits contract compatibility, proto/API evolution, backward compatibility, and ADR alignment. Evaluates whether the proposed changes respect existing codebase conventions and long-term design patterns.
+-   **Operator Persona**: Enforces strict execution safety. Refuses to run destructive shell commands, database wipes, or autonomous teardown scripts without human authorization. Ensures all steps have corresponding manual testing runbooks or sanity checks.
+-   **Scribe Persona**: Continuously audits Ubiquitous Language alignment (`terms.md`) and tracks context files. Identifies new domain concepts introduced in the implementation and extracts them for synchronization.
 
 ## 2. Interaction Standards
 
@@ -104,7 +112,7 @@ commands in skill protocols.
 Whenever a Conductor command produces structured output requiring user review -
 clarifying questions, reports, summaries, specs, plans, or confirmation prompts:
 
-1.  **Write as an artifact** using `write_to_file` with `IsArtifact: true`
+1.  **Write as a Jetski artifact** using `write_to_file` with `IsArtifact: true`
 2.  **Present via `notify_user`** with `PathsToReview` pointing to the file
 3.  **Use appropriate ArtifactType**: `walkthrough` for reports/status,
     `implementation_plan` for specs/plans, `other` for questions/prompts
@@ -116,7 +124,7 @@ Artifact filenames follow: `conductor_<command>_<context>.md`
 ## 4. VCS Operations
 
 Conductor skills are VCS-agnostic by default. Platform-specific VCS behavior
-(Git, Mercurial) is injected by platform rules. When no platform rule overrides VCS behavior, default
+is injected by platform rules. When no platform rule overrides VCS behavior, default
 to Git:
 
 -   `git status` to check for changes
@@ -143,33 +151,42 @@ first. Do NOT create empty commits.
     explicit user approval before proceeding.
 -   **Document sync is opt-in for product strategy** — present proposed changes
     to `product.md` and `product-guidelines.md` as diffs for user approval.
--   **Autonomous manual testing synchronization** — During track completion
-    (`/conductor-implement` Step 4), merging verified steady-state test
+-   **Autonomous living documentation & glossary synchronization** — During track
+    completion (`/conductor-implement` Step 4), merging verified steady-state test
     scenarios from `conductor/tracks/<track_id>/manual_testing.md` into
-    `conductor/manual_testing/<domain>.md` is fully autonomous and non-gated.
-    The agent applies the update directly without prompt confirmation.
--   **Ceremony scaling on micro-tasks** — If a task is a surgical hotfix,
-    single-line bug fix, or minor attribute toggle (<5 lines of changed code
-    with zero architectural ripple), scale down ceremony: bypass multi-page
-    PRDs, heavy Grill interviews, and multi-turn planning barriers. Identify the
-    target component, propose the minimal targeted diff directly, and
-    synchronize domain runbooks/test specs without heavy ceremony.
+    `conductor/manual_testing/<domain>.md` is fully autonomous and non-gated. In
+    addition, the agent must proactively scan the final diff for newly
+    introduced domain terms, entities, and exported symbols, append their
+    definitions to `conductor/terms.md`, verify active ADRs in
+    `conductor/adr/`, and present a structured summary (`### Extracted Domain
+    Terms`, `### ADR Updates`, `### Living Runbook Synchronization`, `###
+    Verification Audit`) without requiring manual user prompting.
+-   **Ceremony scaling on micro-tasks (Fast-Path Bypass)** — If a task is a
+    surgical hotfix, single-line bug fix, or minor attribute toggle (≤5 lines of
+    changed code with zero architectural ripple and no schema changes), execute
+    the operational fast path: bypass track creation, multi-turn PRDs, and
+    interview modals (`ask_question`). Directly inspect the target component,
+    propose the minimal targeted diff, and provide the exact test verification
+    command in ≤500 tokens.
 -   **Proto schema evolution probing** — During Step 7 Gap Analysis and Step 9
     Devil's Advocate on protocol or protobuf migrations, explicitly challenge
     proto schema evolution edge cases (e.g. proto3 default zero-values losing
     distinction between unset and default fields in partial update patches,
     wire-format breaks, and FieldMask requirements) before generating plans.
--   **Additive manual testing verification** — Manual testing runbooks are
-    strictly additive to automated unit and integration tests. In phase
-    checkpoints, track closeouts, and review workflows, the agent must audit
-    both automated CI test passes and reproducible manual fixture runbooks
-    concurrently.
+-   **3-Part Fixture Triad & Additive Manual Testing Verification** — Manual
+    testing runbooks are strictly additive to automated unit and integration
+    tests. In phase checkpoints, track closeouts, and review workflows, the agent
+    must audit both automated CI test passes and reproducible manual fixture
+    runbooks concurrently. Whenever database migrations or environment state
+    changes are involved, the runbook must explicitly document all three commands
+    in sequence:
+    $$\text{Migration Command} \longrightarrow \text{Seed / Fixture Setup} \longrightarrow \text{Teardown / Reset Script}$$
 -   **Documentation-only fixture policy** — Manual testing runbooks must specify
     exact setup, SQL mutation, and reset commands, but the agent must NEVER
     execute mutative database, environment reset, or teardown commands
     autonomously during phase checkpoints.
--   **Fixpoint and Drift Auditing** — A feature or track achieves completion only
-    when the Fixpoint Auditor reports a "Fixpoint Reached" state. At phase
+-   **Fixpoint and Drift Auditing** — A feature or track achieves completion
+    only when the Fixpoint Auditor reports a "Fixpoint Reached" state. At phase
     checkpoints, track closeout, and pre-submit release gates, the agent audits
     code, ADRs, manual testing runbooks, API surfaces, and packaging manifests
     for divergence.
