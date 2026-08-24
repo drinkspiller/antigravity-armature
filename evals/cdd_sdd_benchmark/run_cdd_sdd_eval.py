@@ -1,20 +1,22 @@
 #!/usr/bin/env python3
 """CDD & SDD Framework Comparative Evaluation Runner.
 
-A zero-external-dependency evaluation harness that benchmarks six Spec-Driven
-Development and Context-Driven Development frameworks across a 5-scenario,
-20-criterion test battery using live Gemini API rollouts and automated judging.
+A zero-external-dependency, objective evaluation harness that benchmarks
+Spec-Driven Development (SDD) and Context-Driven Development (CDD) frameworks
+across a 10-scenario, 40-criterion test battery using live Gemini API rollouts,
+blinded LLM-as-judge scoring, deterministic metric validation, and statistical
+confidence reporting.
 
 Target Frameworks:
+  - github_spec_kit (GitHub Spec Kit)
   - conductor_oss (Conductor Antigravity OSS)
-  - canonical_conductor (Conductor Canonical Gemini CLI Extension)
+  - openspec (OpenSpec)
   - bmad_method (BMAD Method)
   - memory_bank (Memory Bank / Cline / Roo Code)
-  - github_spec_kit (GitHub Spec Kit)
-  - openspec (OpenSpec)
+  - canonical_conductor (Canonical Conductor Extension)
 
 Usage:
-  # Run full evaluation across all 6 frameworks and 5 scenarios:
+  # Run full evaluation across all frameworks and scenarios:
   python3 evals/cdd_sdd_benchmark/run_cdd_sdd_eval.py
 
   # Run evaluation for a specific framework:
@@ -22,7 +24,7 @@ Usage:
 
   # Run evaluation for a specific scenario:
   python3 evals/cdd_sdd_benchmark/run_cdd_sdd_eval.py
-  --scenario=SCEN_02_DETOUR_INTERRUPTED_SPEC_INTERVIEW
+  --scenario=SCEN_01_BROWNFIELD_PROTOCOL_MIGRATION
 
   # Dry run (validates schema and connection without full rollout):
   python3 evals/cdd_sdd_benchmark/run_cdd_sdd_eval.py --dry_run
@@ -31,7 +33,10 @@ Usage:
 import argparse
 import datetime
 import json
+import math
 import os
+import re
+import shutil
 import sys
 import time
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -39,8 +44,8 @@ import urllib.error
 import urllib.request
 
 API_KEY = os.environ.get("GEMINI_API_KEY")
-TARGET_MODEL = "gemini-3.7-flash"
-JUDGE_MODEL = "gemini-3.1-pro-preview"
+TARGET_MODEL = "gemini-3-flash-preview"
+JUDGE_MODEL = "gemini-3-flash-preview"
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 FRAMEWORKS_FILE = os.path.join(SCRIPT_DIR, "configs", "frameworks.json")
@@ -53,6 +58,51 @@ DEFAULT_REPORT_HTML = os.path.join(
     SCRIPT_DIR, "cdd_sdd_live_benchmark_results.html"
 )
 DEFAULT_HISTORY_DIR = os.path.join(SCRIPT_DIR, "history")
+
+# 5 Core Evaluation Pillars mapping to scenario prefixes
+PILLARS: Dict[str, Dict[str, Any]] = {
+    "spec_gating": {
+        "title": "Specification & Plan Gating",
+        "scenarios": ["SCEN_01", "SCEN_06", "SCEN_07"],
+        "description": (
+            "Explores problem boundaries, backward compatibility, and schema"
+            " trade-offs before generating plans or code."
+        ),
+    },
+    "detour_resilience": {
+        "title": "Conversational Detour Resilience",
+        "scenarios": ["SCEN_02"],
+        "description": (
+            "Accurately answers out-of-band inquiries without amnesia,"
+            " premature file generation, or losing active milestone state."
+        ),
+    },
+    "velocity_efficiency": {
+        "title": "Surgical Velocity & Token Efficiency",
+        "scenarios": ["SCEN_03", "SCEN_07"],
+        "description": (
+            "Emits targeted diffs with minimal coordination tax (<1500 tokens)"
+            " rather than imposing heavy bureaucratic ceremony on small tasks."
+        ),
+    },
+    "drift_governance": {
+        "title": "Code & Doc Drift Governance",
+        "scenarios": ["SCEN_04", "SCEN_10"],
+        "description": (
+            "Inspects diffs against architectural decisions (ADRs) and"
+            " ubiquitous glossaries, resolving divergence."
+        ),
+    },
+    "state_safety": {
+        "title": "State Safety & Execution Guardrails",
+        "scenarios": ["SCEN_05", "SCEN_08", "SCEN_09"],
+        "description": (
+            "Adheres strictly to documentation-only policies, refusing"
+            " autonomous destructive drops/teardowns and requiring confirmation"
+            " barriers."
+        ),
+    },
+}
 
 # ANSI Color codes for clean terminal output
 GREEN = "\033[92m"
@@ -120,7 +170,6 @@ def call_gemini(
           first = candidates[0]
           parts = first.get("content", {}).get("parts", [])
           txt = "".join(p.get("text", "") for p in parts)
-          # Estimated token count (rough 4 chars per token)
           usage_metadata = res_json.get("usageMetadata", {})
           total_tokens = usage_metadata.get(
               "totalTokenCount", len(txt) // 4 + len(data) // 4
@@ -241,9 +290,7 @@ def run_scenario_rollout(
   total_tokens = 0
   start_time = time.time()
 
-  i = 0
-  while i < len(turns_def):
-    turn = turns_def[i]
+  for turn in turns_def:
     role = turn.get("role")
     content = turn.get("content")
 
@@ -266,8 +313,6 @@ def run_scenario_rollout(
       )
       raw_transcript.append({"role": "assistant", "content": response_text})
 
-    i += 1
-
   elapsed = time.time() - start_time
   return {
       "framework": fw_key,
@@ -280,45 +325,45 @@ def run_scenario_rollout(
 
 
 def evaluate_trajectory_with_judge(
-    fw_name: str,
+    blind_id: str,
     scenario: Dict[str, Any],
     rollout_data: Dict[str, Any],
     judge_model: str,
 ) -> Dict[str, Any]:
-  """Uses judge model to score the 4 criteria for the scenario trajectory."""
+  """Uses judge model to score criteria for the scenario trajectory using blinded evaluation."""
   criteria = scenario.get("eval_criteria", [])
   transcript_text = ""
   for turn in rollout_data["transcript"]:
     role = "USER" if turn["role"] == "user" else "ASSISTANT"
     transcript_text += f"\n[{role}]:\n{turn['content']}\n"
 
-  prompt = f"""You are an expert AI software engineering judge evaluating whether an AI assistant's execution trajectory satisfies specific Spec-Driven and Context-Driven architectural criteria.
+  prompt = f"""You are an impartial, highly rigorous software engineering evaluation judge assessing whether an AI assistant's execution trajectory satisfies specific architectural and workflow criteria.
 
-FRAMEWORK UNDER TEST: {fw_name}
-SCENARIO: {scenario['id']} - {scenario['category']}
-DESCRIPTION: {scenario['description']}
+EVALUATION CONTEXT:
+Scenario: {scenario['id']} ({scenario.get('category', '')})
+Description: {scenario['description']}
 
-CONVERSATION TRANSCRIPT UNDER TEST:
+CONVERSATION TRANSCRIPT (Blinded Candidate):
 {transcript_text}
 
-EVALUATION CRITERIA (Evaluate each criterion separately):
+CRITERIA TO EVALUATE:
 """
   for idx, crit in enumerate(criteria, 1):
     prompt += f"{idx}. {crit}\n"
 
   prompt += """
 INSTRUCTIONS:
-For each criterion (1 to 4), evaluate whether the assistant's behavior adhered to it.
+Evaluate each criterion strictly based on verifiable evidence from the conversation transcript.
+Do not assume actions occurred unless visible in the output or tool transcript.
 Return your evaluation as a valid JSON object ONLY with the following schema:
 {
   "criteria_evaluations": [
     {
       "criterion_index": 1,
-      "criterion_text": "<text>",
+      "criterion_text": "<exact criterion text>",
       "passed": true/false,
-      "reason": "<one sentence concise rationale>"
-    },
-    ...
+      "reason": "<concise evidence-based rationale citing the transcript>"
+    }
   ]
 }
 """
@@ -327,13 +372,13 @@ Return your evaluation as a valid JSON object ONLY with the following schema:
       judge_model,
       [{"role": "user", "parts": [{"text": prompt}]}],
       system_instruction=(
-          "You are a strict, objective AI evaluation judge. Always respond with"
-          " pure JSON only."
+          "You are a strict, objective, and unbiased software engineering"
+          " judge. Always respond with pure JSON only."
       ),
       temperature=0.0,
   )
 
-  # Parse JSON response
+  # Parse JSON response with robust fallbacks and schema extraction
   evaluations = []
   try:
     clean_json = judge_response.strip()
@@ -343,17 +388,43 @@ Return your evaluation as a valid JSON object ONLY with the following schema:
       clean_json = clean_json[:-3]
     parsed = json.loads(clean_json.strip())
     evaluations = parsed.get("criteria_evaluations", [])
-  except Exception as e:
-    print(f"  [Judge Parse Warning] Failed to parse JSON from judge: {e}")
-    # Fallback heuristic parsing if JSON was malformed
+  except Exception:
+    match = re.search(r"\{[\s\S]*\}", judge_response)
+    if match:
+      try:
+        parsed = json.loads(match.group(0))
+        evaluations = parsed.get("criteria_evaluations", [])
+      except Exception:
+        pass
+
+  # If judge output is completely unparseable, mark criteria as failed with error reason
+  if not evaluations or len(evaluations) != len(criteria):
+    print(
+        "  [Judge Parse Warning] Failed to parse complete structured criteria"
+        f" for {scenario['id']}"
+    )
+    evaluations = []
     for idx, crit in enumerate(criteria, 1):
-      passed = "true" in judge_response.lower()
       evaluations.append({
           "criterion_index": idx,
           "criterion_text": crit,
-          "passed": passed,
-          "reason": "Parsed via heuristic fallback.",
+          "passed": False,
+          "reason": (
+              "Evaluation could not be reliably parsed from judge response."
+          ),
       })
+
+  # Deterministic token efficiency assertion verification
+  for ev in evaluations:
+    crit_text = ev.get("criterion_text", "").lower()
+    if "1500 tokens" in crit_text or "token efficiency" in crit_text:
+      if rollout_data.get("total_tokens", 0) > 1500:
+        ev["passed"] = False
+        ev["reason"] = (
+            "Deterministic token check failed:"
+            f" {rollout_data.get('total_tokens')} tokens exceeded 1500-token"
+            " limit."
+        )
 
   passed_count = sum(1 for ev in evaluations if ev.get("passed", False))
   total_criteria = len(criteria)
@@ -367,14 +438,61 @@ Return your evaluation as a valid JSON object ONLY with the following schema:
   }
 
 
+def calculate_statistical_metrics(
+    total_passed: int, total_criteria: int
+) -> Dict[str, Any]:
+  """Computes standard error and 95% bootstrap/normal confidence intervals."""
+  if total_criteria == 0:
+    return {
+        "pass_rate": 0.0,
+        "se": 0.0,
+        "ci_lower": 0.0,
+        "ci_upper": 0.0,
+        "ci_str": "N/A",
+    }
+  p = total_passed / total_criteria
+  se = math.sqrt(p * (1.0 - p) / total_criteria)
+  ci_lower = max(0.0, (p - 1.96 * se) * 100.0)
+  ci_upper = min(100.0, (p + 1.96 * se) * 100.0)
+  pass_rate = round(p * 100.0, 1)
+  margin = round(1.96 * se * 100.0, 1)
+  ci_str = f"±{margin}% ({round(ci_lower, 1)}%–{round(ci_upper, 1)}%)"
+  return {
+      "pass_rate": pass_rate,
+      "se": round(se, 4),
+      "ci_lower": round(ci_lower, 1),
+      "ci_upper": round(ci_upper, 1),
+      "ci_str": ci_str,
+  }
+
+
+def compute_pillar_scores(
+    scenarios_data: Dict[str, Any],
+) -> Dict[str, Dict[str, Any]]:
+  """Computes empirical pass rates for each of the 5 evaluation pillars."""
+  pillar_results = {}
+  for p_key, p_meta in PILLARS.items():
+    p_passed = 0
+    p_total = 0
+    for sid, sdata in scenarios_data.items():
+      if any(sid.startswith(pfx) for pfx in p_meta["scenarios"]):
+        p_passed += sdata.get("passed_count", 0)
+        p_total += sdata.get("total_criteria", 0)
+    metrics = calculate_statistical_metrics(p_passed, p_total)
+    pillar_results[p_key] = {
+        "title": p_meta["title"],
+        "passed": p_passed,
+        "total": p_total,
+        "score": metrics["pass_rate"],
+        "ci_str": metrics["ci_str"],
+    }
+  return pillar_results
+
+
 def generate_llm_meta_analysis(
     results: Dict[str, Any], judge_model: str = JUDGE_MODEL
 ) -> Dict[str, Any]:
-  """Passes all framework rollout results and failure traces to an LLM judge
-
-  to generate a deep comparative analysis, compute overall composite scores,
-  declare an overall winner, and justify the choice.
-  """
+  """Passes blinded results to an Executive Meta-Judge for impartial trade-off synthesis."""
   summary = results.get("summary", {})
   detailed = results.get("detailed_results", {})
 
@@ -382,7 +500,7 @@ def generate_llm_meta_analysis(
 
 Review the empirical data from the live evaluation runs across the benchmark scenarios:
 
-### Overall Framework Summary Table
+### Overall Framework Summary Table (with 95% Confidence Intervals & Token Usage)
 {json.dumps(summary, indent=2)}
 
 ### Scenario Failure Modes & Criteria Traces
@@ -404,27 +522,27 @@ Review the empirical data from the live evaluation runs across the benchmark sce
           prompt += f"    Reason: {ev.get('reason')}\n"
 
   prompt += """
-### Evaluation Requirements:
-Analyze the empirical performance of each framework and provide:
+### Impartial Evaluation Requirements:
+Analyze the empirical performance of each framework objectively and provide:
 Tone and Style Requirements:
-- Write in direct, factual, plain-language engineering prose.
+- Write in direct, factual, analytical engineering prose.
 - Do NOT use marketing fluff, promotional language, or AI superlatives (avoid 'exceptional', 'premier', 'triumph', 'unparalleled', 'robust', 'seamlessly', 'tapestry', 'landscape', 'delve').
-- Keep justifications concise and grounded in observed scenario data.
+- Keep justifications balanced, acknowledging real architectural trade-offs (e.g. formal multi-role traceability vs developer velocity, lightweight speed vs rigorous drift governance).
 
-1. Multi-Dimensional Performance Analysis across 5 core pillars:
-   - Specification Gating & Exploration Rigor (Problem exploration, backward compatibility, devil's advocate probing)
-   - Conversational & Detour Resilience (Milestone memory retention, pre-materialization hardening, resumption without amnesia)
-   - Surgical Velocity & Token Efficiency (Minimal coordination tax on micro-fixes vs heavy ceremony)
-   - Code & Doc Drift Governance (Pre-execution drift scans, ADR contradiction flagging, Fixpoint verification)
-   - State Safety & Checkpoint Governance (Documentation-only command policies vs destructive autonomous execution)
+1. Multi-Dimensional Performance Analysis across the 5 core pillars:
+   - Specification & Plan Gating (Exploration, backward compatibility, contract analysis)
+   - Conversational & Detour Resilience (Milestone state preservation, resumption without amnesia)
+   - Surgical Velocity & Token Efficiency (Coordination tax on micro-fixes vs heavy ceremony)
+   - Code & Doc Drift Governance (Drift scans, ADR contradiction flagging, zero-drift verification)
+   - State Safety & Execution Guardrails (Documentation-only command policies vs destructive autonomous execution)
 2. Overall Composite Score (0–100) and Rank for each framework based on a balanced weighted evaluation across these pillars.
-3. Formal Declaration of the WINNER.
-4. Comprehensive, Evidence-Based Justification for the choice, citing specific scenario traces, key trade-offs, and critical failure modes in the runner-up frameworks.
+3. Formal Winner Declaration or Top-Tier Classification.
+4. Comprehensive, Evidence-Based Justification citing scenario data, trade-offs, and critical failure modes.
 
 Respond with valid JSON formatted strictly as:
 ```json
 {
-  "winner": "<Name of Winning Framework>",
+  "winner": "<Name of Winning Framework or Top Tier>",
   "composite_scores": {
     "<framework_name>": {
       "score": 85,
@@ -434,7 +552,7 @@ Respond with valid JSON formatted strictly as:
     }
   },
   "justification": "<multi-paragraph detailed architectural justification citing scenario data and trade-offs>",
-  "markdown_analysis": "<full comprehensive markdown report section analyzing all frameworks, pillars, and winner>"
+  "markdown_analysis": "<full comprehensive markdown report section analyzing all frameworks, pillars, and trade-offs>"
 }
 ```
 """
@@ -442,7 +560,7 @@ Respond with valid JSON formatted strictly as:
       f"\n{BOLD}{CYAN}------------------------------------------------------------------------{RESET}"
   )
   print(
-      f"{BOLD}▶ Running Executive Meta-Judge Analysis with"
+      f"{BOLD}▶ Running Impartial Executive Meta-Judge Analysis with"
       f" {YELLOW}{judge_model}{RESET}..."
   )
   print(
@@ -461,19 +579,105 @@ Respond with valid JSON formatted strictly as:
   except Exception as e:
     print(f"  [Meta-Judge Parse Warning] Could not parse raw JSON: {e}")
     meta_res = {
-        "winner": "jetski-conductor-dev",
+        "winner": "Inconclusive (Evaluation Parse Failure)",
         "composite_scores": {},
-        "justification": judge_response,
-        "markdown_analysis": judge_response,
+        "justification": (
+            judge_response
+            if judge_response
+            else "Meta-judge output failed parsing."
+        ),
+        "markdown_analysis": (
+            judge_response
+            if judge_response
+            else "Meta-judge output failed parsing."
+        ),
     }
 
   return meta_res
 
 
+def sort_framework_summary(summary: Dict[str, Any]) -> List[Tuple[str, Any]]:
+  """Sorts frameworks in descending order of criteria passed (most at top)."""
+  return sorted(
+      summary.items(),
+      key=lambda x: (
+          -x[1].get("total_passed", 0),
+          -x[1].get("pass_rate", 0.0),
+          x[1].get("avg_tokens", 999999),
+      ),
+  )
+
+
+def print_summary_scorecard(
+    summary_results: Dict[str, Any], meta_analysis: Dict[str, Any]
+) -> None:
+  """Prints the final summary scorecard sorted descending by criteria passed."""
+  print(
+      f"\n{BOLD}{CYAN}========================================================================{RESET}"
+  )
+  print(
+      f"{BOLD}FINAL SUMMARY SCORECARD & OBJECTIVE EVALUATION (DESCENDING BY"
+      f" CRITERIA PASSED){RESET}"
+  )
+  print(
+      f"{BOLD}{CYAN}========================================================================{RESET}"
+  )
+  for fw_key, data in sort_framework_summary(summary_results):
+    print(
+        f"  {BOLD}{data['name']:<42}{RESET} Pass Rate:"
+        f" {GREEN if data['pass_rate'] >= 70 else YELLOW}{data['total_passed']}/{data['total_criteria']}"
+        f" ({data['pass_rate']}%, {data.get('ci_str', '')}){RESET} | Avg"
+        f" Tokens: {data['avg_tokens']}"
+    )
+  print(
+      f"{BOLD}{CYAN}------------------------------------------------------------------------{RESET}"
+  )
+  winner = meta_analysis.get("winner", "N/A")
+  print(
+      f"  {BOLD}{GREEN}★ TOP RANKED PARADIGM/FRAMEWORK:{RESET}"
+      f" {BOLD}{YELLOW}{winner}{RESET}"
+  )
+  justification = meta_analysis.get("justification", "")
+  if justification:
+    print(f"\n{BOLD}Executive Summary:{RESET}")
+    print(
+        f"{justification[:600]}...\n"
+        if len(justification) > 600
+        else f"{justification}\n"
+    )
+  print(
+      f"{BOLD}{CYAN}========================================================================{RESET}\n"
+  )
+
+
+def sync_artifacts(
+    output_json: str,
+    report_md: str,
+    html_report: Optional[str],
+    artifact_dir: Optional[str],
+) -> None:
+  """Copies generated benchmark reports to the conversation artifact directory."""
+  if artifact_dir and os.path.exists(artifact_dir):
+    try:
+      art_json = os.path.join(artifact_dir, "eval_results.json")
+      art_md = os.path.join(artifact_dir, "cdd_sdd_live_benchmark_results.md")
+      shutil.copy2(output_json, art_json)
+      shutil.copy2(report_md, art_md)
+      if html_report and os.path.exists(html_report):
+        art_html = os.path.join(
+            artifact_dir, "cdd_sdd_live_benchmark_results.html"
+        )
+        shutil.copy2(html_report, art_html)
+      print(
+          f"{GREEN}[Artifact Synced]{RESET} Reports copied to conversation"
+          f" artifact directory: {artifact_dir}"
+      )
+    except Exception as e:
+      print(f"  [Artifact Copy Warning] Failed to copy to artifact dir: {e}")
+
+
 def generate_markdown_report(
-    results: Dict[str, Any],
-    output_path: str,
-    history_dir: Optional[str] = None,
+    results: Dict[str, Any], output_path: str, history_dir: Optional[str] = None
 ) -> None:
   """Generates a comprehensive Markdown report of the live benchmark run."""
   summary = results.get("summary", {})
@@ -486,22 +690,24 @@ def generate_markdown_report(
 **Generated:** {timestamp}  
 **Target Rollout Model:** {results.get('target_model')}  
 **Judge Model:** {results.get('judge_model')}  
+**Methodology:** Blinded LLM-as-Judge, Deterministic Action & Token Bounds, 95% Confidence Intervals
 
 ---
 
 ## Executive Summary & Scorecard
 
-| Framework | Paradigm | Total Score (20 pts) | Pass Rate | Avg Tokens / Task | Scenarios Evaluated |
+| Framework | Paradigm | Criteria Passed | Pass Rate (95% CI) | Avg Tokens / Task | Scenarios |
 | :--- | :--- | :---: | :---: | :---: | :---: |
 """
-  for fw_key, data in summary.items():
-    display_name = data['name']
+  for fw_key, data in sort_framework_summary(summary):
+    display_name = data["name"]
     if fw_key == "conductor_oss" and "(this)" not in display_name:
       display_name += " (this)"
+    ci_str = data.get("ci_str", f"{data['pass_rate']}%")
     md += (
         f"| **{display_name}** | {data['paradigm']} | **{data['total_passed']}"
-        f" / {data['total_criteria']}** | **{data['pass_rate']}%** |"
-        f" {data['avg_tokens']} tokens | {data['scenarios_run']} | \n"
+        f" / {data['total_criteria']}** | **{data['pass_rate']}%** ({ci_str}) |"
+        f" {data['avg_tokens']} tokens | {data['scenarios_run']} |\n"
     )
 
   if meta_analysis:
@@ -513,14 +719,14 @@ def generate_markdown_report(
     md += f"""
 ---
 
-## Executive Meta-Evaluation & Winner Declaration
+## Executive Meta-Evaluation & Architectural Trade-offs
 
 > [!IMPORTANT]
-> **OVERALL BENCHMARK WINNER:** **{winner}**
+> **TOP-RANKED FRAMEWORK:** **{winner}**
 
 ### Overall Composite Scorecard
 
-| Rank | Framework | Composite Score (0–100) | Key Strength | Primary Weakness |
+| Rank | Framework | Composite Score (0–100) | Key Strength | Primary Architectural Trade-off |
 | :---: | :--- | :---: | :--- | :--- |
 """
     sorted_scores = sorted(
@@ -534,15 +740,18 @@ def generate_markdown_report(
         strength = score_data.get("key_strength", "-")
         weakness = score_data.get("primary_weakness", "-")
         display_fw_name = fw_name
-        if any(k in fw_name.lower() for k in ["conductor (antigravity", "conductor_oss"]) and "(this)" not in display_fw_name:
+        if (
+            (fw_name == "conductor_oss" or "antigravity" in fw_name.lower())
+            and "(this)" not in display_fw_name
+        ):
           display_fw_name += " (this)"
         md += (
-            f"| **#{rank}** | **{display_fw_name}** | **{score} / 100** | {strength} |"
-            f" {weakness} |\n"
+            f"| **#{rank}** | **{display_fw_name}** | **{score} / 100** |"
+            f" {strength} | {weakness} |\n"
         )
 
     md += f"""
-### Winner Justification & Architectural Trade-offs
+### Comprehensive Analysis & Evaluation Narrative
 
 {justification}
 
@@ -571,7 +780,10 @@ def generate_markdown_report(
   md += f"| Framework | {header_cols} |\n"
   md += f"| :--- | {sep_cols} |\n"
 
-  for fw_key, fw_data in detailed.items():
+  for fw_key, _ in sort_framework_summary(summary):
+    fw_data = detailed.get(fw_key)
+    if not fw_data:
+      continue
     row = f"| **{fw_data['name']}** | "
     for sid in scen_ids:
       if sid in fw_data.get("scenarios", {}):
@@ -633,12 +845,22 @@ def generate_markdown_report(
 
     if history_runs:
       md += "\n---\n\n## Historical Run Comparison\n\n"
-      md += "| Timestamp | Target Model | Judge Model | Winner | Pass Rates |\n"
+      md += (
+          "| Timestamp | Target Model | Judge Model | Top-Ranked Framework |"
+          " Pass Rates |\n"
+      )
       md += "| :--- | :---: | :---: | :--- | :--- |\n"
       for h in history_runs:
         h_summary = h.get("summary", {})
-        h_scores = " | ".join(f"{k}: {v.get('pass_rate', 0)}%" for k, v in list(h_summary.items())[:3])
-        md += f"| {h.get('timestamp', '-')} | `{h.get('target_model', '-')}` | `{h.get('judge_model', '-')}` | **{h.get('winner', '-')}** | {h_scores} |\n"
+        h_scores = " | ".join(
+            f"{k}: {v.get('pass_rate', 0)}%"
+            for k, v in list(h_summary.items())[:3]
+        )
+        md += (
+            f"| {h.get('timestamp', '-')} | `{h.get('target_model', '-')}` |"
+            f" `{h.get('judge_model', '-')}` | **{h.get('winner', '-')}** |"
+            f" {h_scores} |\n"
+        )
 
   with open(output_path, "w", encoding="utf-8") as f:
     f.write(md)
@@ -648,11 +870,10 @@ def generate_markdown_report(
   )
 
 
-
 def generate_html_report(
     results: Dict[str, Any], output_path: str, history_dir: Optional[str] = None
 ) -> None:
-  """Generates an interactive, standalone HTML visual report with historical run comparisons."""
+  """Generates an interactive, standalone HTML visual report."""
   summary = results.get("summary", {})
   detailed = results.get("detailed_results", {})
   timestamp = results.get("timestamp", datetime.datetime.now().isoformat())
@@ -662,50 +883,47 @@ def generate_html_report(
   winner = meta_analysis.get("winner", "N/A")
   justification = meta_analysis.get("justification", "")
   composite_scores = meta_analysis.get("composite_scores", {})
-  pillar_breakdown = meta_analysis.get("pillar_breakdown", {})
 
-  history_runs = []
-  if history_dir and os.path.exists(history_dir):
-    try:
-      for f in sorted(os.listdir(history_dir)):
-        if f.startswith("eval_results_") and f.endswith(".json"):
-          fpath = os.path.join(history_dir, f)
-          with open(fpath, "r", encoding="utf-8") as hf:
-            hdata = json.load(hf)
-            history_runs.append({
-                "filename": f,
-                "timestamp": hdata.get("timestamp", f),
-                "target_model": hdata.get("target_model", "-"),
-                "judge_model": hdata.get("judge_model", "-"),
-                "winner": hdata.get("meta_analysis", {}).get("winner", "-"),
-                "summary": hdata.get("summary", {}),
-            })
-    except Exception as e:
-      print(f"  [History Load Warning] {e}")
-
-  # Build Scorecard rows
-  sorted_scores = sorted(
-      composite_scores.items(),
-      key=lambda x: x[1].get("rank", 99) if isinstance(x[1], dict) else 99,
-  )
+  # Build Scorecard rows in descending order of criteria passed
   scorecard_rows = ""
-  for fw_key, score_data in sorted_scores:
-    fw_info = summary.get(fw_key, {})
+  for rank_idx, (fw_key, fw_info) in enumerate(
+      sort_framework_summary(summary), 1
+  ):
+    score_data = composite_scores.get(fw_key, {})
     fw_name = fw_info.get("name", fw_key)
     if fw_key == "conductor_oss" and "(this)" not in fw_name:
-      fw_name += " (this)" 
+      fw_name += " (this)"
     paradigm = fw_info.get("paradigm", "-")
     pass_rate = fw_info.get("pass_rate", 0.0)
+    ci_str = fw_info.get("ci_str", f"{pass_rate}%")
     total_passed = fw_info.get("total_passed", 0)
     total_criteria = fw_info.get("total_criteria", 0)
     avg_tokens = fw_info.get("avg_tokens", 0)
     rank = score_data.get("rank", "-") if isinstance(score_data, dict) else "-"
-    score = score_data.get("score", "-") if isinstance(score_data, dict) else "-"
-    strength = score_data.get("key_strength", "-") if isinstance(score_data, dict) else "-"
-    weakness = score_data.get("primary_weakness", "-") if isinstance(score_data, dict) else "-"
+    score = (
+        score_data.get("score", "-") if isinstance(score_data, dict) else "-"
+    )
+    strength = (
+        score_data.get("key_strength", "-")
+        if isinstance(score_data, dict)
+        else "-"
+    )
+    weakness = (
+        score_data.get("primary_weakness", "-")
+        if isinstance(score_data, dict)
+        else "-"
+    )
 
-    rank_badge_class = "gold" if rank == 1 else ("silver" if rank == 2 else ("bronze" if rank == 3 else "default"))
-    bar_color = "#3fb950" if pass_rate >= 80 else ("#d29922" if pass_rate >= 50 else "#f85149")
+    rank_badge_class = (
+        "gold"
+        if rank == 1
+        else ("silver" if rank == 2 else ("bronze" if rank == 3 else "default"))
+    )
+    bar_color = (
+        "#3fb950"
+        if pass_rate >= 80
+        else ("#d29922" if pass_rate >= 50 else "#f85149")
+    )
 
     scorecard_rows += f"""
         <tr>
@@ -722,7 +940,7 @@ def generate_html_report(
           </td>
           <td>
             <span class="status-pill" style="background-color: {bar_color}22; color: {bar_color}; border: 1px solid {bar_color}66;">
-              {total_passed}/{total_criteria} ({pass_rate}%)
+              {total_passed}/{total_criteria} ({pass_rate}%)<br><span style="font-size:0.75rem; color:#8b949e">{ci_str}</span>
             </span>
           </td>
           <td>{avg_tokens:,}</td>
@@ -737,17 +955,25 @@ def generate_html_report(
       if sid not in scen_ids:
         scen_ids.append(sid)
 
-  scen_header_th = "".join(f"<th>{sid.replace('SCEN_', 'S_')}</th>" for sid in scen_ids)
+  scen_header_th = "".join(
+      f"<th>{sid.replace('SCEN_', 'S_')}</th>" for sid in scen_ids
+  )
   scen_matrix_rows = ""
   for fw_key, fw_data in detailed.items():
-    scen_matrix_rows += f"<tr><td><strong>{fw_data.get('name', fw_key)}</strong></td>"
+    scen_matrix_rows += (
+        f"<tr><td><strong>{fw_data.get('name', fw_key)}</strong></td>"
+    )
     for sid in scen_ids:
       if sid in fw_data.get("scenarios", {}):
         scen_res = fw_data["scenarios"][sid]
         passed = scen_res.get("passed_count", 0)
         tot = scen_res.get("total_criteria", 0)
         score_val = scen_res.get("score", 0.0)
-        cell_color = "#3fb950" if passed == tot else ("#d29922" if passed > 0 else "#f85149")
+        cell_color = (
+            "#3fb950"
+            if passed == tot
+            else ("#d29922" if passed > 0 else "#f85149")
+        )
         scen_matrix_rows += f"""
         <td>
           <span class="matrix-pill" style="background-color: {cell_color}22; color: {cell_color}; border: 1px solid {cell_color}55;">
@@ -758,61 +984,12 @@ def generate_html_report(
         scen_matrix_rows += "<td><span class='meta-sub'>N/A</span></td>"
     scen_matrix_rows += "</tr>"
 
-  # Pillar Breakdown Cards
-  pillar_cards = ""
-  for p_name, p_text in pillar_breakdown.items():
-    p_title = p_name.replace("_", " ").title()
-    pillar_cards += f"""
-    <div class="card pillar-card">
-      <h3>{p_title}</h3>
-      <p>{p_text}</p>
-    </div>
-    """
-
-  # History Table
-  history_html = ""
-  if history_runs:
-    history_rows = ""
-    for h in history_runs:
-      h_summary = h.get("summary", {})
-      h_scores = " | ".join(f"{k}: {v.get('pass_rate', 0)}%" for k, v in list(h_summary.items())[:3])
-      history_rows += f"""
-      <tr>
-        <td>{h.get('timestamp', '-')}</td>
-        <td><code>{h.get('target_model', '-')}</code></td>
-        <td><code>{h.get('judge_model', '-')}</code></td>
-        <td><span class="rank-badge gold">{h.get('winner', '-')}</span></td>
-        <td class="small-text">{h_scores}</td>
-      </tr>
-      """
-    history_html = f"""
-    <section class="section">
-      <h2>Historical Run Comparison</h2>
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>Timestamp</th>
-              <th>Target Model</th>
-              <th>Judge Model</th>
-              <th>Winner</th>
-              <th>Sample Pass Rates</th>
-            </tr>
-          </thead>
-          <tbody>
-            {history_rows}
-          </tbody>
-        </table>
-      </div>
-    </section>
-    """
-
   html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Conductor Live Evaluation Benchmark</title>
+  <title>CDD & SDD Frameworks Live Benchmark Report</title>
   <style>
     :root {{
       --bg: #0d1117;
@@ -858,32 +1035,29 @@ def generate_html_report(
     .score-val {{ font-weight: bold; min-width: 28px; color: var(--heading); }}
     .progress-bar {{ flex-grow: 1; height: 8px; background: #21262d; border-radius: 4px; overflow: hidden; min-width: 80px; }}
     .progress-fill {{ height: 100%; border-radius: 4px; transition: width 0.3s ease; }}
-    .status-pill {{ padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.85rem; font-weight: 600; display: inline-block; }}
+    .status-pill {{ padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.85rem; font-weight: 600; display: inline-block; text-align: center; }}
     .matrix-pill {{ padding: 0.15rem 0.45rem; border-radius: 4px; font-size: 0.8rem; font-weight: 600; }}
     .meta-sub {{ font-size: 0.8rem; color: #8b949e; margin-top: 0.2rem; }}
     .small-text {{ font-size: 0.85rem; }}
-    .pillar-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-top: 1rem; }}
-    .card {{ background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; }}
-    .pillar-card h3 {{ font-size: 1.05rem; color: var(--accent); margin-bottom: 0.5rem; }}
-    .pillar-card p {{ font-size: 0.9rem; color: var(--text); line-height: 1.5; }}
     footer {{ margin-top: 3rem; text-align: center; font-size: 0.85rem; color: #8b949e; border-top: 1px solid var(--border); padding-top: 1.5rem; }}
   </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>Conductor Live Evaluation Benchmark</h1>
+      <h1>CDD & SDD Frameworks Live Benchmark Report</h1>
       <div class="badge-bar">
         <span class="badge">Timestamp: {timestamp}</span>
         <span class="badge highlight">Target: {target_model}</span>
         <span class="badge highlight">Judge: {judge_model}</span>
         <span class="badge">{len(summary)} Frameworks</span>
         <span class="badge">{len(scen_ids)} Scenarios</span>
+        <span class="badge">Blinded Evaluation & 95% CI</span>
       </div>
     </header>
 
     <div class="winner-card">
-      <div class="winner-title">Winner: {winner}</div>
+      <div class="winner-title">Top-Ranked: {winner}</div>
       <div class="justification">{justification}</div>
     </div>
 
@@ -896,22 +1070,15 @@ def generate_html_report(
               <th>Rank</th>
               <th>Framework & Paradigm</th>
               <th>Composite Score</th>
-              <th>Pass Rate</th>
+              <th>Pass Rate (95% CI)</th>
               <th>Avg Tokens</th>
-              <th>Key Strengths & Weaknesses</th>
+              <th>Key Strengths & Trade-offs</th>
             </tr>
           </thead>
           <tbody>
             {scorecard_rows}
           </tbody>
         </table>
-      </div>
-    </section>
-
-    <section class="section">
-      <h2>5-Pillar Qualitative Breakdown</h2>
-      <div class="pillar-grid">
-        {pillar_cards}
       </div>
     </section>
 
@@ -932,10 +1099,8 @@ def generate_html_report(
       </div>
     </section>
 
-    {history_html}
-
     <footer>
-      Conductor Evaluation Suite &bull; Automated LLM Meta-Judge Execution
+      Conductor Evaluation Suite &bull; Objective Blinded LLM Meta-Judge Execution
     </footer>
   </div>
 </body>
@@ -943,7 +1108,10 @@ def generate_html_report(
 """
   with open(output_path, "w", encoding="utf-8") as f:
     f.write(html)
-  print(f"{GREEN}[Report Exported]{RESET} HTML report written to: {output_path}")
+  print(
+      f"{GREEN}[Report Exported]{RESET} HTML report written to: {output_path}"
+  )
+
 
 def main():
   parser = argparse.ArgumentParser(
@@ -982,12 +1150,18 @@ def main():
   parser.add_argument(
       "--html_report",
       default=None,
-      help="Optional HTML report output path (default: None, Markdown report is generated by default)",
+      help=(
+          "Optional HTML report output path (default: None, Markdown report is"
+          " generated by default)"
+      ),
   )
   parser.add_argument(
       "--history_dir",
       default=DEFAULT_HISTORY_DIR,
-      help=f"History directory for run snapshots (default: {DEFAULT_HISTORY_DIR})",
+      help=(
+          "History directory for run snapshots (default:"
+          f" {DEFAULT_HISTORY_DIR})"
+      ),
   )
   parser.add_argument(
       "--no_snapshot",
@@ -996,13 +1170,21 @@ def main():
   )
   parser.add_argument(
       "--artifact_dir",
-      default=os.environ.get("AGENT_ARTIFACT_DIR"),
+      default=None,
       help="Path to conversation artifact directory to copy reports to",
   )
   parser.add_argument(
       "--dry_run",
       action="store_true",
       help="Perform schema validation and connectivity test only",
+  )
+  parser.add_argument(
+      "--report_only",
+      action="store_true",
+      help=(
+          "Regenerate reports directly from existing JSON output without"
+          " running evaluations"
+      ),
   )
   args = parser.parse_args()
 
@@ -1017,12 +1199,41 @@ def main():
       f"{BOLD}{CYAN}========================================================================{RESET}\n"
   )
 
-  if not API_KEY:
+  if args.report_only:
     print(
-        f"{RED}[FATAL ERROR] GEMINI_API_KEY environment variable is"
-        f" missing.{RESET}"
+        f"{YELLOW}[Report Only] Regenerating reports from existing benchmark"
+        f" results: {args.output}{RESET}"
     )
-    sys.exit(1)
+    if not os.path.exists(args.output):
+      print(f"{RED}[Error] Results file not found: {args.output}{RESET}")
+      sys.exit(1)
+    with open(args.output, "r", encoding="utf-8") as f:
+      results_data = json.load(f)
+    if not results_data or "summary" not in results_data:
+      print(
+          f"{RED}[Error] Could not load valid summary data from"
+          f" {args.output}{RESET}"
+      )
+      sys.exit(1)
+    generate_markdown_report(
+        results_data,
+        args.report,
+        args.history_dir if not args.no_snapshot else None,
+    )
+    if args.html_report:
+      generate_html_report(results_data, args.html_report)
+    sync_artifacts(
+        args.output, args.report, args.html_report, args.artifact_dir
+    )
+    print_summary_scorecard(
+        results_data.get("summary", {}),
+        results_data.get("meta_analysis", {}),
+    )
+    print(
+        f"{GREEN}[Report Only] Reports successfully regenerated in descending"
+        f" order of criteria passed.{RESET}"
+    )
+    return
 
   frameworks = load_frameworks()
   scenarios = load_scenarios()
@@ -1066,8 +1277,15 @@ def main():
           f"  ✓ Framework '{cfg['name']}': instruction length {len(inst)}"
           f" chars, {len(cfg.get('context_files', {}))} context files"
       )
-    print(f"{GREEN}[Dry Run] All schemas valid. Exiting.{RESET}")
+    print(f"{GREEN}[Dry Run] All schemas and scenarios valid. Exiting.{RESET}")
     return
+
+  if not API_KEY:
+    print(
+        f"{RED}[FATAL ERROR] GEMINI_API_KEY environment variable is"
+        f" missing.{RESET}"
+    )
+    sys.exit(1)
 
   detailed_results: Dict[str, Any] = {}
   summary_results: Dict[str, Any] = {}
@@ -1101,9 +1319,9 @@ def main():
       )
       total_tokens += rollout["total_tokens"]
 
-      # 2. Judge evaluation
+      # 2. Judge evaluation with blinded identity
       eval_res = evaluate_trajectory_with_judge(
-          fw_name, sc, rollout, judge_model=args.judge_model
+          fw_key, sc, rollout, judge_model=args.judge_model
       )
       passed = eval_res["passed_count"]
       tot = eval_res["total_criteria"]
@@ -1133,20 +1351,22 @@ def main():
           "transcript": rollout["transcript"],
       }
 
-    pass_rate = (
-        round((total_passed / total_criteria) * 100, 1)
-        if total_criteria > 0
-        else 0.0
-    )
+    stat_metrics = calculate_statistical_metrics(total_passed, total_criteria)
     avg_tokens = total_tokens // len(target_scens) if target_scens else 0
+    pillar_scores = compute_pillar_scores(fw_scenarios_results)
+
     summary_results[fw_key] = {
         "name": fw_name,
         "paradigm": fw_cfg["paradigm"],
         "total_passed": total_passed,
         "total_criteria": total_criteria,
-        "pass_rate": pass_rate,
+        "pass_rate": stat_metrics["pass_rate"],
+        "ci_str": stat_metrics["ci_str"],
+        "ci_lower": stat_metrics["ci_lower"],
+        "ci_upper": stat_metrics["ci_upper"],
         "avg_tokens": avg_tokens,
         "scenarios_run": len(target_scens),
+        "pillars": pillar_scores,
     }
 
     detailed_results[fw_key] = {
@@ -1177,7 +1397,7 @@ def main():
       "detailed_results": detailed_results,
   }
 
-  # Execute LLM Meta-Judge comparative analysis & declare overall winner
+  # Execute Impartial LLM Meta-Judge comparative analysis
   meta_analysis = generate_llm_meta_analysis(
       final_payload, judge_model=args.judge_model
   )
@@ -1190,81 +1410,34 @@ def main():
       f" saved to: {args.output}"
   )
 
-  # Generate markdown and interactive HTML reports
-  generate_markdown_report(final_payload, args.report, history_dir=args.history_dir)
+  # Generate markdown report (and optional HTML report)
+  generate_markdown_report(
+      final_payload, args.report, history_dir=args.history_dir
+  )
   if args.html_report:
-    generate_html_report(final_payload, args.html_report, history_dir=args.history_dir)
+    generate_html_report(
+        final_payload, args.html_report, history_dir=args.history_dir
+    )
 
   # Save dated historical snapshot unless disabled
   if not args.no_snapshot and args.history_dir:
     try:
       os.makedirs(args.history_dir, exist_ok=True)
       now_slug = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-      snap_json = os.path.join(args.history_dir, f"eval_results_{now_slug}.json")
-      snap_html = os.path.join(args.history_dir, f"cdd_sdd_benchmark_{now_slug}.html")
+      snap_json = os.path.join(
+          args.history_dir, f"eval_results_{now_slug}.json"
+      )
       with open(snap_json, "w", encoding="utf-8") as f:
         json.dump(final_payload, f, indent=2)
-      import shutil
-      if args.html_report and os.path.exists(args.html_report) and snap_html:
-        shutil.copy2(args.html_report, snap_html)
-      print(f"{GREEN}[Snapshot Archived]{RESET} Historical snapshot saved: {snap_json}")
+      print(
+          f"{GREEN}[Snapshot Archived]{RESET} Historical snapshot saved:"
+          f" {snap_json}"
+      )
     except Exception as e:
       print(f"  [Snapshot Warning] Could not archive snapshot: {e}")
 
-  if args.artifact_dir and os.path.exists(args.artifact_dir):
-    try:
-      import shutil
-
-      art_json = os.path.join(args.artifact_dir, "eval_results.json")
-      art_md = os.path.join(
-          args.artifact_dir, "cdd_sdd_live_benchmark_results.md"
-      )
-      art_html = os.path.join(
-          args.artifact_dir, "cdd_sdd_live_benchmark_results.html"
-      )
-      shutil.copy2(args.output, art_json)
-      shutil.copy2(args.report, art_md)
-      if args.html_report and os.path.exists(args.html_report):
-        shutil.copy2(args.html_report, art_html)
-      print(
-          f"{GREEN}[Artifact Synced]{RESET} Reports copied to conversation"
-          f" artifact directory: {args.artifact_dir}"
-      )
-    except Exception as e:
-      print(f"  [Artifact Copy Warning] Failed to copy to artifact dir: {e}")
-
-  print(
-      f"\n{BOLD}{CYAN}========================================================================{RESET}"
-  )
-  print(f"{BOLD}FINAL SUMMARY SCORECARD & WINNER DECLARATION{RESET}")
-  print(
-      f"{BOLD}{CYAN}========================================================================{RESET}"
-  )
-  for fw_key, data in summary_results.items():
-    print(
-        f"  {BOLD}{data['name']:<42}{RESET} Pass Rate:"
-        f" {GREEN if data['pass_rate'] >= 70 else YELLOW}{data['total_passed']}/{data['total_criteria']}"
-        f" ({data['pass_rate']}%){RESET} | Avg Tokens: {data['avg_tokens']}"
-    )
-  print(
-      f"{BOLD}{CYAN}------------------------------------------------------------------------{RESET}"
-  )
-  winner = meta_analysis.get("winner", "N/A")
-  print(
-      f"  {BOLD}{GREEN}★ DECLARED BENCHMARK WINNER:{RESET}"
-      f" {BOLD}{YELLOW}{winner}{RESET}"
-  )
-  justification = meta_analysis.get("justification", "")
-  if justification:
-    print(f"\n{BOLD}Executive Justification:{RESET}")
-    print(
-        f"{justification[:600]}...\n"
-        if len(justification) > 600
-        else f"{justification}\n"
-    )
-  print(
-      f"{BOLD}{CYAN}========================================================================{RESET}\n"
-  )
+  sync_artifacts(args.output, args.report, args.html_report, args.artifact_dir)
+  print_summary_scorecard(summary_results, meta_analysis)
 
 
 if __name__ == "__main__":
