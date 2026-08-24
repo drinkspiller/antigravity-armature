@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Conductor SkillOpt Evaluation & Optimization Runner.
+"""Conductor SkillOpt Evaluation & Optimization Runner.
 
 A zero-external-dependency benchmarking and optimization runner for the
 Conductor skill suite. Evaluates skills against structured task suites and
@@ -11,10 +10,12 @@ Usage:
   python3 evals/skillopt/run_optimizer.py --eval_only
 
   # Run benchmark for a specific skill:
-  python3 evals/skillopt/run_optimizer.py --target=skills/conductor-new-track/SKILL.md --eval_only
+  python3 evals/skillopt/run_optimizer.py
+  --target=skills/conductor-new-track/SKILL.md --eval_only
 
   # Run full optimization loop on a skill:
-  python3 evals/skillopt/run_optimizer.py --target=skills/conductor-new-track/SKILL.md --optimize
+  python3 evals/skillopt/run_optimizer.py
+  --target=skills/conductor-new-track/SKILL.md --optimize
 """
 
 import argparse
@@ -27,8 +28,8 @@ import time
 import urllib.error
 import urllib.request
 
-TARGET_MODEL = "gemini-3.5-flash"
-OPTIMIZER_MODEL = "gemini-3.1-pro-preview"
+TARGET_MODEL = "gemini-3-flash-preview"
+OPTIMIZER_MODEL = "gemini-pro-latest"
 API_KEY = os.environ.get("GEMINI_API_KEY")
 
 EVALS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -60,9 +61,18 @@ def call_gemini(
       "safetySettings": [
           {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
           {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
-          {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
-          {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
-          {"category": "HARM_CATEGORY_CIVIC_INTEGRITY", "threshold": "BLOCK_NONE"},
+          {
+              "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+              "threshold": "BLOCK_NONE",
+          },
+          {
+              "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+              "threshold": "BLOCK_NONE",
+          },
+          {
+              "category": "HARM_CATEGORY_CIVIC_INTEGRITY",
+              "threshold": "BLOCK_NONE",
+          },
       ],
   }
   if system_instruction:
@@ -80,28 +90,22 @@ def call_gemini(
         candidates = res_json.get("candidates", [])
         if candidates:
           first = candidates[0]
-          if "content" in first and "parts" in first["content"]:
+          if "content" in first:
             parts = first["content"].get("parts", [])
-            txt = "".join(p.get("text", "") for p in parts)
-            if txt:
-              return txt
-          finish_reason = first.get("finishReason", "UNKNOWN")
-          print(
-              f"  [API Warning] {model} finished with reason: {finish_reason}"
-              f" (attempt {attempt}/{max_retries})",
-              file=sys.stderr,
-              flush=True,
-          )
-          if attempt < max_retries:
-            time.sleep(2 * attempt)
-            continue
-        if attempt < max_retries:
-          time.sleep(2 * attempt)
-          continue
+            return "".join(p.get("text", "") for p in parts)
+          else:
+            finish_reason = first.get("finishReason", "UNKNOWN")
+            print(
+                f"  [API Warning] {model} finished with reason:"
+                f" {finish_reason}",
+                file=sys.stderr,
+                flush=True,
+            )
         return ""
     except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError) as e:
       print(
-          f"  [API Warning] {model} call failed (attempt {attempt}/{max_retries}): {e}",
+          f"  [API Warning] {model} call failed (attempt"
+          f" {attempt}/{max_retries}): {e}",
           file=sys.stderr,
           flush=True,
       )
@@ -122,7 +126,11 @@ def load_tasks(filepath: str, target_skill: str = None):
         continue
       task = json.loads(line)
       if target_skill and target_skill != "all":
-        skill_name = os.path.basename(os.path.dirname(target_skill)) if target_skill.endswith("SKILL.md") else target_skill
+        skill_name = (
+            os.path.basename(os.path.dirname(target_skill))
+            if target_skill.endswith("SKILL.md")
+            else target_skill
+        )
         if task.get("target_skill") and task.get("target_skill") != skill_name:
           continue
       tasks.append(task)
@@ -141,7 +149,9 @@ def resolve_skill_path(target_arg: str) -> str:
   return direct_path
 
 
-def get_skill_text_for_task(task: dict, default_skill_text: str, default_skill_name: str) -> str:
+def get_skill_text_for_task(
+    task: dict, default_skill_text: str, default_skill_name: str
+) -> str:
   task_target = task.get("target_skill")
   if not task_target or task_target == default_skill_name:
     return default_skill_text
@@ -153,19 +163,24 @@ def get_skill_text_for_task(task: dict, default_skill_text: str, default_skill_n
 
 
 def evaluate_task(task: dict, default_skill_text: str, default_skill_name: str):
-  skill_text = get_skill_text_for_task(task, default_skill_text, default_skill_name)
+  skill_text = get_skill_text_for_task(
+      task, default_skill_text, default_skill_name
+  )
   target_skill_name = task.get("target_skill", default_skill_name)
 
   system_instruction = (
-      f"You are an AI assistant executing instructions in the Conductor '{target_skill_name}' skill document strictly:\n\n"
-      f"```markdown\n{skill_text}\n```\n\n"
-      "Follow all guardrails, turn-ending barriers, step sequencing, and interaction protocols exactly."
+      "You are an AI assistant executing instructions in the Conductor"
+      f" '{target_skill_name}' skill document"
+      f" strictly:\n\n```markdown\n{skill_text}\n```\n\nFollow all guardrails,"
+      " turn-ending barriers, step sequencing, and interaction protocols"
+      " exactly."
   )
 
   rollout_prompt = (
-      f"Execute the following user request and scenario:\n\n{task['prompt']}\n\n"
-      "Detail every action, step number, tool invocation (e.g. ask_question, write_to_file, etc.), "
-      "and the exact output/questions you present to the user."
+      "Execute the following user request and"
+      f" scenario:\n\n{task['prompt']}\n\nDetail every action, step number,"
+      " tool invocation (e.g. ask_question, write_to_file, etc.), and the"
+      " exact output/questions you present to the user."
   )
 
   try:
@@ -213,7 +228,11 @@ Respond with ONLY a valid JSON array of objects:
       eval_results = json.loads(match.group(0))
     else:
       eval_results = [
-          {"criterion": c, "passed": False, "reason": "Failed to parse judge JSON"}
+          {
+              "criterion": c,
+              "passed": False,
+              "reason": "Failed to parse judge JSON",
+          }
           for c in criteria
       ]
   except Exception as e:
@@ -238,8 +257,16 @@ Respond with ONLY a valid JSON array of objects:
   }
 
 
-def run_benchmark(default_skill_text: str, default_skill_name: str, tasks: list, split_name: str):
-  print(f"\n--- Running Benchmark on {split_name} ({len(tasks)} tasks) ---", flush=True)
+def run_benchmark(
+    default_skill_text: str,
+    default_skill_name: str,
+    tasks: list,
+    split_name: str,
+):
+  print(
+      f"\n--- Running Benchmark on {split_name} ({len(tasks)} tasks) ---",
+      flush=True,
+  )
   task_results = []
   total_passed = 0
   total_criteria = 0
@@ -250,23 +277,34 @@ def run_benchmark(default_skill_text: str, default_skill_name: str, tasks: list,
     total_passed += res["passed_count"]
     total_criteria += res["total_count"]
     print(
-        f"  Task {res['task_id']} [{res['target_skill']}] ({res['category']}): Score = {res['score']:.2f} ({res['passed_count']}/{res['total_count']})",
+        f"  Task {res['task_id']} [{res['target_skill']}] ({res['category']}):"
+        f" Score = {res['score']:.2f}"
+        f" ({res['passed_count']}/{res['total_count']})",
         flush=True,
     )
     for r in res["eval_results"]:
       status = "PASS" if r.get("passed") else "FAIL"
-      print(f"    [{status}] {r.get('criterion')}: {r.get('reason')}", flush=True)
+      print(
+          f"    [{status}] {r.get('criterion')}: {r.get('reason')}", flush=True
+      )
 
   aggregate_score = total_passed / total_criteria if total_criteria > 0 else 0.0
   print(
-      f"-> {split_name} Aggregate Score: {aggregate_score:.4f} ({total_passed}/{total_criteria})",
+      f"-> {split_name} Aggregate Score: {aggregate_score:.4f}"
+      f" ({total_passed}/{total_criteria})",
       flush=True,
   )
   return aggregate_score, task_results
 
 
-def validate_syntax_and_clip(seed_text: str, candidate_text: str) -> tuple[bool, str]:
-  if not (candidate_text.startswith("---") and "\nname:" in candidate_text and "\ndescription:" in candidate_text):
+def validate_syntax_and_clip(
+    seed_text: str, candidate_text: str
+) -> tuple[bool, str]:
+  if not (
+      candidate_text.startswith("---")
+      and "\nname:" in candidate_text
+      and "\ndescription:" in candidate_text
+  ):
     return False, "Malformed YAML frontmatter"
 
   seed_lines = seed_text.splitlines()
@@ -274,18 +312,31 @@ def validate_syntax_and_clip(seed_text: str, candidate_text: str) -> tuple[bool,
   matcher = difflib.SequenceMatcher(None, seed_lines, cand_lines)
   ratio = matcher.ratio()
   diff_pct = (1.0 - ratio) * 100
-  if diff_pct > 40.0:
-    return False, f"Edit distance too large: {diff_pct:.1f}% modified (limit is 40%)"
+  if diff_pct > 30.0:
+    return (
+        False,
+        f"Edit distance too large: {diff_pct:.1f}% modified (limit is 30%)",
+    )
 
   return True, f"Valid (diff: {diff_pct:.1f}%)"
 
 
-def reflect_and_mutate(current_skill: str, failed_traces: list, val_score: float) -> str:
-  print("\n--- Reflecting on Failure Traces & Synthesizing Surgical Patch ---", flush=True)
+def reflect_and_mutate(
+    current_skill: str, failed_traces: list, val_score: float
+) -> str:
+  print(
+      "\n--- Reflecting on Failure Traces & Synthesizing Generalized Patch ---",
+      flush=True,
+  )
   step_sizing = (
-      "Current performance is below 0.70. Perform structural additions, missing procedural steps, and strict prerequisite barriers."
+      "Current performance is below 0.70. Perform structural additions, missing"
+      " procedural steps, and strict prerequisite barriers."
       if val_score < 0.70
-      else "Current performance is >= 0.70. Perform minimal surgical edits (targeted phrasing, single-line constraints, strict sequencing guards) while preserving working sections."
+      else (
+          "Current performance is >= 0.70. Perform minimal surgical edits"
+          " (targeted phrasing, single-line constraints, strict sequencing"
+          " guards) while preserving working sections."
+      )
   )
 
   reflection_prompt = f"""You are an expert prompt engineer and Skill Optimizer optimizing a Conductor skill markdown file.
@@ -296,6 +347,11 @@ Failed Task Traces & Violated Criteria:
 Optimization Guidelines:
 {step_sizing}
 
+Anti-Overfitting Rules:
+1. NEVER inject scenario-specific keywords, concrete variable names, specific CSS classes, or test-specific strings into SKILL.md.
+2. Formulate all additions as universal architectural principles, step sequencing constraints, or interaction protocols applicable across any project or domain.
+3. Preserve all existing guardrails, step alignments, and interaction barriers.
+
 Current SKILL.md Content:
 \"\"\"markdown
 {current_skill}
@@ -303,11 +359,12 @@ Current SKILL.md Content:
 
 Requirements for Candidate Mutation:
 1. Maintain valid YAML frontmatter (name, description, persona).
-2. Fix the violated criteria surgically without degrading working features.
-3. Preserve all existing guardrails, step alignments, and interaction barriers.
-4. Output the FULL updated SKILL.md in a single ```markdown ... ``` block without conversational preamble.
+2. Fix the underlying procedural or architectural gaps without overfitting to individual task strings.
+3. Output the FULL updated SKILL.md in a single ```markdown ... ``` block without conversational preamble.
 """
-  candidate_raw = call_gemini(OPTIMIZER_MODEL, reflection_prompt, temperature=0.2)
+  candidate_raw = call_gemini(
+      OPTIMIZER_MODEL, reflection_prompt, temperature=0.2
+  )
   match = re.search(r"```markdown\s*\n(.*?)\n```", candidate_raw, re.DOTALL)
   if match:
     return match.group(1).strip()
@@ -318,11 +375,16 @@ Requirements for Candidate Mutation:
 
 
 def main():
-  parser = argparse.ArgumentParser(description="Conductor SkillOpt Benchmarking & Optimization")
+  parser = argparse.ArgumentParser(
+      description="Conductor SkillOpt Benchmarking & Optimization"
+  )
   parser.add_argument(
       "--target",
       default="all",
-      help="Target skill path relative to conductor root or skill name (e.g. skills/conductor-new-track/SKILL.md, or 'all')",
+      help=(
+          "Target skill path relative to conductor root or skill name (e.g."
+          " skills/conductor-new-track/SKILL.md, or 'all')"
+      ),
   )
   parser.add_argument(
       "--eval_only",
@@ -350,7 +412,11 @@ def main():
     target_path = resolve_skill_path(args.target)
     if not os.path.exists(target_path):
       sys.exit(f"Target skill path does not exist: {target_path}")
-    target_skill_name = os.path.basename(os.path.dirname(target_path)) if target_path.endswith("SKILL.md") else args.target
+    target_skill_name = (
+        os.path.basename(os.path.dirname(target_path))
+        if target_path.endswith("SKILL.md")
+        else args.target
+    )
     with open(target_path, "r", encoding="utf-8") as f:
       skill_text = f.read()
 
@@ -360,10 +426,16 @@ def main():
 
   train_tasks = load_tasks(TRAIN_PATH, args.target)
   val_tasks = load_tasks(VAL_PATH, args.target)
-  print(f"Loaded {len(train_tasks)} train tasks and {len(val_tasks)} val tasks.")
+  print(
+      f"Loaded {len(train_tasks)} train tasks and {len(val_tasks)} val tasks."
+  )
 
-  train_score, train_res = run_benchmark(skill_text, target_skill_name, train_tasks, "TRAIN")
-  val_score, val_res = run_benchmark(skill_text, target_skill_name, val_tasks, "VAL")
+  train_score, train_res = run_benchmark(
+      skill_text, target_skill_name, train_tasks, "TRAIN"
+  )
+  val_score, val_res = run_benchmark(
+      skill_text, target_skill_name, val_tasks, "VAL"
+  )
 
   results = {
       "target": target_path,
@@ -388,7 +460,9 @@ def main():
       print(f"\n=== Optimization Epoch {epoch}/{args.epochs} ===")
       failed_traces = []
       for tr in train_res:
-        failed_criteria = [r for r in tr["eval_results"] if not r.get("passed", False)]
+        failed_criteria = [
+            r for r in tr["eval_results"] if not r.get("passed", False)
+        ]
         if failed_criteria:
           failed_traces.append({
               "task_id": tr["task_id"],
@@ -407,9 +481,16 @@ def main():
       if not valid:
         continue
 
-      cand_val_score, _ = run_benchmark(candidate, target_skill_name, val_tasks, f"VAL (Candidate Epoch {epoch})")
+      cand_val_score, _ = run_benchmark(
+          candidate,
+          target_skill_name,
+          val_tasks,
+          f"VAL (Candidate Epoch {epoch})",
+      )
       if cand_val_score > best_val_score:
-        print(f"Accepted candidate: {best_val_score:.4f} -> {cand_val_score:.4f}")
+        print(
+            f"Accepted candidate: {best_val_score:.4f} -> {cand_val_score:.4f}"
+        )
         best_skill = candidate
         best_val_score = cand_val_score
 

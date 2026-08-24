@@ -35,16 +35,16 @@ context that the whole team can use.
 
 ## Evaluation results & benchmark
 
-Conductor is benchmarked against alternative Spec-Driven Development (SDD) and Context-Driven Development (CDD) frameworks across 8 real-world engineering scenarios (32 test criteria) using live Gemini rollouts and LLM Meta-Judging.
+Conductor is benchmarked against alternative Spec-Driven Development (SDD) and Context-Driven Development (CDD) frameworks across 10 real-world engineering scenarios (40 test criteria) using blinded LLM-as-Judge evaluation and deterministic token/safety bounds.
 
-| Rank | Framework | Composite score | Pass rate | Key takeaway |
-| :---: | :--- | :---: | :---: | :--- |
-| **#1** | **Conductor (Antigravity OSS)** | **88 / 100** | **87.5%** (28/32) | Scales ceremony on small fixes, holds specs in memory during review, and catches out-of-band drift across documents and symbol exports. |
-| **#2** | **Conductor (Canonical Extension)** | **65 / 100** | **65.0%** (13/20) | Fast on surgical fixes; lacks multi-turn detour recovery. |
-| **#3** | **BMAD Method** | **50 / 100** | **50.0%** (10/20) | Clear role separation; high token overhead on minor fixes. |
-| **#4** | **Memory Bank (Cline / Roo Code)** | **50 / 100** | **50.0%** (10/20) | Fast single-prompt edits; misses pre-materialization gates. |
-| **#5** | **GitHub Spec Kit** | **45 / 100** | **45.0%** (9/20) | Handles interruptions well; heavy planning tax on small changes. |
-| **#6** | **OpenSpec** | **35 / 100** | **35.0%** (7/20) | Lightweight proposals; lacks destructive command safeguards. |
+| Framework | Paradigm | Criteria Passed | Pass Rate (95% CI) | Avg Tokens / Task | Scenarios |
+| :--- | :--- | :---: | :---: | :---: | :---: |
+| **BMAD Method** | Multi-Agent Agile SDD | **33 / 40** | **82.5%** (±11.8% (70.7%–94.3%)) | 2007 tokens | 10 |
+| **Conductor (Antigravity OSS) (this)** | Context-Driven Development (CDD) | **32 / 40** | **80.0%** (±12.4% (67.6%–92.4%)) | 1802 tokens | 10 |
+| **GitHub Spec Kit** | Spec-Driven Development (SDD) | **31 / 40** | **77.5%** (±12.9% (64.6%–90.4%)) | 2376 tokens | 10 |
+| **Conductor (Canonical Gemini CLI Extension)** | Context-Driven Development (CDD) | **24 / 40** | **60.0%** (±15.2% (44.8%–75.2%)) | 2265 tokens | 10 |
+| **OpenSpec** | Lightweight SDD | **16 / 40** | **40.0%** (±15.2% (24.8%–55.2%)) | 1132 tokens | 10 |
+| **Memory Bank (Cline / Roo Code)** | Stateful Agent Memory | **12 / 40** | **30.0%** (±14.2% (15.8%–44.2%)) | 1304 tokens | 10 |
 
 Full reports and test documentation:
 - [Evaluation suite guide](evals/README.md)
@@ -181,18 +181,18 @@ appropriate command based on your prompt.
 
 Antigravity Conductor is continuously evaluated against industry agent development frameworks using the live CDD & SDD benchmark suite (`evals/cdd_sdd_benchmark/`):
 
-| Framework | Paradigm | Composite Score | Pass Rate | Avg Tokens | Rank |
+| Framework | Paradigm | Criteria Passed | Pass Rate (95% CI) | Avg Tokens / Task | Scenarios |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| **Conductor (Antigravity OSS) (this)** | Context-Driven Development (CDD) | **91 / 100** | **90.6% (29/32)** | 2095 | **#1 (Winner)** |
-| **GitHub Spec Kit** | Spec-Driven Development (SDD) | **59 / 100** | **59.4% (19/32)** | 4493 | #2 |
-| **OpenSpec** | Lightweight SDD | **56 / 100** | **56.2% (18/32)** | 1806 | #3 |
-| **BMAD Method** | Multi-Agent Agile SDD | **56 / 100** | **56.2% (18/32)** | 4822 | #4 |
-| **Conductor (Canonical Gemini CLI Extension)** | Context-Driven Development (CDD) | **50 / 100** | **50.0% (16/32)** | 1677 | #5 |
-| **Memory Bank (Cline / Roo Code)** | Stateful Agent Memory | **47 / 100** | **46.9% (15/32)** | 2397 | #6 |
+| **BMAD Method** | Multi-Agent Agile SDD | **33 / 40** | **82.5%** (±11.8% (70.7%–94.3%)) | 2007 tokens | 10 |
+| **Conductor (Antigravity OSS) (this)** | Context-Driven Development (CDD) | **32 / 40** | **80.0%** (±12.4% (67.6%–92.4%)) | 1802 tokens | 10 |
+| **GitHub Spec Kit** | Spec-Driven Development (SDD) | **31 / 40** | **77.5%** (±12.9% (64.6%–90.4%)) | 2376 tokens | 10 |
+| **Conductor (Canonical Gemini CLI Extension)** | Context-Driven Development (CDD) | **24 / 40** | **60.0%** (±15.2% (44.8%–75.2%)) | 2265 tokens | 10 |
+| **OpenSpec** | Lightweight SDD | **16 / 40** | **40.0%** (±15.2% (24.8%–55.2%)) | 1132 tokens | 10 |
+| **Memory Bank (Cline / Roo Code)** | Stateful Agent Memory | **12 / 40** | **30.0%** (±14.2% (15.8%–44.2%)) | 1304 tokens | 10 |
 
-*Evaluated across 8 complex engineering scenarios using `gemini-3.7-flash` and meta-judged with `gemini-3.1-pro-preview`. Full details in [`evals/cdd_sdd_benchmark/cdd_sdd_live_benchmark_results.md`](evals/cdd_sdd_benchmark/cdd_sdd_live_benchmark_results.md).*
+*Evaluated across 10 complex engineering scenarios using blinded LLM-as-Judge scoring with `gemini-3-flash-preview`. Full details in [`evals/cdd_sdd_benchmark/cdd_sdd_live_benchmark_results.md`](evals/cdd_sdd_benchmark/cdd_sdd_live_benchmark_results.md).*
 
 ## Version
 
-Current: **v0.16.2**
+Current: **v0.17.0**
 

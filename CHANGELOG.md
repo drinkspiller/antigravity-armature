@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.17.0] - 2026-08-24
+
+### Added
+- **Objective CDD/SDD Evaluation Harness Overhaul (`evals/cdd_sdd_benchmark/`)**:
+  - Implemented blinded LLM-as-Judge scoring (`CANDIDATE UNDER TEST (Blinded Candidate)`) to eliminate brand and naming bias.
+  - Added deterministic token efficiency assertions (<1500 tokens for micro-tasks) and autonomous destructive execution safety rejection (`DROP TABLE`).
+  - Added standard error ($SE$) and normal 95% confidence interval ($p \pm 1.96 \cdot SE$) reporting across all benchmark scorecards.
+  - Enforced descending order by criteria passed across all scorecard tables and added `--report_only` for offline report regeneration.
+- **10-Scenario Stratified Benchmark Suite (`tasks/scenarios.jsonl`)**:
+  - Replaced redundant micro-hotfixes with 10 distinct, non-redundant engineering scenarios (40 total test criteria) mapped across 5 core evaluation pillars.
+- **SkillOpt Held-Out Validation & De-Overfitting (`evals/skillopt/`)**:
+  - Replaced `val.jsonl` with 12 strictly held-out domain validation tasks with 0% mirror-task overlap against `train.jsonl`.
+  - Injected anti-overfitting prompt reflection constraints and tightened the sequence-matcher clip threshold to 30%.
+- **De-overfitted Core Conductor Skills (`/conductor-new-track`)**:
+  - Generalized injected styling tokens into universal, domain-agnostic architectural failure-mode stress-testing and detour recovery.
+
 ## [0.16.2] - 2026-08-23
 
 ### Added
