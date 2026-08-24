@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.17.1] - 2026-08-24
+
+### Added
+- **Continuous Inquiry Depth Traversal Matrix (`/conductor-new-track`)**:
+  - Replaced abstract branch traversal narrative in Step 5 with an explicit, continuous 6-dimension inquiry matrix: (1) Primary UX & Architecture, (2) Failure Modes & Recovery, (3) Boundary Interactions & Escape Hatches, (4) State Invariants, Concurrency & Security, (5) Accessibility & Environmental Constraints, (6) Adversarial Stress Testing (Devil's Advocate).
+  - **Anti-Early-Exit Invariant**: Explicitly forbids terminating track interview turns after 1–2 happy-path questions, requiring follow-up probes across failure recovery, a11y live regions, and adversarial failure modes before convergence.
+  - **Convergence Summary & Confirmation Gate**: Enforces presenting a structured markdown summary across all 6 inquiry dimensions and obtaining explicit user confirmation via `ask_question` before writing `spec.md` to disk.
+- **SkillOpt Depth Regression Tasks (`evals/skillopt/`)**:
+  - Added `TRAIN_20` and `VAL_13` test scenarios modeling asynchronous loading dialogues and real-time state synchronization to enforce multi-turn inquiry depth across failure recovery, boundaries, and adversarial challenges.
+
 ## [0.17.0] - 2026-08-24
 
 ### Added

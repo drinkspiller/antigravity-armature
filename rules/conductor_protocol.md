@@ -154,11 +154,12 @@ first. Do NOT create empty commits.
     PRDs, heavy Grill interviews, and multi-turn planning barriers. Identify the
     target component, propose the minimal targeted diff directly, and
     synchronize domain runbooks/test specs without heavy ceremony.
--   **Proto schema evolution probing** — During Step 7 Gap Analysis and Step 9
-    Devil's Advocate on protocol or protobuf migrations, explicitly challenge
-    proto schema evolution edge cases (e.g. proto3 default zero-values losing
-    distinction between unset and default fields in partial update patches,
-    wire-format breaks, and FieldMask requirements) before generating plans.
+-   **Proto schema evolution probing** — During Step 5 Inquiry Depth Traversal
+    (Failure Modes, Boundary Gaps, and Devil's Advocate) on protocol or protobuf
+    migrations, explicitly challenge proto schema evolution edge cases (e.g.
+    proto3 default zero-values losing distinction between unset and default
+    fields in partial update patches, wire-format breaks, and FieldMask
+    requirements) before generating plans.
 -   **Additive manual testing verification** — Manual testing runbooks are
     strictly additive to automated unit and integration tests. In phase
     checkpoints, track closeouts, and review workflows, the agent must audit
