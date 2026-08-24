@@ -16,35 +16,44 @@ reconciliation until the project reaches a verified **Fixpoint Reached** state.
 ### Step 1: Scope & Mode Resolution
 
 1.  **Parse Arguments**:
-    -   `--doc-only`: Phase 1 only (audit `product.md`, `tech-stack.md`, `workflow.md`, `terms.md`, `adr/*.md`, `manual_testing/*.md`, and active track specs without scanning code).
-    -   `--code-only`: Phase 2 only (audit `.api_surface_cache.json`, public exports, and per-directory `## Conductor Context` boundaries).
-    -   `--meta`: Phase 3 only (audit `install.sh`, `install.bat`, `plugin.json`, `marketplace.json`, and `README.md` packaging arrays and version agreement).
+    -   `--scope=docs`: Phase 1 only (audit project files, ADRs, and glossary).
+    -   `--scope=phase`: Incremental Phase Checkpoint mode (audit files changed in active phase against ADRs and runbooks without blocking WIP code).
+    -   `--scope=code`: Phase 2 only (audit `.api_surface_cache.json`, public exports, and per-directory `## Conductor Context` boundaries).
+    -   `--scope=meta`: Phase 3 only (audit `install.sh`, `install.bat`, `plugin.json`, `marketplace.json`, and `README.md` packaging arrays and version agreement).
     -   `--fix`: Automatically apply mechanical auto-fixes (installer arrays, version alignment, table freshness, and `.api_surface_cache.json` refresh).
     -   `--check`: Non-interactive CI / pre-submit validation mode (verifies fixpoint state and outputs pass/fail status).
 2.  **Resolve Project Root**: Follow Conductor Protocol Rule 7 to locate `{PROJECT_ROOT}`.
 
-### Step 2: Native 3-Tier Scan Execution
+### Step 2: Native Scan Execution
 
 Execute the audit across the three tiers (or the requested scope) using native file inspection tools:
 
-1.  **Phase 1: Project Documentation Fixpoint**:
+1.  **Incremental Phase Checkpoint Mode (`--scope=phase`)**:
+    -   Determine which files and directories were modified or added in the active track's current phase (using the active track's `plan.md` and/or VCS diff).
+    -   For each changed file:
+        -   Identify matching ADRs in `conductor/adr/` and directory context files (`GEMINI.md`, `CLAUDE.md`, `AGENTS.md`). Verify that any new architectural decisions or constraints introduced by the changes are recorded as ADRs.
+        -   Identify matching manual testing runbook scenarios in the active track's `manual_testing.md` or domain guides in `conductor/manual_testing/`.
+        -   If a new route handler, state guard, or major logic flow was added, verify it has corresponding manual verification test cases. If missing, report a `[WARNING]`.
+        -   Audit modified source tree context files for standard boundary tags.
+    -   Report all findings as advisory warnings (`[WARNING]`) without blocking work-in-progress code execution.
+2.  **Phase 1: Project Documentation Fixpoint**:
     -   Verify minimum viable project files exist (`product.md`, `tech-stack.md`, `workflow.md`, `tracks.md`).
     -   Audit ADR sequence numbers, filename format (`NNNN-slug.md`), and MADR section schemas (`## Context`, `## Decision`, `## Confirmation`).
     -   Audit domain manual testing runbooks (`conductor/manual_testing/<domain>.md`) for standard `### Test <Domain>.<ID>` headers.
     -   Audit active track specifications (`conductor/tracks/<track_id>/spec.md`) for required `## Manual Verification Plan` sections.
-2.  **Phase 2: Codebase & Implementation Fixpoint**:
+3.  **Phase 2: Codebase & Implementation Fixpoint**:
     -   Compare public exported symbols against `.api_surface_cache.json` and `conductor/terms.md`. Flag untracked API symbols.
     -   Inspect source tree context files (`GEMINI.md`, `CLAUDE.md`, `AGENTS.md`, `AGENT.md`) for standard `START`/`END` boundary tags and valid ADR references.
-3.  **Phase 3: Meta, Packaging & Release Manifest Fixpoint (Developer Mode)**:
+4.  **Phase 3: Meta, Packaging & Release Manifest Fixpoint (Developer Mode)**:
     -   Verify all sub-skills in `skills/` are registered in `install.sh` (`SUB_SKILL_NAMES`), `install.bat`, and `README.md`.
     -   Verify rule files in `rules/` are in `RULE_FILE_NAMES` / `ALL_TARGET_FILES`.
     -   Verify setup asset templates in `skills/conductor-setup/assets/` are in installer target arrays.
     -   Verify 100% version agreement across `install.sh` (`VERSION=`), `install.bat` (`set "VERSION="`), `plugin.json` (`"version"`), `.claude-plugin/marketplace.json`, and `CHANGELOG.md`.
 
 **Render the Fixpoint Audit Report**:
-Always print the complete 3-tier audit results directly in your response:
--   If no discrepancies exist: Print `✅ [Fixpoint Reached] Zero drift detected across all tiers.`
--   If discrepancies exist: Group findings by phase (Phase 1, Phase 2, Phase 3) with severity tags (`[ERROR]`, `[WARNING]`, `[INFO]`) and indicate `[Auto-Fixable]` status.
+Always print the complete audit results directly in your response:
+-   If no discrepancies exist: Print `✅ [Fixpoint Reached] Zero drift detected across all tiers.` (or in the active phase scope).
+-   If discrepancies exist: Group findings by phase/scope with severity tags (`[ERROR]`, `[WARNING]`, `[INFO]`) and indicate `[Auto-Fixable]` status.
 
 ### Step 3: Interactive Reconciliation & Remediation
 

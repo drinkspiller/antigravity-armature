@@ -183,16 +183,16 @@ Antigravity Conductor is continuously evaluated against industry agent developme
 
 | Framework | Paradigm | Composite Score | Pass Rate | Avg Tokens | Rank |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| **Conductor (Antigravity OSS) (this)** | Context-Driven Development (CDD) | **88 / 100** | **87.5% (28/32)** | 2018 | **#1 (Winner)** |
-| **BMAD Method** | Multi-Agent Agile SDD | **63 / 100** | **62.5% (20/32)** | 3508 | #2 |
-| **OpenSpec** | Lightweight SDD | **59 / 100** | **59.4% (19/32)** | 1810 | #3 |
-| **GitHub Spec Kit** | Spec-Driven Development (SDD) | **53 / 100** | **53.1% (17/32)** | 3690 | #4 |
-| **Conductor (Canonical Gemini CLI Extension)** | Context-Driven Development (CDD) | **50 / 100** | **50.0% (16/32)** | 2135 | #5 |
-| **Memory Bank (Cline / Roo Code)** | Stateful Agent Memory | **47 / 100** | **46.9% (15/32)** | 2392 | #6 |
+| **Conductor (Antigravity OSS) (this)** | Context-Driven Development (CDD) | **91 / 100** | **90.6% (29/32)** | 2095 | **#1 (Winner)** |
+| **GitHub Spec Kit** | Spec-Driven Development (SDD) | **59 / 100** | **59.4% (19/32)** | 4493 | #2 |
+| **OpenSpec** | Lightweight SDD | **56 / 100** | **56.2% (18/32)** | 1806 | #3 |
+| **BMAD Method** | Multi-Agent Agile SDD | **56 / 100** | **56.2% (18/32)** | 4822 | #4 |
+| **Conductor (Canonical Gemini CLI Extension)** | Context-Driven Development (CDD) | **50 / 100** | **50.0% (16/32)** | 1677 | #5 |
+| **Memory Bank (Cline / Roo Code)** | Stateful Agent Memory | **47 / 100** | **46.9% (15/32)** | 2397 | #6 |
 
 *Evaluated across 8 complex engineering scenarios using `gemini-3.7-flash` and meta-judged with `gemini-3.1-pro-preview`. Full details in [`evals/cdd_sdd_benchmark/cdd_sdd_live_benchmark_results.md`](evals/cdd_sdd_benchmark/cdd_sdd_live_benchmark_results.md).*
 
 ## Version
 
-Current: **v0.16.1**
+Current: **v0.16.2**
 

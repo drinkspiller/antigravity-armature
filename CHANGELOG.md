@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.16.2] - 2026-08-23
+
+### Added
+- **Adversarial Token & Layout Refactoring Probes (`/conductor-new-track`)**:
+  - Injected mandatory adversarial stress testing for UI layout and design token refactoring to probe custom property fallbacks and CSS cascade specificity collisions before finalizing specs.
+  - Added detour recovery and re-challenging to systematically evaluate down-stream accessibility contrast and token cascade risks after answering out-of-band inquiries.
+  - Added explicit Protobuf/gRPC schema evolution and proto3 zero-default value probing during Step 7 Gap Analysis.
+- **Incremental Phase Checkpoint Mode (`/conductor-drift --scope=phase`)**:
+  - Added structured scoping to audit files modified in the active track's current phase against ADRs and manual testing runbooks without blocking work-in-progress code.
+- **Continuous Document Synchronization Execution (`/conductor-implement`)**:
+  - Added single-turn continuous execution directive for Step 4 Document Synchronization through Step 5.2 Next Steps Elicitation Gate.
+- **SkillOpt Benchmark Calibration**:
+  - Validated 30-task evaluation harness achieving 100.0% validation scores across 7 Conductor command skills.
+
 ## [0.16.1] - 2026-08-23
 
 ### Added
