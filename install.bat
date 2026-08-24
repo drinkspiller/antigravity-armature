@@ -4,7 +4,7 @@ setlocal EnableDelayedExpansion
 :: Antigravity Conductor Skills & Rules Installer (Windows)
 :: =============================================================================
 
-set "VERSION=0.17.0"
+set "VERSION=0.18.2"
 set "FLAGS_dry_run=0"
 set "FLAGS_force=0"
 set "FLAGS_uninstall=0"

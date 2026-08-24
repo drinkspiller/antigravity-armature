@@ -17,7 +17,12 @@ skill's primary protocol, perform a lightweight drift check:
     matching ADR decision statement or confirmation rule. Check for surface-level
     contradictions (e.g., ADR says "use WebSocket for mutations" but the file
     adds a direct REST call).
-4.  **Resolution:** If drift is detected:
+4.  **Fixture & Schema Conformance:** For database mutation scripts, reset
+    utilities, or test fixtures, verify table names, column types, and enum
+    literals against authoritative schema declarations (Protobuf definitions,
+    SQL DDL, ORM models, or type interfaces). Verify that CLI tool wrappers obey
+    execution constraints (e.g., single-statement execution vs batch piping).
+5.  **Resolution:** If drift is detected:
     -   Present a `> [!WARNING]` callout naming the ADR/rule, the file, and
         the contradiction.
     -   Use `ask_question` with a randomized prompt:

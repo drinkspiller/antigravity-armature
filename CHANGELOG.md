@@ -6,14 +6,41 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.17.0] - 2026-08-24
+## [0.18.2] - 2026-08-24
 
 ### Added
+- **Continuous Inquiry Depth Traversal Matrix (`/conductor-new-track`)**:
+  - Replaced abstract branch traversal narrative in Step 5 with an explicit, continuous 6-dimension inquiry matrix: (1) Primary UX & Architecture, (2) Failure Modes & Recovery, (3) Boundary Interactions & Escape Hatches, (4) State Invariants, Concurrency & Security, (5) Accessibility & Environmental Constraints, (6) Adversarial Stress Testing (Devil's Advocate).
+  - **Anti-Early-Exit Invariant**: Explicitly forbids terminating track interview turns after 1–2 happy-path questions, requiring follow-up probes across failure recovery, a11y live regions, and adversarial failure modes before convergence.
+  - **Convergence Summary & Confirmation Gate**: Enforces presenting a structured markdown summary across all 6 inquiry dimensions and obtaining explicit user confirmation via `ask_question` before writing `spec.md` to disk.
+- **SkillOpt Depth Regression Tasks (`evals/skillopt/`)**:
+  - Added `TRAIN_20` and `VAL_13` test scenarios modeling asynchronous loading dialogues and real-time state synchronization to enforce multi-turn inquiry depth across failure recovery, boundaries, and adversarial challenges.
+
+## [0.18.1] - 2026-08-24
+
+### Added
+- **Universal Fixture & Schema Conformance Auditing (`/conductor-drift`)**:
+  - Added automated schema conformance checks in Phase 2 Fixpoint to audit test reset tools, fixture scripts, and seeders against `.proto`, SQL DDL, and ORM schema definitions for valid enum values and field names.
+  - Audits CLI execution constraints (e.g. single-statement execution vs batch piping limits in database CLI tools).
+  - Cross-references API precondition handlers with ADRs to formalize and test required payload invariants.
+
+## [0.18.0] - 2026-08-24
+
+### Added
+- **Multi-Perspective Persona Reasoning (`conductor_protocol.md` §1a)**:
+  - Added internal simulation of Architect, Operator, and Scribe perspectives for contract compatibility, execution safety, and ubiquitous language synchronization.
+- **Autonomous Living Documentation & AST Glossary Synchronization (`conductor-implement` Step 4)**:
+  - Added deterministic AST and symbol scanning to track completion, extracting newly introduced entities, contracts, and interfaces directly from the git diff into `conductor/terms.md`.
+  - Reconciles active Architecture Decision Records in `conductor/adr/` and outputs structured sync summaries (`### Extracted Domain Terms`, `### ADR Updates`, `### Living Runbook Synchronization`, `### Verification Audit`).
+- **3-Part Fixture Triad & Additive Testing Policy (`conductor_protocol.md` §5)**:
+  - Formally mandates the 3-part sequence (`migrate` → `seed` → `teardown/reset`) in runbooks for database migrations and environment state changes.
+  - Strictly audits manual runbooks in conjunction with automated CI test suites while enforcing documentation-only safety against autonomous drops.
+- **Operational Micro-Fix Fast-Path Bypass (`conductor_protocol.md` §5 & `conductor-chat`)**:
+  - Automatically bypasses PRD interview modals, track creation, and multi-turn planning when a task modifies ≤5 lines of code with zero schema changes.
 - **Objective CDD/SDD Evaluation Harness Overhaul (`evals/cdd_sdd_benchmark/`)**:
   - Implemented blinded LLM-as-Judge scoring (`CANDIDATE UNDER TEST (Blinded Candidate)`) to eliminate brand and naming bias.
   - Added deterministic token efficiency assertions (<1500 tokens for micro-tasks) and autonomous destructive execution safety rejection (`DROP TABLE`).
   - Added standard error ($SE$) and normal 95% confidence interval ($p \pm 1.96 \cdot SE$) reporting across all benchmark scorecards.
-  - Enforced descending order by criteria passed across all scorecard tables and added `--report_only` for offline report regeneration.
 - **10-Scenario Stratified Benchmark Suite (`tasks/scenarios.jsonl`)**:
   - Replaced redundant micro-hotfixes with 10 distinct, non-redundant engineering scenarios (40 total test criteria) mapped across 5 core evaluation pillars.
 - **SkillOpt Held-Out Validation & De-Overfitting (`evals/skillopt/`)**:

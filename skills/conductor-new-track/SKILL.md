@@ -7,7 +7,7 @@ persona: Conductor Planner
 # /conductor-new-track — Create a New Track
 
 **Purpose:** Start a new feature or bug fix track with a specification and
-phased plan through a rigorous, unified decision-tree traversal interview.
+phased plan through a rigorous, multi-turn inquiry depth traversal interview.
 
 ## Mandatory Execution Guardrails
 
@@ -15,27 +15,23 @@ phased plan through a rigorous, unified decision-tree traversal interview.
     (`spec.md`, `plan.md`) or write code in a single autonomous turn. Every
     track requires step-by-step user alignment.
 -   **Synchronous Turn-Ending Barrier:** You MUST invoke `ask_question` and end
-    your turn at Step 5 (Deep Grill Probes), Step 6 (Spec Approval), and Step 7
+    your turn at Step 5 (Inquiry Depth Probes), Step 6 (Spec Approval), and Step 7
     (Plan Approval). Do not proceed to subsequent steps until the user responds.
 -   **Compound Directive Shielding:** If the user invokes `/conductor-new-track`
     alongside other instructions (e.g., `/diagnose`, `Fix`, or implementation
     tasks), you MUST explicitly refuse to write code or generate `plan.md` prematurely. Complete all interactive track creation milestones sequentially before starting downstream execution.
--   **Premature Draft Command Shielding:** If the user issues commands like "Draft the spec", "Looks good, write the spec", or "Proceed to drafting" before boundary conditions (error, edge, security, compatibility, testing) and adversarial failure modes have been explored, you MUST NOT materialize `spec.md` immediately. Explicitly note which boundary branches remain open and pose the next targeted probe via `ask_question`.
+-   **Premature Draft Command Shielding:** If the user issues commands like "Draft the spec", "Looks good, write the spec", or "Proceed to drafting" before all open inquiry matrix dimensions (error recovery, edge cases, accessibility, security, failure modes, adversarial challenges) have been explored, you MUST NOT materialize `spec.md` immediately. Explicitly state which inquiry dimensions remain open and pose the next targeted probe via `ask_question`.
+-   **Anti-Early-Exit Invariant:** You MUST NEVER terminate the interview after only 1–3 happy-path questions. When the primary architectural flow is settled, you MUST continue formulating follow-up probes across failure recovery, boundary edge cases, accessibility/ARIA state, and adversarial stress tests before converging.
 -   **No Autonomous Skipping:** The presence of extensive context (e.g., chat
     logs, design docs, bug descriptions, or codebase reconnaissance) informs
     your questions and recommendations, but NEVER excuses skipping the
     interactive interview.
--   **Deep Branch Completeness Invariant:** A decision branch is NEVER marked
-    resolved merely by selecting a happy-path option. A branch is only resolved
-    when its functional contract, boundary gaps (error, edge, security,
-    backwards compatibility, accessibility, testing), and adversarial failure
-    modes are explored and settled.
 -   **Pre-Materialization Hardening Barrier:** You MUST hold specification state
     in memory during Step 5. Canonical `spec.md` is only materialized on disk in
-    Step 6 after all decision branches reach fully resolved leaves.
+    Step 6 after all 6 inquiry dimensions reach resolved decisions and the user confirms the Convergence Summary.
 -   **Interruption & Detour Recovery:** If the user asks side questions, clarifies
     requirements, or explores asset tangents mid-traversal, answer the inquiry
-    and resume traversing the open decision branches. NEVER leap to Plan
+    and resume traversing the open inquiry matrix dimensions. NEVER leap to Plan
     Generation or VCS Commit.
 
 ## Protocol
@@ -81,47 +77,51 @@ phased plan through a rigorous, unified decision-tree traversal interview.
     -   Use findings to inform the spec questions in the next step — questions
         must reference specific codebase context.
 
-5.  **Unified Deep Grill Session (Decision-Tree Traversal Engine):**
+5.  **Continuous Inquiry Depth Traversal (The 6-Dimension Matrix):**
 
-    Conduct a rigorous, one-question-at-a-time interview with the user. The interview operates as an active decision tree where every major decision branch is immediately traversed down into its boundary conditions, edge cases, and adversarial failure modes before the branch is closed.
+    Conduct a rigorous, one-question-at-a-time interview with the user. The interview systematically explores the 6 fundamental dimensions of production software engineering before converging on a specification:
 
-    -   **Multi-Lens Question Synthesis**:
-        Every question probe MUST synthesize three simultaneous lenses:
-        1.  *Elicitation (Grill)*: What is the core behavior, route, or interface?
-        2.  *Boundary Gaps*: What are the error states, edge cases, backwards compatibility impacts, security (PII/auth), performance (scale/bundle), accessibility (WCAG contrast/a11y), and testing requirements?
-        3.  *Adversarial Stress Testing (Devil's Advocate)*: What happens when
-            an assumption breaks ("What happens if [X]?", "Have you considered
-            [Y]?", "This assumes [Z] — is that valid?")? Systematically evaluate
-            the core failure modes of the domain (e.g. wire format / proto
-            schema evolution breaks, fallback cascades, race conditions, or
-            unhandled error states).
-    -   **Branch Resolution Discipline**:
-        -   When the user chooses an architectural path (e.g., token storage, state model, API protocol), do NOT treat the branch as resolved.
-        -   Immediately explore the child sub-branches spawned by that decision (e.g., expiry race conditions, legacy client fallback, error handling).
-        -   Only mark a branch "Resolved" when its functional contract, boundary gaps, and failure stress checks are settled.
-        -   **Detour Recovery & State Resumption**: If the user takes a detour
-            or asks an out-of-band inquiry, answer it accurately, preserve the
-            active milestone state, synthesize any decisions reached during the
-            detour, and cleanly resume traversal without amnesia or skipping
-            remaining open items.
+    -   **The 6-Dimension Inquiry Matrix**:
+        1.  *Primary Architectural & UX Flow*: Core trigger mechanisms, component hierarchy, route transitions, data contracts, and happy-path presentation.
+        2.  *Failure Modes & Error Recovery*: Network outages, backend 500s/RPC failures, timeout thresholds, degraded fallback UI states, retry backoff strategies, and abort/cancellation cascades.
+        3.  *Boundary Interactions & Escape Hatches*: ESC dismissal, backdrop navigation interrupts, double-submit debounce/guards, route teardown cleanup, and rapid navigation race conditions.
+        4.  *State Invariants, Concurrency & Security*: Multi-tab synchronization, session expiration handling (401/403 vs 500), cache invalidation, input sanitization, PII redaction, and ACL enforcement.
+        5.  *Accessibility, Contrast & Environmental Constraints*: ARIA live regions/announcements for async operations, focus trapping and restoration, screen reader visibility (`aria-hidden`), dark/light theme contrast, and bundle/performance overhead.
+        6.  *Adversarial Stress Testing (Devil's Advocate)*: Present at least 2 explicit adversarial challenges ("What happens if [X]?", "Have you considered [Y]?", "This assumes [Z] — is that valid?"), probing schema evolution breaks, dependency weight, race conditions, or unhandled cascading states.
+
+    -   **Progressive Depth Traversal**:
+        -   When the user chooses an architectural path for the primary flow (Dimension 1), do NOT stop questioning.
+        -   Immediately formulate targeted follow-up probes addressing the remaining open dimensions (Dimensions 2 through 6).
+        -   Every question must be concrete, referencing codebase paths, component names, and real runtime constraints discovered during reconnaissance.
+
+    -   **Detour Recovery & State Resumption**:
+        -   If the user takes a detour, clarifies tangent requirements, or explores assets, answer accurately.
+        -   Preserve the active matrix state, synthesize decisions reached during the detour, and cleanly resume probing the remaining open dimensions without skipping.
+
     -   **Testing Strategy Classification**:
-        Classify the track's manual testing depth as part of the unified interview:
+        Classify the track's manual testing depth as part of the interview:
         -   *Interactive / Stateful / Route / API Tracks*: Require a full `manual_testing.md` runbook with environment setup, CLI reset tooling, persona matrices, and sequential route test cases.
         -   *Pure Refactor / Utility / Chore Tracks*: Require a lightweight `manual_testing.md` with concise smoke and sanity checks alongside automated unit tests.
+
     -   **Questioning Mechanics**:
         -   Ask questions **strictly one at a time** using `ask_question`.
         -   List your recommended option first (`(Recommended)`) with 2–4 calibrated peer choices.
         -   **MANDATORY:** End your turn after each `ask_question` call to wait for the user's answer.
+
     -   **Inline Design Decisions & ADRs**:
         -   Evaluate the 3-part gate as trade-offs emerge: (1) Hard to reverse, (2) Surprising without context, (3) Real trade-off.
         -   If met, immediately offer to capture an ADR (`conductor/adr/NNNN-slug.md`) using `ask_question`.
+
     -   **Inline Glossary Elicitation (`terms.md`)**:
         -   If a decision introduces or refines domain terminology, offer to record it in `terms.md`.
+
     -   **Cross-Track & ADR Conflict Check**:
-        -   Check active branches against `conductor/tracks.md` and matching `conductor/adr/` records to flag cross-track dependencies or policy violations inline.
-    -   **Termination Invariant**:
-        -   The Deep Grill session concludes ONLY when all active decision branches have reached resolved leaves (zero open ambiguity, boundary gaps, or unaddressed failure modes) OR when natural convergence is reached and confirmed via `ask_question`: "All core branches, edge cases, and failure modes are resolved. Ready to materialize the spec?" (`["(Recommended) Yes, materialize spec and plan", "Not yet — I want to explore [topic]"]`).
-        -   Record all resolved decisions in memory under `## Design Decisions`.
+        -   Check active decisions against `conductor/tracks.md` and matching `conductor/adr/` records to flag cross-track dependencies or policy violations inline.
+
+    -   **Convergence Summary & Modal Confirmation Gate**:
+        -   When all 6 dimensions have been explored, present a structured **Convergence Summary** in markdown summarizing the settled decisions across all dimensions.
+        -   Then, call `ask_question`: "All 6 inquiry dimensions and adversarial challenges are resolved. Ready to materialize the specification and manual testing runbook?" (`["(Recommended) Yes, materialize spec and runbook", "Not yet — let's revisit [dimension]"]`).
+        -   **MANDATORY:** End your turn and wait for explicit confirmation.
 
 6.  **Spec & Manual Testing Materialization & Final Confirmation:**
 
@@ -163,6 +163,6 @@ phased plan through a rigorous, unified decision-tree traversal interview.
 ## Guardrails
 
 -   **Compound Directive Shielding**: If the user prompt includes compound instructions (e.g., "create a track and implement it immediately in foo.ts"), do NOT start implementation or write code. Strictly limit scope to track planning and state that implementation must wait until the plan is approved.
--   **Turn-Ending Barriers**: Enforce strict synchronous pauses at Step 5 (Deep Grill Probes), Step 6 (Spec Approval), and Step 7 (Plan Approval) via `ask_question`. Never batch questions or skip ahead.
--   **Pre-Materialization Barrier**: Hold `spec.md` in memory during Step 5. Never write `spec.md` to disk until all decision branches are resolved.
--   **Deep Branch Resolution**: Never conclude an interview turn without probing the boundary and stress dimensions of chosen decisions.
+-   **Turn-Ending Barriers**: Enforce strict synchronous pauses at Step 5 (Inquiry Depth Probes & Convergence Gate), Step 6 (Spec Approval), and Step 7 (Plan Approval) via `ask_question`. Never batch questions or skip ahead.
+-   **Pre-Materialization Barrier**: Hold `spec.md` in memory during Step 5. Never write `spec.md` to disk until all 6 inquiry dimensions are explored and the convergence summary is confirmed.
+-   **Continuous Inquiry Depth**: Never conclude an interview turn without systematically probing failure modes, boundary interactions, accessibility, state invariants, and adversarial stress challenges.
