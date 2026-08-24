@@ -51,6 +51,8 @@ tasks sequentially, synchronizing documentation, and managing track cleanup.
 
 ### Step 4: Document Synchronization
 
+**Mandatory Single-Turn Continuous Execution:** When asked to finalize/synchronize documentation (or when transitioning from completing all tasks), you MUST execute all steps of Step 4 AND Step 5.1 & Step 5.2 in a single turn. Perform all file operations, edits, commits, and retrospective review tasks autonomously without printing intermediate conversational updates or waiting for the user. Do NOT end your turn or pause until you invoke the mandatory `ask_question` next-steps modal in Step 5.2.
+
 When all tasks in the track are complete (or when asked to finalize and synchronize documentation):
 
 1.  Evaluate what documentation must be updated from `spec.md`.

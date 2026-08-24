@@ -94,6 +94,7 @@ Conduct a rigorous, one-question-at-a-time interview with the user to build a de
 ### 7. Structured Gap Analysis (7 Mandatory Categories)
 
 -   Run a structured gap check against ALL 7 mandatory categories: 1. Error handling, 2. Edge cases, 3. Backwards compatibility, 4. Security (PII, auth, input validation), 5. Performance (scale, bundle size), 6. Accessibility, and 7. Testing strategy.
+-   **Protocol & Schema Evolution Probing**: On protocol or schema migrations (e.g. REST to gRPC / Protobuf), systematically evaluate serialization breaks, backwards compatibility constraints, and proto3 zero-default value nuances (distinguishing default zero values from unset fields in partial update patches).
 -   **Interruption Resilience**: If resuming after a user question, architectural detour, or asset tangent, do NOT jump directly to spec finalization. Explicitly assess and present findings across all 7 categories.
 -   **Testing Strategy Classification**: Under Testing strategy, classify
     the track's manual testing depth:
@@ -113,7 +114,7 @@ Conduct a rigorous, one-question-at-a-time interview with the user to build a de
 -   **MANDATORY:** End your turn at each `ask_question` call.
 -   After all individual gap questions have been answered, incorporate the
     user's per-gap decisions into your in-memory spec draft.
--   **Opportunities Selection:** If discovery mode identified opportunities:
+-   **Opportunities Selection**: If discovery mode identified opportunities:
     -   Present the brainstormed opportunities to the user using the
         `ask_question` tool with `is_multi_select: true`.
     -   For each selected opportunity, integrate it into Functional or Non-Functional Requirements.
@@ -123,12 +124,9 @@ Conduct a rigorous, one-question-at-a-time interview with the user to build a de
 -   Read `{PROJECT_ROOT}/conductor/tracks.md` and review the existing
     `*/spec.md` files.
 -   **ADR Cross-Reference**: Scan `{PROJECT_ROOT}/conductor/adr/` (if it
-    exists).
-    -   To conserve tokens, perform a **title-scan** (reading filenames
-        only) by default.
-    -   Identify ADRs whose slugs contain domain terms that match the active
-        terms identified in the current track's scope (based on
-        `{PROJECT_ROOT}/conductor/terms.md`).
+    exists) for active architecture decision records that reference domain
+    terms identified in the current track's scope (based on
+    `{PROJECT_ROOT}/conductor/terms.md`).
     -   For matching ADRs, load their full text to check for architectural
         constraints or precedents.
 -   Identify: overlapping scope with existing tracks, sequencing
@@ -145,6 +143,8 @@ Conduct a rigorous, one-question-at-a-time interview with the user to build a de
 -   Generate 2-3 challenges to the spec's assumptions based on codebase
     context.
 -   You MUST format these challenges explicitly as: "What happens if [X]?", "Have you considered [Y]?", or "This assumes [Z] — is that still valid?"
+-   **UI & Design Token Refactoring Probes**: For styling, SCSS, or design token refactoring tracks, you MUST present an adversarial challenge addressing CSS custom property fallbacks for unstyled legacy blocks and specificity collisions from parent theme overrides.
+-   **Protocol Migration Probes**: For API/protocol migrations, you MUST present an adversarial challenge probing proto3 default zero-values losing distinction between unset and default fields in partial updates.
 -   Present ALL challenges as a numbered list in your regular markdown
     response first (with full context, code references, and reasoning).
 -   Then, for **each individual challenge**, call `ask_question` with the
