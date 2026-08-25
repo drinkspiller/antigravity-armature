@@ -1,8 +1,16 @@
-# Armature: Structural Permanence for AI Coding Agents
+# Armature CDD: Structural Permanence for AI Coding Agents
 
 > [!NOTE]
 > **Conductor is now Armature (v0.19.0)**  
 > Conductor has been officially rebranded to **Armature** — representing the internal precision steel skeleton that provides joint discipline and structural permanence to fluid, autonomous AI agents. Existing repositories with a `conductor/` directory continue operating seamlessly via Transparent Dual-Discovery with zero file migrations required.
+
+## Background
+
+**Armature** (formerly Antigravity Conductor) is an advanced Context-Driven Development (CDD) framework for Antigravity, Gemini CLI, Claude Code, and Windsurf. It manages the full lifecycle of software development tracks: context setup, multi-turn inquiry depth specification, phased planning, test-driven implementation, living manual testing runbooks, and continuous multi-tier drift auditing.
+
+This project was originally forked from the canonical Gemini CLI Conductor (`github.com/gemini-cli-extensions/conductor`). While upstream Conductor focused on basic task planning and linear prompt orchestration, this codebase diverged substantially to pioneer Context-Driven Development (CDD). Over successive releases, it introduced living Architecture Decision Records (ADRs), ubiquitous domain glossaries (`terms.md`), interactive multi-dimension inquiry matrices, living manual verification runbooks, and automated multi-tier drift detection.
+
+The rebrand from Conductor to **Armature** reflects this fundamental architectural divergence: shifting from an orchestral conductor waving a baton over a fluid model to an internal, precision-machined steel skeleton that gives autonomous agents structural permanence and joint discipline.
 
 ## Motivation: Structural Permanence & Joint Discipline
 
@@ -12,7 +20,7 @@ In stop-motion animation, puppets look soft and pliable on the outside, but thei
 
 Autonomous agents without structural boundaries do the exact same thing. When an agent gets an execution loop, it moves fast. Without an internal structural skeleton, models deform architecture, accumulate synonyms, and drift off spec.
 
-**Conductor is now Armature.**
+**Antigravity Conductor is now Armature.**
 
 We replaced prompt wishes with an internal steel skeleton—giving agents full creative fluidity on the outside while anchoring them to deterministic structural boundaries underneath.
 
@@ -31,7 +39,7 @@ Armature integrates Bounded Context domain modeling and Architecture Decision Re
 1. **Glossary (`terms.md`)**: Created during setup. It defines canonical terms and lists forbidden synonyms.
 2. **Architecture Decision Records (`adr/`)**: Written to `{PROJECT_CONTEXT_DIR}/adr/` as `NNNN-slug.md` using MADR format.
 3. **Living Manual Testing Runbooks (`manual_testing/<domain>.md`)**: Synchronized autonomously from active track runbooks during track closeout.
-4. **Fixpoint Zero-Drift Auditor (`/arm-drift`)**: Audits documentation, AST symbols, and release packaging manifests across 3 tiers.
+4. **Automated 3-Tier Drift Auditor (`/arm-drift`)**: Audits documentation, AST symbols, and release packaging manifests across 3 tiers.
 
 ### The Operational Loop
 
@@ -144,7 +152,7 @@ Once installed, the `/arm-*` commands are available globally in chat:
 /arm-status         # View progress across all tracks
 /arm-review         # Review completed work against spec
 /arm-revert         # Undo work from a track, phase, or task
-/arm-drift          # Run 3-tier Fixpoint zero-drift audit
+/arm-drift          # Run 3-tier continuous drift audit
 /arm-chat           # Ingest project knowledge, then proceed with task directly
 ```
 
