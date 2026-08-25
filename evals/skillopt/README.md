@@ -1,12 +1,12 @@
-# Conductor SkillOpt Evaluation Harness
+# Armature SkillOpt Evaluation Harness
 
 This directory contains the automated evaluation and optimization suite for
-Conductor skills and protocols.
+Armature skills and protocols.
 
 ## Overview
 
 The test harness uses Microsoft SkillOpt's text-space optimization framework
-adapted for Gemini models to verify that Conductor skills adhere to strict
+adapted for Gemini models to verify that Armature skills adhere to strict
 execution guardrails, interaction barriers, and handoff contracts.
 
 -   **Target Model (`gemini-3.5-flash` / `gemini-3.7-flash`)**: Executes task
@@ -41,15 +41,14 @@ export GEMINI_API_KEY="your-api-key"
 python3 evals/skillopt/run_optimizer.py --eval_only
 
 # Run benchmark for a specific target skill
-python3 evals/skillopt/run_optimizer.py --target=skills/conductor-new-track/SKILL.md --eval_only
-python3 evals/skillopt/run_optimizer.py --target=skills/conductor-implement/SKILL.md --eval_only
-python3 evals/skillopt/run_optimizer.py --target=skills/conductor-review/SKILL.md --eval_only
-python3 evals/skillopt/run_optimizer.py --target=skills/conductor-chat/SKILL.md --eval_only
+python3 evals/skillopt/run_optimizer.py --target=skills/arm-new-track/SKILL.md --eval_only
+python3 evals/skillopt/run_optimizer.py --target=skills/arm-implement/SKILL.md --eval_only
+python3 evals/skillopt/run_optimizer.py --target=skills/arm-review/SKILL.md --eval_only
 ```
 
 ### Run Optimization Loop
 
 ```bash
 # Optimize a skill across 2 reflection epochs
-python3 evals/skillopt/run_optimizer.py --target=skills/conductor-new-track/SKILL.md --optimize --epochs=2
+python3 evals/skillopt/run_optimizer.py --target=skills/arm-new-track/SKILL.md --optimize --epochs=2
 ```

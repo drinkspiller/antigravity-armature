@@ -1,68 +1,138 @@
 #!/bin/bash
 # =============================================================================
-# Antigravity Conductor Skills & Rules Installer
-# Copies Conductor skill and rule files to Antigravity directory.
+# Armature Plugin Installer
+# Installs Armature as a unified plugin for Antigravity, Gemini CLI, Claude Code, and Windsurf.
 #
-# Usage:
-#   bash install.sh
-#   bash install.sh --dry_run
-#   bash install.sh --force
-#   bash install.sh --uninstall
-#   bash install.sh --update
+# Usage (from any google3 root):
+#   bash experimental/users/skyebot/antigravity_armature/install.sh
+#   bash experimental/users/skyebot/antigravity_armature/install.sh --dry_run
+#   bash experimental/users/skyebot/antigravity_armature/install.sh --force
+#   bash experimental/users/skyebot/antigravity_armature/install.sh --uninstall
+#   bash experimental/users/skyebot/antigravity_armature/install.sh --update
 #
-# Target locations:
-#   ~/.gemini/antigravity/skills/conductor-*/SKILL.md
-#   ~/.gemini/antigravity/rules/conductor_*.md
+# Target location:
+#   ~/.gemini/config/plugins/antigravity-armature/
+#     ├── plugin.json
+#     ├── .claude-plugin/marketplace.json
+#     ├── README.md
+#     ├── CHANGELOG.md
+#     ├── .armature_version
+#     ├── skills/
+#     │   ├── arm-setup/SKILL.md (with assets/)
+#     │   ├── arm-new-track/SKILL.md
+#     │   ├── arm-implement/SKILL.md
+#     │   ├── arm-status/SKILL.md
+#     │   ├── arm-review/SKILL.md
+#     │   ├── arm-revert/SKILL.md
+#     │   ├── arm-drift/SKILL.md
+#     │   └── arm-chat/SKILL.md
+#     └── rules/
+#         ├── armature_protocol.md
+#         ├── armature_antigravity.md
+#         ├── armature_google3.md
+#         ├── armature_adr_preflight.md
+#         └── armature_cdd_protocols.md
 # =============================================================================
 
-FLAGS_TRUE=0
-FLAGS_FALSE=1
-FLAGS_dry_run=${FLAGS_FALSE}
-FLAGS_force=${FLAGS_FALSE}
-FLAGS_uninstall=${FLAGS_FALSE}
-FLAGS_update=${FLAGS_FALSE}
+# --- gbash with fallback for non-google3 environments ---
+if [[ -f /google/bin/releases/gbashr/gbash.sh ]]; then
+  source /google/bin/releases/gbashr/gbash.sh
+else
+  FLAGS_TRUE=0
+  FLAGS_FALSE=1
+  _DEFINED_FLAGS=()
+  _DEFINED_STRING_FLAGS=()
 
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --dry_run)
-      FLAGS_dry_run=${FLAGS_TRUE}
-      ;;
-    --force)
-      FLAGS_force=${FLAGS_TRUE}
-      ;;
-    --uninstall)
-      FLAGS_uninstall=${FLAGS_TRUE}
-      ;;
-    --update)
-      FLAGS_update=${FLAGS_TRUE}
-      ;;
-    --help|-h)
-      echo "Usage: bash install.sh [OPTIONS]"
-      echo "  --dry_run    Preview changes without writing files"
-      echo "  --force      Overwrite existing files without backup"
-      echo "  --update     Update to the latest version (implies --force)"
-      echo "  --uninstall  Remove all installed files"
-      echo "  --help, -h   Show this help message"
-      exit 0
-      ;;
-    *)
-      echo "Unknown argument: $1"
-      exit 1
-      ;;
-  esac
-  shift
-done
+  DEFINE_bool() {
+    local name="$1" default="$2" desc="$3"
+    if [[ "$default" == "true" ]]; then
+      eval "FLAGS_${name}=${FLAGS_TRUE}"
+    else
+      eval "FLAGS_${name}=${FLAGS_FALSE}"
+    fi
+    _DEFINED_FLAGS+=("$name")
+  }
 
-VERSION="0.18.2"
+  DEFINE_string() {
+    local name="$1" default="$2" desc="$3"
+    eval "FLAGS_${name}='${default}'"
+    _DEFINED_STRING_FLAGS+=("$name")
+  }
+
+  gbash::init_google() {
+    while [[ $# -gt 0 ]]; do
+      case "$1" in
+        --help|-h|--helpfull)
+          for flag in "${_DEFINED_FLAGS[@]}"; do
+            eval "local val=\${FLAGS_${flag}}"
+            local default_str="false"
+            [[ "$val" -eq "${FLAGS_TRUE}" ]] && default_str="true"
+            printf "  --%-20s (default: %s)\n" "${flag}" "${default_str}"
+          done
+          for flag in "${_DEFINED_STRING_FLAGS[@]}"; do
+            eval "local val=\${FLAGS_${flag}}"
+            printf "  --%-20s (default: '%s')\n" "${flag}=<value>" "${val}"
+          done
+          exit 0
+          ;;
+        --no*)
+          local flag_name="${1#--no}"
+          flag_name="${flag_name//-/_}"
+          eval "FLAGS_${flag_name}=${FLAGS_FALSE}"
+          ;;
+        --*=*)
+          local flag_name="${1%%=*}"
+          flag_name="${flag_name#--}"
+          flag_name="${flag_name//-/_}"
+          local flag_value="${1#*=}"
+          eval "FLAGS_${flag_name}='${flag_value}'"
+          ;;
+        --*)
+          local flag_name="${1#--}"
+          flag_name="${flag_name//-/_}"
+          eval "FLAGS_${flag_name}=${FLAGS_TRUE}"
+          ;;
+      esac
+      shift
+    done
+  }
+fi
+
+DEFINE_bool dry_run false "Preview changes without writing files"
+DEFINE_bool force false "Overwrite existing files without backup"
+DEFINE_bool uninstall false "Remove all installed files"
+DEFINE_bool update false "Update to the latest version (implies --force)"
+DEFINE_string target "global" "Install target: global (default, ~/.gemini/config/plugins/antigravity-armature)"
+DEFINE_bool release_notes false "Show release notes for the current version"
+
+gbash::init_google "$@"
+
+VERSION="0.19.0"
+
+# --- Toolsearch logging () ---
+
+TOOLLOG_LOGARGS=true
+TOOLLOG_METADATA=(
+  "version:${VERSION}"
+  "target:${FLAGS_target}"
+  "dry_run:$(( FLAGS_dry_run == FLAGS_TRUE ))"
+  "force:$(( FLAGS_force == FLAGS_TRUE ))"
+  "uninstall:$(( FLAGS_uninstall == FLAGS_TRUE ))"
+)
+
 
 # --- Resolve source directory (relative to this script) ---
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SOURCE_ASSETS_DIR="${SCRIPT_DIR}/skills/conductor-setup/assets"
+SOURCE_ASSETS_DIR="${SCRIPT_DIR}/skills/arm-setup/assets"
 # Sub-skill names (each has its own directory under skills/)
-SUB_SKILL_NAMES=(conductor-setup conductor-new-track conductor-implement conductor-status conductor-review conductor-revert conductor-chat conductor-drift)
+SUB_SKILL_NAMES=(arm-setup arm-new-track arm-implement arm-status arm-review arm-revert arm-drift arm-chat)
 # Rules files (always-on rule files for MVC architecture)
 SOURCE_RULES_DIR="${SCRIPT_DIR}/rules"
-RULE_FILE_NAMES=(conductor_protocol.md conductor_antigravity.md conductor_adr_preflight.md conductor_cdd_protocols.md)
+RULE_FILE_NAMES=(armature_protocol.md armature_antigravity.md armature_google3.md)
+# Reference files (inert protocol extensions loaded on demand by skills)
+REFERENCE_FILE_NAMES=(armature_adr_preflight.md armature_cdd_protocols.md)
+# CHANGELOG for release notes extraction
+SOURCE_CHANGELOG="${SCRIPT_DIR}/CHANGELOG.md"
 
 # --- Color helpers ---
 RED='\033[0;31m'
@@ -85,8 +155,8 @@ msg_skip()    { echo -e "  ${DIM}⏭️${NC}   ${DIM}$*${NC}"; }
 banner() {
   echo ""
   echo -e "${MAGENTA}  ╔══════════════════════════════════════════════════╗${NC}"
-  echo -e "${MAGENTA}  ║${NC}  ${BOLD}🎵 Antigravity Conductor Installer${NC}  ${DIM}v${VERSION}${NC}      ${MAGENTA}║${NC}"
-  echo -e "${MAGENTA}  ║${NC}  ${DIM}Skills & Rules for Antigravity${NC}                    ${MAGENTA}║${NC}"
+  echo -e "${MAGENTA}  ║${NC}  ${BOLD}🦾 Armature Installer${NC}  ${DIM}v${VERSION}${NC}                   ${MAGENTA}║${NC}"
+  echo -e "${MAGENTA}  ║${NC}  ${DIM}Structural Permanence for AI Coding Agents${NC}         ${MAGENTA}║${NC}"
   echo -e "${MAGENTA}  ╚══════════════════════════════════════════════════╝${NC}"
   echo ""
 }
@@ -98,6 +168,10 @@ validate_sources() {
   local missing=0
   if [[ ! -f "${SOURCE_ASSETS_DIR}/workflow_template.md" ]]; then
     msg_error "Source not found: ${SOURCE_ASSETS_DIR}/workflow_template.md"
+    ((missing++))
+  fi
+  if [[ ! -f "${SOURCE_ASSETS_DIR}/adr_template.md" ]]; then
+    msg_error "Source not found: ${SOURCE_ASSETS_DIR}/adr_template.md"
     ((missing++))
   fi
   if [[ ! -f "${SOURCE_ASSETS_DIR}/manual_testing_template.md" ]]; then
@@ -116,6 +190,12 @@ validate_sources() {
       ((missing++))
     fi
   done
+  for ref_file in "${REFERENCE_FILE_NAMES[@]}"; do
+    if [[ ! -f "${SOURCE_RULES_DIR}/${ref_file}" ]]; then
+      msg_error "Source not found: ${SOURCE_RULES_DIR}/${ref_file}"
+      ((missing++))
+    fi
+  done
   if [[ $missing -gt 0 ]]; then
     msg_error "Missing ${missing} source file(s). Run from the correct directory."
     exit 1
@@ -126,32 +206,61 @@ validate_sources() {
 # Target Selection
 # =============================================================================
 
-if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
-  USER_HOME="${USERPROFILE:-$HOME}"
-else
-  USER_HOME="$HOME"
-fi
+select_target() {
+  local target_choice="${FLAGS_target:-global}"
 
-INSTALL_TARGET="antigravity"
-TARGET_SKILLS_ROOT="${USER_HOME}/.gemini/antigravity/skills"
-TARGET_RULES_ROOT="${USER_HOME}/.gemini/antigravity/rules"
-TARGET_ASSETS_DIR="${TARGET_SKILLS_ROOT}/conductor-setup/assets"
-TARGET_MANIFEST_ROOT="${USER_HOME}/.gemini/antigravity"
+  case "$target_choice" in
+    global|antigravity|antigravity|"")
+      INSTALL_TARGET="global"
+      TARGET_PLUGIN_DIR="${HOME}/.gemini/config/plugins/antigravity-armature"
+      TARGET_SKILLS_ROOT="${TARGET_PLUGIN_DIR}/skills"
+      TARGET_RULES_ROOT="${TARGET_PLUGIN_DIR}/rules"
+      TARGET_MANIFEST_ROOT="${TARGET_PLUGIN_DIR}"
+      ;;
+    gemini_coder)
+      msg_warn "Gemini Coder has been retired in favor of AI IDEs."
+      msg_info "AI IDEs automatically reads plugins from ~/.gemini/config/plugins/."
+      msg_info "Installing to global plugin directory: ${HOME}/.gemini/config/plugins/antigravity-armature"
+      INSTALL_TARGET="global"
+      TARGET_PLUGIN_DIR="${HOME}/.gemini/config/plugins/antigravity-armature"
+      TARGET_SKILLS_ROOT="${TARGET_PLUGIN_DIR}/skills"
+      TARGET_RULES_ROOT="${TARGET_PLUGIN_DIR}/rules"
+      TARGET_MANIFEST_ROOT="${TARGET_PLUGIN_DIR}"
+      ;;
+    *)
+      msg_error "Invalid target '${target_choice}'. Use 'global' (or legacy aliases 'antigravity', 'antigravity')."
+      exit 1
+      ;;
+  esac
+}
+
+# =============================================================================
+# Build target file list (after target selection)
+# =============================================================================
 
 build_target_list() {
+  TARGET_ASSETS_DIR="${TARGET_SKILLS_ROOT}/arm-setup/assets"
   ALL_TARGET_FILES=(
     "${TARGET_ASSETS_DIR}/workflow_template.md"
     "${TARGET_ASSETS_DIR}/adr_template.md"
     "${TARGET_ASSETS_DIR}/manual_testing_template.md"
-    "${TARGET_SKILLS_ROOT}/conductor-setup/.conductor_version"
-    "${TARGET_MANIFEST_ROOT}/plugin.json"
-    "${TARGET_MANIFEST_ROOT}/.claude-plugin/marketplace.json"
+    "${TARGET_SKILLS_ROOT}/arm-setup/.armature_version"
+    "${TARGET_PLUGIN_DIR}/.armature_version"
+    "${TARGET_PLUGIN_DIR}/plugin.json"
+    "${TARGET_PLUGIN_DIR}/README.md"
+    "${TARGET_PLUGIN_DIR}/CHANGELOG.md"
   )
+  if [[ -f "${SCRIPT_DIR}/.claude-plugin/marketplace.json" ]]; then
+    ALL_TARGET_FILES+=("${TARGET_PLUGIN_DIR}/.claude-plugin/marketplace.json")
+  fi
   for sub_skill in "${SUB_SKILL_NAMES[@]}"; do
     ALL_TARGET_FILES+=("${TARGET_SKILLS_ROOT}/${sub_skill}/SKILL.md")
   done
   for rule_file in "${RULE_FILE_NAMES[@]}"; do
     ALL_TARGET_FILES+=("${TARGET_RULES_ROOT}/${rule_file}")
+  done
+  for ref_file in "${REFERENCE_FILE_NAMES[@]}"; do
+    ALL_TARGET_FILES+=("${TARGET_RULES_ROOT}/${ref_file}")
   done
 }
 
@@ -198,7 +307,166 @@ install_file() {
   fi
 }
 
-# --- Migrate to hyphenated skills & remove deprecated skills (v0.10.0 → v0.11.0) ---
+# =============================================================================
+# Legacy Migrations
+# =============================================================================
+
+migrate_legacy_conductor_plugin() {
+  local legacy_paths=(
+    "${HOME}/.gemini/config/plugins/antigravity-geppetto"
+    "${HOME}/.gemini/config/plugins/antigravity-conductor"
+    "${HOME}/.gemini/extensions/conductor"
+    "${HOME}/.gemini/antigravity-cli/plugins/conductor"
+    "${HOME}/.gemini/extensions/geppetto"
+    "${HOME}/.gemini/antigravity-cli/plugins/geppetto"
+  )
+
+  local found_legacy_plugins=()
+  for p in "${legacy_paths[@]}"; do
+    if [[ -d "$p" ]]; then
+      found_legacy_plugins+=("$p")
+    fi
+  done
+
+  local enablement_file="${HOME}/.gemini/extensions/extension-enablement.json"
+  local has_enablement_entry=0
+  if [[ -f "$enablement_file" ]] && (grep -q '"conductor"' "$enablement_file" |
+    has_enablement_entry=1
+  fi
+
+  if [[ ${#found_legacy_plugins[@]} -gt 0 |
+    section "🔄 Legacy Conductor/Geppetto Plugin & Extension Cleanup"
+    echo ""
+    if [[ ${#found_legacy_plugins[@]} -gt 0 ]]; then
+      msg_warn "Found ${#found_legacy_plugins[@]} legacy plugin/extension installation(s). Migrating to antigravity-armature..."
+      for p in "${found_legacy_plugins[@]}"; do
+        if [[ "${FLAGS_dry_run}" -eq "${FLAGS_TRUE}" ]]; then
+          msg_info "${YELLOW}[dry-run]${NC} Would remove legacy directory: ${CYAN}${p}${NC}"
+        else
+          rm -rf "${p}"
+          msg_success "Removed legacy directory: ${CYAN}${p}${NC}"
+        fi
+      done
+    fi
+
+    if [[ $has_enablement_entry -eq 1 ]]; then
+      if [[ "${FLAGS_dry_run}" -eq "${FLAGS_TRUE}" ]]; then
+        msg_info "${YELLOW}[dry-run]${NC} Would remove legacy entries from: ${CYAN}${enablement_file}${NC}"
+      else
+        python3 -c "
+import json
+p = '$enablement_file'
+try:
+  with open(p, 'r') as f:
+    data = json.load(f)
+  changed = False
+  for key in ['conductor', 'geppetto']:
+    if key in data:
+      del data[key]
+      changed = True
+  if changed:
+    with open(p, 'w') as f:
+      json.dump(data, f, indent=2)
+except Exception:
+  pass
+" 2>/dev/null |
+        msg_success "Cleaned legacy entries from: ${CYAN}${enablement_file}${NC}"
+      fi
+    fi
+    echo ""
+  fi
+}
+
+sync_config_json_plugins() {
+  local config_file="${HOME}/.gemini/config/config.json"
+  if [[ -f "$config_file" ]]; then
+    if [[ "${FLAGS_dry_run}" -eq "${FLAGS_TRUE}" ]]; then
+      msg_info "${YELLOW}[dry-run]${NC} Would register plugin in: ${CYAN}${config_file}${NC}"
+    else
+      python3 -c "
+import json
+p = '$config_file'
+try:
+  with open(p, 'r') as f:
+    data = json.load(f)
+  if 'plugins' not in data:
+    data['plugins'] = {}
+  data['plugins']['antigravity-armature'] = {'enabled': True}
+  for key in ['antigravity-conductor', 'antigravity-geppetto']:
+    if key in data['plugins']:
+      del data['plugins'][key]
+  with open(p, 'w') as f:
+    json.dump(data, f, indent=2)
+except Exception:
+  pass
+" 2>/dev/null |
+      msg_success "Registered plugin in ${CYAN}${config_file}${NC}"
+    fi
+  fi
+}
+
+migrate_from_workflows() {
+  local legacy_dirs=(
+    "${HOME}/.gemini/antigravity/global_workflows"
+    "${HOME}/.gemini/antigravity/global_workflows"
+  )
+
+  local legacy_files=()
+  for dir in "${legacy_dirs[@]}"; do
+    if [[ -d "$dir" ]]; then
+      for wf in implement newTrack revert review setup status; do
+        local legacy_file="${dir}/conductor_${wf}.md"
+        if [[ -f "$legacy_file" ]]; then
+          legacy_files+=("$legacy_file")
+        fi
+      done
+    fi
+  done
+
+  if [[ ${#legacy_files[@]} -eq 0 ]]; then
+    return 0
+  fi
+
+  section "🔄 Legacy Workflow Migration"
+  echo ""
+  msg_warn "Found ${BOLD}${#legacy_files[@]}${NC}${YELLOW} legacy Conductor workflow file(s):${NC}"
+  for f in "${legacy_files[@]}"; do
+    echo -e "     ${DIM}${f}${NC}"
+  done
+  echo ""
+
+  if [[ "${FLAGS_dry_run}" -eq "${FLAGS_TRUE}" ]]; then
+    for f in "${legacy_files[@]}"; do
+      msg_info "${YELLOW}[dry-run]${NC} Would remove legacy workflow: ${CYAN}$(basename "$f")${NC}"
+    done
+    return 0
+  fi
+
+  for f in "${legacy_files[@]}"; do
+    rm -f "$f"
+    msg_success "Removed legacy workflow: ${CYAN}$(basename "$f")${NC}"
+  done
+}
+
+migrate_from_hub_skill() {
+  local hub_dirs=(
+    "${HOME}/.gemini/antigravity/skills/conductor"
+    "${HOME}/.gemini/antigravity/skills/conductor"
+    "${HOME}/.gemini/config/skills/conductor"
+  )
+
+  for hub_dir in "${hub_dirs[@]}"; do
+    if [[ -d "$hub_dir" ]]; then
+      if [[ "${FLAGS_dry_run}" -eq "${FLAGS_TRUE}" ]]; then
+        msg_info "${YELLOW}[dry-run]${NC} Would remove legacy hub skill directory: ${CYAN}${hub_dir}${NC}"
+      else
+        rm -rf "$hub_dir"
+        msg_success "Removed legacy hub skill directory: ${CYAN}${hub_dir}${NC}"
+      fi
+    fi
+  done
+}
+
 migrate_to_v0_11_0() {
   local old_skills=(
     "conductor_setup"
@@ -212,51 +480,128 @@ migrate_to_v0_11_0() {
     "conductor_chat"
   )
 
-  local deprecated_found=()
-  for old in "${old_skills[@]}"; do
-    local old_path="${TARGET_SKILLS_ROOT}/${old}"
-    if [[ -d "$old_path" ]]; then
-      deprecated_found+=("$old_path")
-    fi
+  local search_roots=(
+    "${HOME}/.gemini/antigravity/skills"
+    "${HOME}/.gemini/antigravity/skills"
+    "${HOME}/.gemini/config/skills"
+  )
+
+  for root in "${search_roots[@]}"; do
+    for old_skill in "${old_skills[@]}"; do
+      local old_dir="${root}/${old_skill}"
+      if [[ -d "$old_dir" ]]; then
+        if [[ "${FLAGS_dry_run}" -eq "${FLAGS_TRUE}" ]]; then
+          msg_info "${YELLOW}[dry-run]${NC} Would remove deprecated skill directory: ${CYAN}${old_dir}${NC}"
+        else
+          rm -rf "$old_dir"
+          msg_success "Removed deprecated skill directory: ${CYAN}${old_dir}${NC}"
+        fi
+      fi
+    done
+  done
+}
+
+migrate_to_v0_12_0() {
+  local legacy_dirs=(
+    "${HOME}/.gemini/antigravity/skills"
+    "${HOME}/.gemini/config/skills"
+    "${HOME}/.gemini/antigravity/skills"
+  )
+  local skill_names=(
+    "conductor"
+    "conductor-setup" "conductor_setup"
+    "conductor-new-track" "conductor_newTrack" "conductor_newTrack_grill" "conductor_newTrack_discovery"
+    "conductor-implement" "conductor_implement"
+    "conductor-status" "conductor_status"
+    "conductor-review" "conductor_review"
+    "conductor-revert" "conductor_revert"
+    "conductor-chat" "conductor_chat"
+    "gpto-setup" "gpto-new-track" "gpto-implement" "gpto-status" "gpto-review" "gpto-revert" "gpto-drift" "gpto-chat"
+  )
+
+  local found_legacy=()
+  for base_dir in "${legacy_dirs[@]}"; do
+    for skill_name in "${skill_names[@]}"; do
+      local target_dir="${base_dir}/${skill_name}"
+      if [[ -d "$target_dir" ]] && [[ "$target_dir" != "${TARGET_SKILLS_ROOT}/${skill_name}" ]]; then
+        found_legacy+=("$target_dir")
+      fi
+    done
   done
 
-  if [[ ${#deprecated_found[@]} -eq 0 ]]; then
+  # Legacy rules in ~/.gemini/antigravity/rules/ or ~/.gemini/config/rules/ or ~/.gemini/antigravity/rules/
+  local rule_dirs=(
+    "${HOME}/.gemini/antigravity/rules"
+    "${HOME}/.gemini/config/rules"
+    "${HOME}/.gemini/antigravity/rules"
+  )
+  for base_dir in "${rule_dirs[@]}"; do
+    for rf in "${RULE_FILE_NAMES[@]}" "${REFERENCE_FILE_NAMES[@]}" \
+              "geppetto_protocol.md" "geppetto_antigravity.md" "geppetto_google3.md" "geppetto_adr_preflight.md" "geppetto_cdd_protocols.md" \
+              "conductor_protocol.md" "conductor_antigravity.md" "conductor_google3.md" "conductor_adr_preflight.md" "conductor_cdd_protocols.md"; do
+      local target_file="${base_dir}/${rf}"
+      if [[ -f "$target_file" ]] && [[ "$target_file" != "${TARGET_RULES_ROOT}/${rf}" ]]; then
+        found_legacy+=("$target_file")
+      fi
+    done
+  done
+
+  if [[ ${#found_legacy[@]} -eq 0 ]]; then
     return 0
   fi
 
-  msg_info "Found ${#deprecated_found[@]} deprecated skill directory(ies) from pre-v0.11.0."
+  section "🔄 Legacy Path Migration"
+  echo ""
+  msg_warn "Found ${#found_legacy[@]} legacy file(s)/directory(ies) outside ${TARGET_PLUGIN_DIR}:"
+  for item in "${found_legacy[@]}"; do
+    echo -e "     ${DIM}${item}${NC}"
+  done
+  echo ""
+
   if [[ "${FLAGS_dry_run}" -eq "${FLAGS_TRUE}" ]]; then
-    for d in "${deprecated_found[@]}"; do
-      msg_info "${YELLOW}[dry-run]${NC} Would remove deprecated skill directory: ${CYAN}${d}${NC}"
+    for item in "${found_legacy[@]}"; do
+      msg_info "${YELLOW}[dry-run]${NC} Would remove legacy path: ${CYAN}${item}${NC}"
     done
     return 0
   fi
 
-  for d in "${deprecated_found[@]}"; do
-    rm -rf "$d"
-    msg_success "Removed deprecated skill directory: ${CYAN}${d}${NC}"
+  for item in "${found_legacy[@]}"; do
+    if [[ -d "$item" ]]; then
+      rm -rf "$item"
+      msg_success "Removed legacy directory: ${CYAN}${item}${NC}"
+    elif [[ -f "$item" ]]; then
+      rm -f "$item"
+      msg_success "Removed legacy file: ${CYAN}${item}${NC}"
+    fi
   done
 }
 
 # --- Version check ---
 check_for_updates() {
-  local version_file="${TARGET_SKILLS_ROOT}/conductor-setup/.conductor_version"
-  local skill_file="${TARGET_SKILLS_ROOT}/conductor-setup/SKILL.md"
+  local latest_version="${VERSION}"
+  local version_file="${TARGET_PLUGIN_DIR}/.armature_version"
+  if [[ ! -f "$version_file" ]]; then
+    version_file="${TARGET_PLUGIN_DIR}/.geppetto_version"
+  fi
+  if [[ ! -f "$version_file" ]]; then
+    version_file="${TARGET_PLUGIN_DIR}/.conductor_version"
+  fi
 
   if [[ -f "$version_file" ]]; then
     local installed_version
-    installed_version=$(cat "$version_file" 2>/dev/null | tr -d '[:space:]')
-    if [[ "$installed_version" == "$VERSION" ]]; then
-      msg_success "Installed version: ${WHITE}v${installed_version}${NC} (up to date)"
+    installed_version=$(cat "$version_file" 2>/dev/null 
+
+    if [[ "$installed_version" == "$latest_version" ]]; then
+      msg_success "Armature plugin is up to date (${WHITE}v${installed_version}${NC})"
     else
-      echo -e "  ${YELLOW}🆕${NC} Update available: ${DIM}v${installed_version}${NC} → ${GREEN}v${VERSION}${NC}"
-      echo -e "  Run ${CYAN}bash install.sh --update${NC} to upgrade."
+      echo -e "  ${YELLOW}🆕${NC}  Update available: ${DIM}v${installed_version}${NC} → ${GREEN}v${latest_version}${NC}"
     fi
-  elif [[ -f "$skill_file" ]]; then
-    echo -e "  ${YELLOW}🆕${NC} Legacy install detected (pre-v0.2.0) — update to ${GREEN}v${VERSION}${NC}"
   else
-    msg_info "No existing installation found."
+    msg_info "Armature plugin installed at ${CYAN}${TARGET_PLUGIN_DIR}${NC}"
   fi
+  echo ""
+  echo -e "  ${DIM}To update to the latest version at any time, run:${NC}"
+  echo -e "  ${CYAN}bash experimental/users/skyebot/antigravity_armature/install.sh --update${NC}"
 }
 
 # =============================================================================
@@ -265,68 +610,82 @@ check_for_updates() {
 
 banner
 
+if [[ "${FLAGS_release_notes}" -eq "${FLAGS_TRUE}" ]]; then
+  if [[ -f "${SOURCE_CHANGELOG:-}" ]]; then
+    section "📝 Release Notes — v${VERSION}"
+    echo ""
+    awk -v ver="${VERSION}" '
+      /^## \[/ { if (found) exit; if (index($0, ver)) found=1 }
+      found { print "  " $0 }
+    ' "${SOURCE_CHANGELOG}"
+    echo ""
+  else
+    msg_warn "CHANGELOG.md not found."
+  fi
+  exit 0
+fi
+
 if [[ "${FLAGS_update}" -eq "${FLAGS_TRUE}" ]]; then
   FLAGS_force="${FLAGS_TRUE}"
+
+  select_target
   build_target_list
 
-  version_file="${TARGET_SKILLS_ROOT}/conductor-setup/.conductor_version"
+  version_file="${TARGET_PLUGIN_DIR}/.armature_version"
+  if [[ ! -f "$version_file" ]]; then
+    version_file="${TARGET_PLUGIN_DIR}/.geppetto_version"
+  fi
+  if [[ ! -f "$version_file" ]]; then
+    version_file="${TARGET_PLUGIN_DIR}/.conductor_version"
+  fi
+
   if [[ -f "$version_file" ]]; then
-    installed_version=$(cat "$version_file" 2>/dev/null | tr -d '[:space:]')
+    installed_version=$(cat "$version_file" 2>/dev/null 
     if [[ "$installed_version" == "$VERSION" ]]; then
       msg_success "Already up to date (${WHITE}v${VERSION}${NC})"
       exit 0
     fi
     echo -e "  ${DIM}Installed:${NC} ${WHITE}v${installed_version}${NC}  →  ${GREEN}v${VERSION}${NC}"
-  elif [[ -f "${TARGET_SKILLS_ROOT}/conductor-setup/SKILL.md" ]]; then
-    echo -e "  ${DIM}Installed:${NC} ${YELLOW}pre-v0.2.0 (legacy)${NC}  →  ${GREEN}v${VERSION}${NC}"
   else
-    msg_info "No existing installation found. Performing fresh install."
+    msg_info "No existing plugin installation found. Performing fresh install."
   fi
   echo ""
 fi
 
-build_target_list
+if [[ -z "${INSTALL_TARGET:-}" ]]; then
+  select_target
+  build_target_list
+fi
 
-echo -e "  ${DIM}Target:${NC}  ${WHITE}${INSTALL_TARGET}${NC}"
+echo -e "  ${DIM}Target:${NC}      ${WHITE}${TARGET_PLUGIN_DIR}${NC}"
 
 # =============================================================================
 # Uninstall
 # =============================================================================
 if [[ "${FLAGS_uninstall}" -eq "${FLAGS_TRUE}" ]]; then
-  section "🗑️  Uninstalling Conductor"
+  section "🗑️  Uninstalling Armature Plugin"
   echo ""
 
   removed=0
-  for file in "${ALL_TARGET_FILES[@]}"; do
-    if [[ -f "$file" ]]; then
-      local_name=$(basename "$file")
-      if [[ "${FLAGS_dry_run}" -eq "${FLAGS_TRUE}" ]]; then
-        msg_info "${YELLOW}[dry-run]${NC} Would remove: ${CYAN}${local_name}${NC}"
-      else
-        rm "$file"
-        msg_success "Removed: ${CYAN}${local_name}${NC}"
-      fi
-      ((removed++))
+  if [[ -d "${TARGET_PLUGIN_DIR}" ]]; then
+    if [[ "${FLAGS_dry_run}" -eq "${FLAGS_TRUE}" ]]; then
+      msg_info "${YELLOW}[dry-run]${NC} Would remove plugin directory: ${CYAN}${TARGET_PLUGIN_DIR}${NC}"
+    else
+      rm -rf "${TARGET_PLUGIN_DIR}"
+      msg_success "Removed plugin directory: ${CYAN}${TARGET_PLUGIN_DIR}${NC}"
     fi
-  done
+    ((removed++))
+  fi
 
-  for sub_skill in "${SUB_SKILL_NAMES[@]}"; do
-    local sub_dir="${TARGET_SKILLS_ROOT}/${sub_skill}"
-    if [[ -d "$sub_dir" ]] && [[ -z "$(ls -A "$sub_dir" 2>/dev/null)" ]]; then
-      if [[ "${FLAGS_dry_run}" -eq "${FLAGS_TRUE}" ]]; then
-        msg_info "${YELLOW}[dry-run]${NC} Would remove empty directory: ${DIM}${sub_dir}${NC}"
-      else
-        rmdir "$sub_dir"
-        msg_success "Cleaned up empty directory: ${DIM}${sub_dir}${NC}"
-      fi
-    fi
-  done
+  # Also clean legacy conductor/geppetto plugin, extension, and antigravity directories if present
+  migrate_legacy_conductor_plugin
+  migrate_to_v0_12_0
 
   echo ""
   if [[ $removed -eq 0 ]]; then
-    msg_info "Nothing to uninstall — no Conductor files found."
+    msg_info "Nothing to uninstall — no Armature plugin found."
   else
-    echo -e "  ${GREEN}🧹 Uninstalled ${BOLD}${removed}${NC}${GREEN} file(s). All clean!${NC}"
+    echo -e "  ${GREEN}🧹 Uninstalled Armature plugin. All clean!${NC}"
   fi
   echo ""
   exit 0
@@ -342,58 +701,86 @@ if [[ "${FLAGS_dry_run}" -eq "${FLAGS_TRUE}" ]]; then
   echo -e "  ${YELLOW}👀 DRY RUN MODE — no files will be written${NC}"
 fi
 
+# --- Legacy migrations ---
+migrate_legacy_conductor_plugin
+migrate_from_workflows
+migrate_from_hub_skill
 migrate_to_v0_11_0
+migrate_to_v0_12_0
 
-section "📄 Installing Conductor Setup Assets"
+# --- Assets ---
+section "📄 Installing Armature Setup Assets"
 echo ""
 install_file "${SOURCE_ASSETS_DIR}/workflow_template.md" "${TARGET_ASSETS_DIR}/workflow_template.md"
 install_file "${SOURCE_ASSETS_DIR}/adr_template.md" "${TARGET_ASSETS_DIR}/adr_template.md"
 install_file "${SOURCE_ASSETS_DIR}/manual_testing_template.md" "${TARGET_ASSETS_DIR}/manual_testing_template.md"
 
+# --- Write version stamps ---
 if [[ "${FLAGS_dry_run}" -eq "${FLAGS_TRUE}" ]]; then
-  msg_info "${YELLOW}[dry-run]${NC} Would write version file: ${GREEN}.conductor_version${NC}"
+  msg_info "${YELLOW}[dry-run]${NC} Would write version file: ${GREEN}.armature_version${NC}"
 else
-  mkdir -p "${TARGET_SKILLS_ROOT}/conductor-setup"
-  echo "$VERSION" > "${TARGET_SKILLS_ROOT}/conductor-setup/.conductor_version"
+  mkdir -p "${TARGET_SKILLS_ROOT}/arm-setup"
+  echo "$VERSION" > "${TARGET_SKILLS_ROOT}/arm-setup/.armature_version"
+  echo "$VERSION" > "${TARGET_PLUGIN_DIR}/.armature_version"
   msg_success "Wrote version stamp: ${GREEN}v${VERSION}${NC}"
 fi
 
-section "📦 Installing Conductor Plugin Manifests"
+# --- Manifests & Docs ---
+section "📦 Installing Armature Plugin Manifests & Docs"
 echo ""
-if [[ -f "${SCRIPT_DIR}/plugin.json" ]]; then
-  install_file "${SCRIPT_DIR}/plugin.json" "${TARGET_MANIFEST_ROOT}/plugin.json"
-fi
+install_file "${SCRIPT_DIR}/plugin.json" "${TARGET_PLUGIN_DIR}/plugin.json"
+install_file "${SCRIPT_DIR}/README.md" "${TARGET_PLUGIN_DIR}/README.md"
+install_file "${SCRIPT_DIR}/CHANGELOG.md" "${TARGET_PLUGIN_DIR}/CHANGELOG.md"
 if [[ -f "${SCRIPT_DIR}/.claude-plugin/marketplace.json" ]]; then
-  install_file "${SCRIPT_DIR}/.claude-plugin/marketplace.json" "${TARGET_MANIFEST_ROOT}/.claude-plugin/marketplace.json"
+  install_file "${SCRIPT_DIR}/.claude-plugin/marketplace.json" "${TARGET_PLUGIN_DIR}/.claude-plugin/marketplace.json"
 fi
 
-section "🔧 Installing Conductor Command Skills"
+# --- Sub-Skills ---
+section "🔧 Installing Armature Command Skills"
 echo ""
 for sub_skill in "${SUB_SKILL_NAMES[@]}"; do
   install_file "${SCRIPT_DIR}/skills/${sub_skill}/SKILL.md" "${TARGET_SKILLS_ROOT}/${sub_skill}/SKILL.md"
 done
 
-section "📏 Installing Conductor Rules"
+# --- Rules ---
+section "📏 Installing Armature Rules"
 echo ""
 for rule_file in "${RULE_FILE_NAMES[@]}"; do
   install_file "${SOURCE_RULES_DIR}/${rule_file}" "${TARGET_RULES_ROOT}/${rule_file}"
 done
+for ref_file in "${REFERENCE_FILE_NAMES[@]}"; do
+  install_file "${SOURCE_RULES_DIR}/${ref_file}" "${TARGET_RULES_ROOT}/${ref_file}"
+done
 
+# --- Plugin Enablement ---
+sync_config_json_plugins
+
+# --- Summary ---
 section "📊 Summary"
 echo ""
 echo -e "  ${DIM}Version:${NC}       ${WHITE}${VERSION}${NC}"
-echo -e "  ${DIM}Target:${NC}        ${WHITE}${INSTALL_TARGET}${NC}"
 echo -e "  ${DIM}Source:${NC}        ${CYAN}${SCRIPT_DIR}${NC}"
-echo -e "  ${DIM}Skills:${NC}        ${CYAN}${TARGET_SKILLS_ROOT}/conductor-*/${NC}"
-echo -e "  ${DIM}Rules dir:${NC}     ${CYAN}${TARGET_RULES_ROOT}${NC}"
+echo -e "  ${DIM}Plugin dir:${NC}    ${CYAN}${TARGET_PLUGIN_DIR}${NC}"
+echo -e "  ${DIM}Skills:${NC}        ${CYAN}${TARGET_SKILLS_ROOT}/arm-*/${NC}"
+echo -e "  ${DIM}Rules:${NC}         ${CYAN}${TARGET_RULES_ROOT}/*.md${NC}"
 echo -e "  ${DIM}Files:${NC}         ${WHITE}${#ALL_TARGET_FILES[@]}${NC} total"
 echo ""
 
 check_for_updates
 
+# --- Optional dependency check ---
+if ! command -v sg &>/dev/null; then
+  echo -e "  ${YELLOW}[optional]${NC} ast-grep (sg) not found"
+  echo -e "           API surface extraction will use regex fallback."
+  echo -e "           For higher-quality glossary suggestions, install ast-grep:"
+  echo -e "           ${CYAN}https://ast-grep.github.io/guide/quick-start.html${NC}"
+  echo ""
+fi
+
 if [[ "${FLAGS_dry_run}" -eq "${FLAGS_TRUE}" ]]; then
   echo -e "  ${YELLOW}🔍 Dry run complete. Re-run without --dry_run to apply changes.${NC}"
 else
-  echo -e "  ${GREEN}🚀 Installation complete! You're ready to conduct.${NC}"
+  echo -e "  ${GREEN}🚀 Installation complete! You're ready to build with precision.${NC}"
+  echo -e "  ${DIM}💡 If IDE or the web UI is already open, reload the tab (${WHITE}Cmd+R${DIM} / ${WHITE}F5${DIM}) to refresh the slash menu.${NC}"
 fi
 echo ""

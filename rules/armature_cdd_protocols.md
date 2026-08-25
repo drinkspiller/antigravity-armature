@@ -1,6 +1,6 @@
 # CDD Protocols (Drift Scan, ADR Capture, Per-Directory Context)
 
-> Loaded on demand by Conductor skills. Not an always-on rule.
+> Loaded on demand by Armature skills. Not an always-on rule.
 
 ## 9. Pre-Execution Drift Scan
 
@@ -8,10 +8,10 @@ After completing context loading (items 1–7), and before executing the invoked
 skill's primary protocol, perform a lightweight drift check:
 
 1.  **Diff stat:** Run a VCS diff stat (`git diff --stat` / `hg diff --stat`)
-    against the last Conductor checkpoint commit (or HEAD if no checkpoint
+    against the last Armature / Conductor checkpoint commit (or HEAD if no checkpoint
     exists). This yields the list of files with uncommitted or recent changes.
 2.  **Scope matching:** For each changed file, scan the loaded ADRs in
-    `conductor/adr/*.md` and directory context files for scope annotations that
+    `{PROJECT_CONTEXT_DIR}/adr/*.md` and directory context files for scope annotations that
     reference the changed file or its parent directory.
 3.  **Targeted read:** For each scope match, read the changed file and the
     matching ADR decision statement or confirmation rule. Check for surface-level
@@ -47,21 +47,21 @@ skill's primary protocol, perform a lightweight drift check:
 
 Architectural decisions and non-negotiable behavioral contracts (ordering
 constraints, null-check requirements, state guards, initialization rules)
-must be recorded in `{PROJECT_ROOT}/conductor/adr/NNNN-slug.md`.
+must be recorded in `{PROJECT_ROOT}/{PROJECT_CONTEXT_DIR}/adr/NNNN-slug.md`.
 
 ### Capture Triggers
 
-ADR capture can fire at five points in the Conductor lifecycle:
+ADR capture can fire at five points in the Armature lifecycle:
 
-1.  **During spec generation** (`/conductor_newTrack` Step 10 — Devil's
+1.  **During spec generation** (`/arm-new-track` Step 9 — Devil's
     Advocate): when a challenge reveals an architectural trade-off or ordering
     assumption.
-2.  **During design decisions** (`/conductor_newTrack` Step 6): when an interview
+2.  **During design decisions** (`/arm-new-track` Step 5): when an interview
     decision establishes a project-wide pattern or technology choice.
-3.  **During implementation** (`/conductor_implement` Step 3): when the agent
+3.  **During implementation** (`/arm-implement` Step 3): when the agent
     writes a guard, assertion, or safety constraint that extends beyond the
     active track.
-4.  **During review** (`/conductor_review` § 2.4): when a correctness finding
+4.  **During review** (`/arm-review` § 2.4): when a correctness finding
     implies an architectural rule or race condition fix.
 5.  **User-initiated**: when the user explicitly states a non-negotiable rule.
 
@@ -79,7 +79,7 @@ At each trigger point, the agent follows this protocol:
     -   Find the next sequential number (e.g., `0003-slug.md`).
     -   Draft the ADR following standard MADR format (`Status`, `Context`,
         `Decision`, `Consequences`, `Confirmation`).
-    -   Save to `{PROJECT_ROOT}/conductor/adr/NNNN-slug.md`.
+    -   Save to `{PROJECT_ROOT}/{PROJECT_CONTEXT_DIR}/adr/NNNN-slug.md`.
 
 ## 11. Per-Directory Context Protocol
 
@@ -88,13 +88,13 @@ tax by scoping what the agent reads to what's relevant for the current task.
 
 ### Section Format
 
-Conductor manages a `## Conductor Context` section inside existing agent context
+Armature manages a `## Armature Context` (or legacy `## Conductor Context`) section inside existing agent context
 files (`GEMINI.md`, `CLAUDE.md`, `AGENTS.md`, or `AGENT.md`). The section is
 delimited by boundary comments:
 
 ```markdown
-<!-- Conductor Context: START (manual edits go above this line) -->
-## Conductor Context
+<!-- Armature Context: START (manual edits go above this line) -->
+## Armature Context
 
 ### Purpose
 {1-2 sentences describing the directory's role}
@@ -103,14 +103,14 @@ delimited by boundary comments:
 {Directory-scoped rules, handler conventions, and failure handling policies}
 
 ### Relevant ADRs
-- [ADR-NNNN: Title](file:///conductor/adr/NNNN-slug.md)
+- [ADR-NNNN: Title](file:///armature/adr/NNNN-slug.md)
 
 ### Key Types
 {Primary exported types, classes, and functions}
 
 ### Term Overrides
 {Terms used differently in this directory vs project-level terms.md}
-<!-- Conductor Context: END (manual edits go below this line) -->
+<!-- Armature Context: END (manual edits go below this line) -->
 ```
 
 ### Multi-File Discovery & Creation
@@ -119,11 +119,8 @@ Before modifying files in a directory for the first time in a track, check
 case-insensitively for existing agent context files: `GEMINI.md`, `CLAUDE.md`,
 `AGENTS.md`, or `AGENT.md`.
 
--   **Discovery**: If any of these files exist and contain a `## Conductor
-    Context` section, use that file and do NOT prompt to create a new one.
--   **Appending**: If exactly one of those files exists but lacks a `##
-    Conductor Context` section, append the section to that existing file rather
-    than creating a second context file.
+-   **Discovery**: If any of these files exist and contain a `## Armature Context` or `## Conductor Context` section, use that file and do NOT prompt to create a new one.
+-   **Appending**: If exactly one of those files exists but lacks a context section, append the `## Armature Context` section to that existing file rather than creating a second context file.
 -   **Creation & Architectural Justification**: Do NOT automatically prompt to
     create a context file based on arbitrary file counts. Only prompt if there
     is a concrete architectural justification (multiple interacting services,
@@ -137,14 +134,13 @@ case-insensitively for existing agent context files: `GEMINI.md`, `CLAUDE.md`,
 
 ### Loading
 
-See context loading item 8 in `conductor_protocol.md` §0a. The agent reads the
+See context loading item 8 in `armature_protocol.md` §0a. The agent reads the
 nearest context file (`GEMINI.md`, `CLAUDE.md`, `AGENTS.md`, or `AGENT.md`)
-containing a `## Conductor Context` section in the parent directory chain of
+containing a `## Armature Context` or `## Conductor Context` section in the parent directory chain of
 each file the current task touches. Innermost directory wins.
 
 ### Updates
 
 At phase checkpoints, if the agent added new exports or discovered new local
 rules in a directory, propose appending them to the directory's context file
-`## Conductor Context` section. Only modify content between the START and END
-boundary comments.
+section. Only modify content between the START and END boundary comments.

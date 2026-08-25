@@ -1,11 +1,12 @@
 ---
-trigger: model_decision
-description: Standard visual rules for rendering interactive GUI dialog modals (ask_question) and sequential question loops whenever any Conductor skill or workflow is active.
+trigger: always_on
+description: Armature Antigravity UX adapter - maps interaction requirements onto Antigravity native rendering
 ---
 
-# Conductor Antigravity UX Adapter (View Layer)
+# Armature Antigravity UX Adapter (View Layer)
 
-These operational standards govern the user interface and conversational experience when Conductor skills are executed inside the Antigravity host environment.
+This platform rule informs the agent how to optimally map universal Armature
+interaction requirements onto Antigravity's native visual rendering capabilities.
 
 ## Interactive Interview Rendering
 
@@ -39,7 +40,7 @@ syntax displays as raw characters. Follow these rules:
 
 ```
 question: "A brownfield project detected. Found package.json with React 18,
-TypeScript 5.3, 47 source files in src/, 12 test files, build files present.
+TypeScript 5.3, 47 source files in src/, 12 test files, BUILD files present.
 May I perform a read-only scan of the codebase to extract the tech stack?"
 options: ["Yes", "No"]
 ```
@@ -49,7 +50,7 @@ options: ["Yes", "No"]
 First, output findings as regular markdown:
 
 > **Brownfield project detected.** I found `package.json` with React 18,
-> TypeScript 5.3, 47 source files in `src/`, and build files present.
+> TypeScript 5.3, 47 source files in `src/`, and BUILD files present.
 
 Then call `ask_question`:
 
@@ -91,9 +92,9 @@ Use rich markdown in artifacts: **tables**, **alerts** (`[!NOTE]`, `[!TIP]`,
 
 ## Dual Artifact Strategy
 
-When creating conductor artifacts (spec.md, plan.md, etc.):
+When creating Armature artifacts (spec.md, plan.md, etc.):
 
-1.  Write the **canonical version** to `{PROJECT_ROOT}/conductor/` (committed to
+1.  Write the **canonical version** to `{PROJECT_ROOT}/{PROJECT_CONTEXT_DIR}/` (committed to
     VCS)
-2.  Create a **symlink** in the host artifact directory pointing to the
+2.  Create a **symlink** in the Antigravity artifact directory pointing to the
     canonical file for interactive review

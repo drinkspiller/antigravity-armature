@@ -69,7 +69,7 @@ All tasks follow a strict lifecycle:
     -   Update its status from `[~]` to `[x]`.
     -   Append the first 7 characters of the commit hash.
     -   Write the updated content back to `plan.md`.
-    -   Commit the plan update: `conductor(plan): Mark task '<TASK NAME>' as
+    -   Commit the plan update: `armature(plan): Mark task '<TASK NAME>' as
         complete`
 
 ### Phase Completion Verification and Checkpointing Protocol
@@ -107,7 +107,7 @@ a phase.
 
 6.  **Create Checkpoint Commit:**
 
-    -   Stage all changes and commit: `conductor(checkpoint): Checkpoint end of
+    -   Stage all changes and commit: `armature(checkpoint): Checkpoint end of
         Phase X`
     -   Record the checkpoint SHA in `plan.md`.
     -   Commit the plan update.
@@ -130,7 +130,7 @@ Before marking any task complete, verify:
 ## Development Commands
 
 **AI AGENT INSTRUCTION: Customize this section with the project's specific
-language, framework, and build tools during `/conductor_setup`.**
+language, framework, and build tools during `/arm-setup`.**
 
 ### Setup
 

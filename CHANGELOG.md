@@ -1,98 +1,217 @@
 # Changelog
 
-All notable changes to Antigravity Conductor will be documented in this file.
+All notable changes to Armature (formerly Antigravity Conductor) will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.19.0] - 2026-08-24
+
+### Changed
+
+-   **Renamed Ecosystem to Armature**:
+    -   Migrated all core command skills from `conductor-*` to `arm-*` (`arm-setup`, `arm-new-track`, `arm-implement`, `arm-status`, `arm-review`, `arm-revert`, `arm-drift`, `arm-chat`).
+    -   Migrated universal rule files to `armature_protocol.md`, `armature_antigravity.md`, `armature_google3.md`, `armature_adr_preflight.md`, and `armature_cdd_protocols.md`.
+    -   Target plugin installation directory updated to `~/.gemini/config/plugins/antigravity-armature/`.
+-   **Transparent Dual-Discovery & Backward Compatibility**:
+    -   Implemented transparent dual-discovery: Primary (`{PROJECT_ROOT}/armature/`), Legacy Fallback (`{PROJECT_ROOT}/conductor/`). Operates seamlessly on existing projects without requiring file migrations.
+    -   Multi-syntax source-tree context ingestion: parses `## Armature Context` / `<!-- Armature Context -->` and `## Conductor Context` / `<!-- Conductor Context -->` transparently.
+-   **SkillOpt Backward-Compatibility Benchmark Suite**:
+    -   Updated evaluation tasks across `tasks/train.jsonl` and `tasks/val.jsonl` to enforce `/arm-*` execution and dual-discovery backward compatibility on legacy projects.
+
 ## [0.18.2] - 2026-08-24
 
 ### Added
-- **Continuous Inquiry Depth Traversal Matrix (`/conductor-new-track`)**:
-  - Replaced abstract branch traversal narrative in Step 5 with an explicit, continuous 6-dimension inquiry matrix: (1) Primary UX & Architecture, (2) Failure Modes & Recovery, (3) Boundary Interactions & Escape Hatches, (4) State Invariants, Concurrency & Security, (5) Accessibility & Environmental Constraints, (6) Adversarial Stress Testing (Devil's Advocate).
-  - **Anti-Early-Exit Invariant**: Explicitly forbids terminating track interview turns after 1–2 happy-path questions, requiring follow-up probes across failure recovery, a11y live regions, and adversarial failure modes before convergence.
-  - **Convergence Summary & Confirmation Gate**: Enforces presenting a structured markdown summary across all 6 inquiry dimensions and obtaining explicit user confirmation via `ask_question` before writing `spec.md` to disk.
-- **SkillOpt Depth Regression Tasks (`evals/skillopt/`)**:
-  - Added `TRAIN_20` and `VAL_13` test scenarios modeling asynchronous loading dialogues and real-time state synchronization to enforce multi-turn inquiry depth across failure recovery, boundaries, and adversarial challenges.
+
+-   **Continuous Inquiry Depth Traversal Matrix (`/conductor-new-track` Step 5)**:
+    -   Replaced abstract branch traversal narrative in Step 5 with an explicit,
+        continuous 6-dimension inquiry matrix: (1) Primary UX & Architecture,
+        (2) Failure Modes & Recovery, (3) Boundary Interactions & Escape
+        Hatches, (4) State Invariants, Concurrency & Security, (5) Accessibility
+        & Environmental Constraints, (6) Adversarial Stress Testing (Devil's
+        Advocate).
+    -   **Anti-Early-Exit Invariant**: Explicitly forbids terminating track
+        interview turns after 1–2 happy-path questions, requiring follow-up
+        probes across failure recovery, a11y live regions, and adversarial
+        failure modes before convergence.
+    -   **Convergence Summary & Confirmation Gate**: Enforces presenting a
+        structured markdown summary across all 6 inquiry dimensions and
+        obtaining explicit user confirmation via `ask_question` before writing
+        `spec.md` to disk.
+-   **SkillOpt Depth Regression Tasks (`evals/skillopt/`)**:
+    -   Added `TRAIN_17` and `VAL_13` test scenarios modeling asynchronous
+        loading dialogues and real-time state synchronization to enforce
+        multi-turn inquiry depth across failure recovery, boundaries, and
+        adversarial challenges.
 
 ## [0.18.1] - 2026-08-24
 
 ### Added
-- **Universal Fixture & Schema Conformance Auditing (`/conductor-drift`)**:
-  - Added automated schema conformance checks in Phase 2 Fixpoint to audit test reset tools, fixture scripts, and seeders against `.proto`, SQL DDL, and ORM schema definitions for valid enum values and field names.
-  - Audits CLI execution constraints (e.g. single-statement execution vs batch piping limits in database CLI tools).
-  - Cross-references API precondition handlers with ADRs to formalize and test required payload invariants.
+
+-   **Universal Fixture & Schema Conformance Auditing (`/conductor-drift`)**:
+    -   Added automated schema conformance checks in Phase 2 Fixpoint to audit
+        test reset tools, fixture scripts, and seeders against `.proto`, `.sdl`,
+        and DDL definitions for valid enum values and field names.
+    -   Audits CLI execution constraints (e.g. single-statement execution vs
+        batch piping limits in database CLI tools).
+    -   Cross-references API precondition handlers with ADRs to formalize and
+        test required payload invariants.
 
 ## [0.18.0] - 2026-08-24
 
 ### Added
-- **Multi-Perspective Persona Reasoning (`conductor_protocol.md` §1a)**:
-  - Added internal simulation of Architect, Operator, and Scribe perspectives for contract compatibility, execution safety, and ubiquitous language synchronization.
-- **Autonomous Living Documentation & AST Glossary Synchronization (`conductor-implement` Step 4)**:
-  - Added deterministic AST and symbol scanning to track completion, extracting newly introduced entities, contracts, and interfaces directly from the git diff into `conductor/terms.md`.
-  - Reconciles active Architecture Decision Records in `conductor/adr/` and outputs structured sync summaries (`### Extracted Domain Terms`, `### ADR Updates`, `### Living Runbook Synchronization`, `### Verification Audit`).
-- **3-Part Fixture Triad & Additive Testing Policy (`conductor_protocol.md` §5)**:
-  - Formally mandates the 3-part sequence (`migrate` → `seed` → `teardown/reset`) in runbooks for database migrations and environment state changes.
-  - Strictly audits manual runbooks in conjunction with automated CI test suites while enforcing documentation-only safety against autonomous drops.
-- **Operational Micro-Fix Fast-Path Bypass (`conductor_protocol.md` §5 & `conductor-chat`)**:
-  - Automatically bypasses PRD interview modals, track creation, and multi-turn planning when a task modifies ≤5 lines of code with zero schema changes.
-- **Objective CDD/SDD Evaluation Harness Overhaul (`evals/cdd_sdd_benchmark/`)**:
-  - Implemented blinded LLM-as-Judge scoring (`CANDIDATE UNDER TEST (Blinded Candidate)`) to eliminate brand and naming bias.
-  - Added deterministic token efficiency assertions (<1500 tokens for micro-tasks) and autonomous destructive execution safety rejection (`DROP TABLE`).
-  - Added standard error ($SE$) and normal 95% confidence interval ($p \pm 1.96 \cdot SE$) reporting across all benchmark scorecards.
-- **10-Scenario Stratified Benchmark Suite (`tasks/scenarios.jsonl`)**:
-  - Replaced redundant micro-hotfixes with 10 distinct, non-redundant engineering scenarios (40 total test criteria) mapped across 5 core evaluation pillars.
-- **SkillOpt Held-Out Validation & De-Overfitting (`evals/skillopt/`)**:
-  - Replaced `val.jsonl` with 12 strictly held-out domain validation tasks with 0% mirror-task overlap against `train.jsonl`.
-  - Injected anti-overfitting prompt reflection constraints and tightened the sequence-matcher clip threshold to 30%.
-- **De-overfitted Core Conductor Skills (`/conductor-new-track`)**:
-  - Generalized injected styling tokens into universal, domain-agnostic architectural failure-mode stress-testing and detour recovery.
+
+-   **Operational Micro-Fix Fast-Path Bypass (`conductor_protocol.md` §5 &
+    `conductor-chat`)**:
+    -   Automatically bypasses PRD interview modals, track creation, and
+        multi-turn planning when a task modifies ≤5 lines of code with zero
+        schema changes.
+    -   Emits the minimal surgical diff and verification test commands in ≤500
+        tokens, eliminating bureaucratic coordination tax.
+-   **Autonomous Living Documentation & AST Glossary Synchronization
+    (`conductor-implement` Step 4)**:
+    -   Added deterministic AST and symbol scanning to track completion,
+        extracting newly introduced entities, contracts, and interfaces directly
+        from the git diff into `conductor/terms.md`.
+    -   Reconciles active Architecture Decision Records in `conductor/adr/` and
+        outputs structured sync summaries (`### Extracted Domain Terms`, `###
+        ADR Updates`, `### Living Runbook Synchronization`, `### Verification
+        Audit`).
+-   **3-Part Fixture Triad & Additive Testing Policy (`conductor_protocol.md`
+    §5)**:
+    -   Formally mandates the 3-part sequence (`migrate` → `seed` →
+        `teardown/reset`) in runbooks for database migrations and environment
+        state changes.
+    -   Strictly audits manual runbooks in conjunction with automated CI test
+        suites while enforcing documentation-only safety against autonomous
+        drops.
+-   **Non-Blocking Architectural Decomposition (`conductor-new-track` Step 5)**:
+    -   Generates cross-layer milestone graphs (Contracts → Transport →
+        Consumer) in initial proposals rather than deferring entire plans behind
+        exhaustive sub-branch grilling.
+-   **Expanded 30-Scenario Live CDD/SDD Evaluation Battery
+    (`evals/cdd_sdd_benchmark/`)**:
+    -   Tripled the evaluation suite from 10 to 30 distinct engineering
+        scenarios (120 test criteria) mapped evenly across all 5 core pillars (6
+        scenarios each).
+    -   Narrows the 95% confidence interval from ±12.4% down to ±6.4%,
+        eliminating statistical power overlap.
+-   **Multi-Judge Ensemble Scoring & 20% Edit Distance Clip Guard
+    (`evals/skillopt/`)**:
+    -   Added `--multi_judge` consensus voting (majority pass across judge
+        panel) and tightened mutation edit distance limits from 30% to 20% to
+        prevent prompt drift during optimization.
+
+## [0.17.0] - 2026-08-24
+
+### Added
+
+-   **Objective CDD & SDD Evaluation Harness Overhaul
+    (`evals/cdd_sdd_benchmark/`)**:
+    -   **Authentic Baseline System Instructions**: Purged prompt-criterion
+        contamination and test-solution leaks across all frameworks in
+        `configs/frameworks.json`. Installed authentic upstream system prompts
+        for GitHub Spec Kit, BMAD Method, OpenSpec, and Memory Bank.
+    -   **Blinded LLM-as-Judge Evaluation**: Masked framework identities
+        (`CANDIDATE UNDER TEST (Blinded Candidate)`) before submitting execution
+        transcripts to the criterion judge, eliminating brand bias and hardcoded
+        winner fallbacks.
+    -   **Deterministic Verification & Safety Assertions**: Added deterministic
+        token limit enforcement (<1500 tokens for micro-hotfixes) and automated
+        detection of unshielded destructive shell patterns.
+    -   **Statistical Rigor ($95\%\text{ CI}$)**: Integrated standard error and
+        95% normal confidence interval calculations ($p \pm 1.96 \cdot SE$)
+        across all framework pass rates and architectural pillars.
+    -   **10-Scenario Stratified Benchmark Battery**: Expanded evaluation
+        scenarios to 10 distinct, non-redundant engineering challenges mapped
+        across 5 core architectural pillars (Spec Gating, Detour Resilience,
+        Surgical Efficiency, Drift Governance, State Safety).
+-   **SkillOpt Held-Out Validation Suite & Anti-Overfitting Safeguards
+    (`evals/skillopt/`)**:
+    -   Replaced validation set with 12 strictly held-out domain tasks (zero
+        mirror overlap with `train.jsonl`).
+    -   Injected anti-overfitting rules into the optimizer reflection prompt and
+        tightened the sequence-matcher edit distance limit to 30%.
+-   **Production Skill De-Overfitting**:
+    -   Generalised overfitted CSS-specific rules in
+        `skills/conductor-new-track/SKILL.md` into universal, domain-agnostic
+        failure-mode stress testing and detour recovery.
 
 ## [0.16.2] - 2026-08-23
 
 ### Added
-- **Adversarial Token & Layout Refactoring Probes (`/conductor-new-track`)**:
-  - Injected mandatory adversarial stress testing for UI layout and design token refactoring to probe custom property fallbacks and CSS cascade specificity collisions before finalizing specs.
-  - Added detour recovery and re-challenging to systematically evaluate down-stream accessibility contrast and token cascade risks after answering out-of-band inquiries.
-  - Added explicit Protobuf/gRPC schema evolution and proto3 zero-default value probing during Step 7 Gap Analysis.
-- **Incremental Phase Checkpoint Mode (`/conductor-drift --scope=phase`)**:
-  - Added structured scoping to audit files modified in the active track's current phase against ADRs and manual testing runbooks without blocking work-in-progress code.
-- **Continuous Document Synchronization Execution (`/conductor-implement`)**:
-  - Added single-turn continuous execution directive for Step 4 Document Synchronization through Step 5.2 Next Steps Elicitation Gate.
-- **SkillOpt Benchmark Calibration**:
-  - Validated 30-task evaluation harness achieving 100.0% validation scores across 7 Conductor command skills.
+
+-   **Adversarial Token & Layout Refactoring Probes (`/conductor-new-track`)**:
+    -   Injected mandatory adversarial stress testing for UI layout and design
+        token refactor tracks to probe custom property fallbacks and CSS cascade
+        specificity collisions before finalizing specs.
+    -   Added detour recovery and re-challenging to systematically evaluate
+        down-stream accessibility contrast and token cascade risks after
+        answering out-of-band inquiries.
+-   **Incremental Phase Checkpoint Mode (`/conductor-drift --scope=phase`)**:
+    -   Added structured scoping to audit files modified in the active track's
+        current phase against ADRs and manual testing runbooks without blocking
+        work-in-progress code.
+-   **Continuous Document Synchronization Execution (`/conductor-implement`)**:
+    -   Added single-turn continuous execution directive for Step 4 Document
+        Synchronization through Step 5.2 Next Steps Elicitation Gate.
+-   **SkillOpt 30-Task Batch Calibration**:
+    -   Achieved 100.0% validation scores across 7 Conductor command skills
+        (`conductor-new-track`, `conductor-implement`, `conductor-drift`,
+        `conductor-setup`, `conductor-chat`, `conductor-revert`,
+        `conductor-status`).
 
 ## [0.16.1] - 2026-08-23
 
 ### Added
-- **Track Completion Next-Steps Elicitation Gate (`/conductor-implement`)**:
-  - Implements Step 5.2 Next Steps Elicitation Gate in `skills/conductor-implement/SKILL.md` to prevent agents from going silent or terminating turns with static summaries upon completing a track.
-  - Mandates invoking `ask_question` with structured options:
-    1. `(Recommended) Test the implementation with the manual testing guide ([<domain>.md](file://...))`
-    2. `Push changes / Create PR`
-    3. `Run full code review (/conductor-review)`
-    4. `Archive completed track and finish`
-    5. `Keep track active and finish`
-- **Completion Turn Barrier Guardrail**: Added `Mandatory Completion Next-Steps Barrier` to `conductor-implement` guardrails.
-- **SkillOpt Benchmark Suite**: Calibrated `TRAIN_08` and `VAL_14` evaluating track completion next-steps orchestration, achieving 100% pass rates across train and validation sets.
+
+-   **Track Completion Next-Steps Elicitation Gate (`/conductor-implement`)**:
+    -   Implements Step 5.2 Next Steps Elicitation Gate in
+        `skills/conductor-implement/SKILL.md` to prevent agents from going
+        silent or terminating turns with static summaries upon completing a
+        track.
+    -   Mandates invoking `ask_question` with structured options:
+    *   `(Recommended) Test the implementation with the manual testing guide
+        ([<domain>.md](file://...))`
+    *   `Upload CL to Code Review / Push changes`
+    *   `Run full code review (/conductor-review)`
+    *   `Archive completed track and finish`
+    *   `Keep track active and finish`
+-   **Completion Turn Barrier Guardrail**: Added `Mandatory Completion
+    Next-Steps Barrier` to `conductor-implement` guardrails.
+-   **SkillOpt Benchmark Suite**: Added `TRAIN_08` and `VAL_14` evaluating track
+    completion next-steps orchestration, achieving 100% pass rates across train
+    and validation sets.
 
 ## [0.16.0] - 2026-08-23
 
 ### Added
-- **CDD & SDD Live Evaluation Benchmark Suite (`evals/cdd_sdd_benchmark/`)**:
-  - Standalone, zero-external-dependency live evaluation harness (`run_cdd_sdd_eval.py`) with 8-scenario, 32-criterion test suite comparing 7 industry frameworks (`jetski-conductor-dev`, `canonical_conductor`, `conductor_oss`, `bmad_method`, `memory_bank`, `github_spec_kit`, `openspec`).
-  - Automated LLM Meta-Judge synthesis via `gemini-3.1-pro-preview` generating composite scores (0–100), rank, winner declaration, and markdown report artifacts.
-  - Dynamic ceremony scaling rule for micro-hotfixes (<5 lines, zero ripple) bypassing heavy PRD barriers.
-  - Adversarial proto schema evolution challenge rule during Step 7 / Step 9 Gap Analysis for proto3 default zero-value collisions in partial updates.
-  - Additive manual testing runbook verification rule auditing living runbooks concurrently with automated unit/integration test suites.
-- **SkillOpt Optimization Benchmark Suite (`evals/skillopt/`)**:
-  - Extended training tasks `TRAIN_17`–`TRAIN_19` and validation tasks `VAL_14`–`VAL_15` covering micro-hotfix ceremony scaling, proto3 field presence evolution, and additive runbook auditing.
 
-## [0.15.0] - 2026-08-23
+-   **CDD & SDD Live Evaluation Benchmark Suite (`evals/cdd_sdd_benchmark/`)**:
+    -   Standalone, zero-external-dependency live evaluation harness
+        (`run_cdd_sdd_eval.py`) with 8-scenario, 32-criterion test suite
+        comparing 7 industry frameworks (`antigravity-conductor-dev`,
+        `canonical_conductor`, `conductor_oss`, `bmad_method`, `memory_bank`,
+        `github_spec_kit`, `openspec`).
+    -   Automated LLM Meta-Judge synthesis via `gemini-3.1-pro-preview`
+        generating composite scores (0–100), rank, winner declaration, and
+        markdown report artifacts.
+    -   Dynamic ceremony scaling rule for micro-hotfixes (<5 lines, zero ripple)
+        bypassing heavy PRD barriers.
+    -   Adversarial proto schema evolution challenge rule during Step 7 / Step 9
+        Gap Analysis for proto3 default zero-value collisions in partial
+        updates.
+    -   Additive manual testing runbook verification rule auditing living
+        runbooks concurrently with automated unit/integration test suites.
+-   **SkillOpt Optimization Benchmark Suite (`evals/skillopt/`)**:
+    -   Extended training tasks `TRAIN_17`–`TRAIN_19` and validation tasks
+        `VAL_14`–`VAL_15` covering micro-hotfix ceremony scaling, proto3 field
+        presence evolution, and additive runbook auditing.
 
 ### Added
-- **Conductor Fixpoint Auditor (`/conductor-drift`)**: Dedicated command skill (`skills/conductor-drift/SKILL.md`) natively auditing divergence across project documentation, ADRs, domain manual testing runbooks, API surfaces (`.api_surface_cache.json`), and packaging manifests.
+
+- **Conductor Fixpoint Auditor (`/conductor-drift`)**: Dedicated command skill (`skills/conductor-drift/SKILL.md`) natively auditing divergence across project documentation, ADRs, domain manual testing runbooks, API surfaces, and packaging manifests using native workspace inspection tools.
 - **3-Tier Audit Architecture**:
   - *Phase 1 (Docs & Specs)*: Audits cross-document consistency, ADR schemas/sequences, domain runbook scenarios, and specification completeness.
   - *Phase 2 (Code & Interfaces)*: Compares public exports against `.api_surface_cache.json` and audits per-directory `## Conductor Context` boundary integrity.
@@ -102,24 +221,53 @@ and this project adheres to
   - *Track Completion Gate*: Mandatory Fixpoint verification in `/conductor-implement` Step 4 before archiving.
   - *Review Gate*: Added `Fixpoint Audit: [Pass/Fail]` to `/conductor-review` checklist and `review.md`.
   - *Ambient Health Banner*: 1-line passive Fixpoint health summary in `/conductor-status` and `/conductor-chat`.
-- **29-Scenario SkillOpt Benchmark Suite**: Expanded `evals/skillopt/` with 29 multi-skill evaluation tasks (16 training, 13 validation) and enhanced candidate retry resilience in `run_optimizer.py`.
+  - *Pre-Submit Release Gate*: Section 5 of `antigravity-conductor-dev` enforces running `/conductor-drift` before mailing CLs.
 
 ## [0.14.0] - 2026-08-23
 
 ### Added
-- **Manual Testing Guide Protocol**: Living, domain-organized manual testing runbooks stored at `conductor/manual_testing/<domain>.md` with environment prerequisites, CLI fixture setup, persona matrices, and error resilience.
-- **Tiered Testing Strategy Classification**: Structured testing classification in `/conductor-new-track` Step 7 Gap Analysis, requiring full runbooks for stateful/route tracks and lightweight smoke checks for utility chores.
-- **Specification `## Manual Verification Plan` Section**: Enforced dedicated manual testing section in all generated track specifications.
-- **Developer Test Tooling Injection**: Automated injection of fixture seeding and CLI reset tasks into `plan.md` alongside feature code.
-- **Autonomous Runbook Synchronization**: Fully automated synchronization of steady-state manual testing scenarios into `conductor/manual_testing/<domain>.md` upon track completion (`/conductor-implement` Step 4), generating walkthrough artifacts and clickable chat links.
-- **Continuous Runbook Maintenance**: `/conductor-chat` automatically updates domain manual testing guides and outputs walkthrough artifacts with chat links when new functionality or behavioral changes are introduced.
-- **Additive Manual Testing Review Audit**: Injected `Manual Testing Runbook: [Pass/Fail]` into `/conductor-review` checklist and `review.md`.
-- **SkillOpt Evaluation Suite**: Integrated evaluation test harness under `evals/skillopt/` (`run_optimizer.py`, `tasks/train.jsonl`, `tasks/val.jsonl`, and documentation).
-- **Setup Asset `manual_testing_template.md`**: Bundled canonical manual testing template in `skills/conductor-setup/assets/`.
+
+-   **Manual Testing Runbooks (`conductor/manual_testing/`)**: Integrated
+    living, domain-organized manual testing runbooks into the Conductor
+    protocol.
+-   **Tiered Testing Strategy Classification**: `/conductor-new-track` Gap
+    Analysis (Step 7) classifies tracks into full persona runbooks
+    (interactive/stateful flows) versus concise smoke checks (refactors/chores).
+-   **Autonomous Non-Gated Synchronization**: `/conductor-implement` Step 4
+    automatically extracts verified steady-state test scenarios from
+    `tracks/<track_id>/manual_testing.md` and merges them into
+    `conductor/manual_testing/<domain>.md` without prompting the user.
+-   **Documentation-Only Fixture Invariant**: Enforced that manual testing
+    runbooks document exact setup and CLI reset commands, but agents must never
+    execute mutative database or environment reset commands autonomously.
+-   **Additive Review Gate**: Added `Manual Testing Runbook: [Pass/Fail]` check
+    to `/conductor-review` under Section 2.4 and `review.md`, auditing
+    completeness of newly introduced routes, flags, and personas without
+    altering automated test checks.
+-   **SkillOpt Evaluation Suite (`evals/skillopt/`)**: Added version-controlled
+    evaluation runner (`run_optimizer.py`), training tasks
+    (`tasks/train.jsonl`), and validation tasks (`tasks/val.jsonl`)
+    consolidating historical test scenarios with new manual testing protocol
+    assertions.
+
+## [0.13.2] - 2026-08-22
 
 ### Fixed
-- **Pre-Materialization Hardening Barrier & Detour Recovery**: Enforced in-memory draft retention until all gap analyses and devil's advocate challenges complete, with explicit resumption barriers after user detours in `/conductor-new-track`.
-- **Neutral Retrospective ADR Prompting**: Step 5 in `/conductor-implement` uses neutral retrospective wording rather than referencing "archiving" before track disposition is chosen.
+
+-   **Pre-Materialization Hardening Barrier in `conductor-new-track`**: Prevented
+    premature disk writing of `spec.md` during preliminary drafting (Step 6).
+    `spec.md` is now strictly held as an in-memory draft until Step 10, ensuring
+    it is materialized only after Gap Analysis and Devil's Advocate milestones
+    are complete.
+-   **Sequential Step Numbering Alignment**: Resolved missing Step 6 gap
+    and aligned protocol execution sequentially from Step 1 through Step 14.
+-   **Interruption & Detour Recovery**: Added explicit guardrails ensuring that
+    conversational detours (such as asset handling or technical clarifications)
+    resume at the uncompleted milestone rather than leaping to plan generation or
+    commit.
+-   **Milestone Pre-Plan Checklist**: Enforced a prerequisite checklist gate
+    before `plan.md` generation in Step 11, validating all 7 Gap categories and
+    2–3 Devil's Advocate challenges.
 
 ## [0.13.1] - 2026-08-17
 
@@ -137,32 +285,37 @@ and this project adheres to
 
 ## [0.13.0] - 2026-08-14
 
-### Changed
+### Breaking
 
--   **Subsumed Invariants into ADRs and Local Rules**: Eliminated `conductor/invariants.md` to prevent fragmentation across architectural decisions and invariant rules.
--   **MADR Schema Alignment**: Behavioral contracts, ordering constraints, and safety guards are now recorded directly as Architecture Decision Records in `conductor/adr/*.md` using standard MADR structure (`## Decision` and `## Confirmation` verification tasks).
--   **Per-Directory Context Scoping**: Local conventions and failure handling rules are recorded in `## Conductor Context` (`### Local Rules` and `### Relevant ADRs`) within directory-level agent context files (`GEMINI.md`, `CLAUDE.md`, `AGENTS.md`, or `AGENT.md`).
--   **Protocol & Skill Harmonization**: Rebranded §10 in `conductor_cdd_protocols.md` to **ADR Capture Protocol**, and updated `/conductor-setup`, `/conductor-new-track`, `/conductor-implement`, and `/conductor-review` to verify ADRs and local rules directly.
+-   **Subsumed Invariants into ADRs**: Eliminated `conductor/invariants.md`.
+    Behavioral contracts, ordering constraints, and safety assertions are now
+    unified directly under Architecture Decision Records (`conductor/adr/*.md`)
+    using standard MADR format with checkable `## Confirmation` criteria.
+-   **Rebranded Invariant Capture Protocol**: Converted §10 in
+    `conductor_cdd_protocols.md` to the **ADR Capture Protocol**, formalizing
+    unwritten constraints as lightweight ADRs.
+-   **Per-Directory Context Format**: Updated directory context sections to use
+    `### Local Rules` and `### Relevant ADRs`.
 
 ## [0.12.0] - 2026-08-14
 
-### Changed
+### Breaking
 
--   **Terminology Scrubbing**: Scrubbed lingering internal references and standardized artifact phrasing across all skill files and rules.
--   **Installer Fixes**: Fixed Windows uninstaller (`install.bat`) rule cleanup loop and updated version references to `v0.12.0`.
--   **Documentation**: Updated `README.md` to align the "What Gets Installed" table with current kebab-case skill paths and rules.
-
-## [0.11.1] - 2026-07-20
+-   **Unified Global Plugin Discovery**: Moved installation path to
+    `~/.gemini/config/plugins/antigravity-conductor/`, aligning with modern Antigravity
+    customization discovery (`https://github.com/drinkspiller/antigravity-conductor` and
+    `https://github.com/drinkspiller/antigravity-conductor`). Skills and rules are now automatically
+    discovered across Antigravity CLI, Antigravity IDE, and AI IDEs without manual
+    `skills.json` or `rules.json` configuration.
+-   **Retired Gemini Coder Workstation Target**: Deprecated `--target=gemini_coder`.
+    AI IDEs automatically consumes the host's global plugins under
+    `~/.gemini/config/plugins/`.
 
 ### Added
 
--   **Agent Plugin Manifests**: Root `plugin.json` (v0.11.1) and `.claude-plugin/marketplace.json` for agent plugin auto-discovery across `agy` (Antigravity CLI) and Claude Code.
-
-### Changed
-
--   **Co-located Setup Assets**: Relocated setup templates into `skills/conductor-setup/assets/` to make skill subdirectories completely self-contained.
--   **Enhanced Modal Rules**: Updated `rules/conductor_antigravity.md` with enhanced `ask_question` modal rendering guardrails and report-first interaction standards.
--   **Installer & Docs**: Updated `install.sh`, `install.bat`, and `README.md` to support `assets/` and dual plugin manifests.
+-   **Legacy Path Migration**: Added `migrate_to_v0_12_0` in `install.sh` to
+    clean up legacy skill and rule directories from `~/.gemini/antigravity/` and
+    `~/.gemini/antigravity/` during install, update, and uninstall.
 
 ## [0.11.0] - 2026-07-20
 
@@ -190,12 +343,8 @@ and this project adheres to
     -   Use reason-driven creation based on architectural justification
         (interacting services, stateful controllers, local invariants, domain
         gotchas) rather than arbitrary file-count thresholds.
--   **Report First, Ask Second**: Updated `conductor_antigravity.md` and
-    `conductor-implement` Step 5.1 (Retrospective ADR Review) to mandate
-    printing full context, trade-off summaries, and spec quotes in the main chat
-    response before calling `ask_question`.
 
-## [0.3.0] - 2026-06-22
+## [0.10.0] - 2026-06-22
 
 ### Breaking
 
@@ -231,76 +380,145 @@ and this project adheres to
     `/conductor_setup` (brownfield) and `/conductor_implement` (on first
     directory access).
 
+### Changed
+
+-   **Token footprint reduction (~68%)**: Always-on protocol rule shrank from
+    294 to 199 lines. Extended protocols (ADR preflight, drift scan, invariant
+    capture, per-directory context) extracted to inert reference files
+    (`conductor_adr_preflight.md`, `conductor_cdd_protocols.md`) loaded on
+    demand by skills. Hub skill (331 lines) eliminated entirely.
+-   **Glossary file renamed**: `TERMS.md` → `terms.md` for consistency with all
+    other lowercase conductor artifact filenames.
+-   **Templates relocated**: `workflow_template.md` and `adr_template.md` moved
+    from `conductor/templates/` to `conductor_setup/templates/` — the only skill
+    that uses them.
+-   **Version stamp relocated**: `.conductor_version` now lives under
+    `conductor_setup/` instead of the removed `conductor/` directory.
+-   **Installer**: Installs reference files alongside rules. Removed hub skill
+    installation. Hub skill migration auto-removes old `conductor/` directory
+    during upgrade.
+
+## [0.8.0] - 2026-06-19
+
+### Added
+
+-   **Universal ADR & Glossary Preflight Interceptor**: Added Section 6 to
+    `conductor_protocol.md` (Controller layer). When ANY Conductor command
+    executes against an existing brownfield project that lacks
+    `conductor/adr/*.md` files, execution pauses to perform an automated
+    document sweep (`tech-stack.md`, `product.md`, legacy specs, `README.md`),
+    filter trade-offs through the 3-part gate, interview the developer and
+    backfill historical ADRs before resuming the primary command.
+
+## [0.7.0] - 2026-06-19
+
+### Added
+
+-   **Domain Modeling & ADR Integration (Phase 2)**:
+    -   **Verification Bridge**: `/conductor_newTrack` Step 13 scans generated
+        ADRs for `## Confirmation` sections and automatically injects their
+        verification criteria as explicit tasks into `plan.md`.
+    -   **Duckie Vetting Hook**: Added optional Google3 hook in
+        `conductor_google3.md` that cross-checks architectural decisions against
+        internal engineering standards and infrastructure limits via
+        `ask_duckie` before writing ADR files.
+
+## [0.6.0] - 2026-06-19
+
+### Added
+
+-   **Domain Modeling & ADR Integration (Phase 1)**:
+    -   **Project Glossary (`terms.md`)**: Semi-mandatory, skippable glossary
+        step in `/conductor_setup` (Artifact 8). Auto-populates from codebase
+        scans in Brownfield projects; interviews the developer in Greenfield.
+    -   **Inline ADR Gating**: 3-part gate (hard to reverse × surprising × real
+        trade-off) evaluated per-decision in `/conductor_newTrack` Step 7.
+    -   **Immediate ADR Writing**: Confirmed decisions written immediately to
+        `conductor/adr/NNNN-slug.md` using the new `adr_template.md` template.
+    -   **Varied Copy Phrasing**: User-facing prompts use 3-4 randomized copy
+        phrasings rotated to prevent robotic repetition.
+    -   **Spec Integration**: `spec.md § Design Decisions` links directly to
+        generated ADRs with one-line summaries.
+    -   **Token-Efficient Cross-Track Check**: Step 10 scans ADR filenames by
+        default, selectively loading full-text only when slugs match active
+        glossary terms.
+    -   **Archival Retrospective**: `/conductor_implement` Step 5 track cleanup
+        reviews un-gated decisions in hindsight and offers to promote them.
+    -   **ADR Compliance Reviews**: `/conductor_review` §2.4 and §3.1 check code
+        changes against active ADRs, warning on drift and offering to fix,
+        update the ADR, or record tech debt.
+-   **ADR Template**: Bundled `adr_template.md` installed to templates
+    directory.
+
+## [0.5.0] - 2026-05-26
+
+### Added
+
 -   **Grill mode** for `/conductor_newTrack` — conductor-aware relentless
     interview mode, triggered by "grill", "grill-me", or "grill me" in the
     prompt. Merges grill-me's recursive questioning with conductor domain
     awareness (glossary enforcement, code cross-referencing, spec-section
     targeting). New sub-skill: `conductor_newTrack_grill` (persona: Conductor
-    Interrogator).
-
+    Interrogator)
 -   **Discovery mode** extracted to its own sub-skill — the
     `[experimental-discovery]` categorized questioning is now
     `conductor_newTrack_discovery` (persona: Conductor Explorer), keeping the
-    newTrack protocol clean.
-
--   **ADR & Glossary Preflight Interceptor**: When any Conductor command
-    executes against an existing brownfield project that lacks
-    `conductor/adr/*.md` files, execution pauses to perform an automated
-    document sweep, filter trade-offs through the 3-part gate, and backfill
-    historical ADRs before resuming the primary command.
-
--   **Domain Modeling & ADR Integration**:
-    -   **Project Glossary (`terms.md`)**: Semi-mandatory, skippable glossary
-        step in `/conductor_setup`. Auto-populates from codebase scans in
-        Brownfield projects; interviews the developer in Greenfield.
-    -   **Inline ADR Gating**: 3-part gate (hard to reverse × surprising × real
-        trade-off) evaluated per-decision in `/conductor_newTrack`.
-    -   **Immediate ADR Writing**: Confirmed decisions written immediately to
-        `conductor/adr/NNNN-slug.md` using the bundled `adr_template.md`.
-    -   **Verification Bridge**: `plan.md` generation scans ADR `Confirmation`
-        sections and injects their criteria as explicit verification tasks.
-    -   **ADR Compliance Reviews**: `/conductor_review` checks code changes
-        against active ADRs, warning on drift and offering to fix, update the
-        ADR, or record tech debt.
-
--   **MVC rules architecture**: Extracted universal guardrails and Antigravity
-    UX adapter into always-on rule files (`conductor_protocol.md`,
-    `conductor_antigravity.md`). Extended protocols extracted to inert reference
-    files (`conductor_adr_preflight.md`, `conductor_cdd_protocols.md`) loaded
-    on demand by skills.
-
--   **Agent personas**: Each sub-skill defines a named persona (Conductor
-    Architect, Conductor Planner, Conductor Implementer, Principal Software
-    Engineer, Conductor Observer, Conductor Surgeon, Conductor Guide, Conductor
-    Interrogator, Conductor Explorer).
-
--   **`--release_notes` flag** in installer: Shows changes for the installed
-    version from CHANGELOG.md.
+    newTrack protocol clean
 
 ### Changed
 
--   **Token footprint reduction (~68%)**: Always-on protocol rule is compact.
-    Extended protocols extracted to inert reference files loaded on demand by
-    skills. Hub skill eliminated entirely.
--   **Glossary file renamed**: `TERMS.md` → `terms.md` for consistency with
-    all other lowercase conductor artifact filenames.
--   **Templates relocated**: `workflow_template.md` and `adr_template.md` moved
-    from `conductor/templates/` to `conductor_setup/templates/` — the only
-    skill that uses them.
--   **Version stamp relocated**: `.conductor_version` now lives under
-    `conductor_setup/` instead of the removed `conductor/` directory.
--   **Installer**: Installs rules and reference files alongside skills. Removed
-    hub skill installation. Hub skill migration auto-removes old `conductor/`
-    directory during upgrade. Added `ast-grep` optional dependency check.
 -   **`conductor_newTrack` Step 6** refactored to a mode dispatch point —
-    detects grill/discovery/default mode from the user's prompt and delegates
-    to the appropriate sub-skill.
+    detects grill/discovery/default mode from the user's prompt and delegates to
+    the appropriate sub-skill
+-   **Opportunities Selection** in Step 9 no longer references
+    `[experimental-discovery]` inline — triggers on the presence of the `##
+    Opportunities for Consideration` section regardless of mode
+-   **Version bump** 0.4.0 to 0.5.0
 
-## [0.2.2] - 2026-04-10
+## [0.4.0] - 2026-05-20
 
 ### Added
 
--   `/conductor_chat` — Lightweight ceremony-free context mode
+-   **MVC rules architecture** - Extracted universal guardrails, Antigravity UX
+    adapter, and Google3 platform adapter into always-on rule files
+    (`conductor_protocol.md`, `conductor_antigravity.md`, `conductor_google3.md`)
+-   **Agent personas** - Each sub-skill now defines a named persona (Conductor
+    Architect, Conductor Planner, Conductor Implementer, Principal Software
+    Engineer, Conductor Observer, Conductor Surgeon, Conductor Guide)
+-   **CHANGELOG.md** - Formal semantic versioning with release notes
+-   **`_agents/` path detection** in installer - Automatically uses
+    `_agents/skills/` for Google3 workspaces and `.agents/skills/` elsewhere
+-   **`hg status` guard** - Skills check for actual changes before committing
+    (enforced via `conductor_google3.md` rule)
+-   **Dual artifact strategy** - Conductor artifacts written to `conductor/`
+    (VCS) with symlinks in Antigravity artifact directory for interactive review
+-   **Rules installation** in installer - Automatically copies rule files
+    alongside skills
+-   **CHANGELOG extraction** in installer - `--release-notes` flag shows changes
+    for the installed version
+
+### Changed
+
+-   **Hub skill** (`conductor/SKILL.md`) trimmed to lightweight orientation
+    doc - guardrails, interaction conventions, and artifact output conventions
+    moved to rules
+-   **Sub-skills** no longer contain repeated `ask_question` best practices -
+    extracted to `conductor_antigravity.md` rule
+-   **VCS references** in sub-skills are now generic - platform-specific
+    commands injected by rules instead of inline enumeration
+-   **Version bump** 0.3.0 to 0.4.0
+
+### Removed
+
+-   Duplicate `ask_question` best practices blocks from all 7 sub-skills
+-   Inline multi-VCS command enumeration from sub-skill protocols
+-   Redundant guardrails section from hub skill (now in `conductor_protocol.md`)
+
+## [0.3.0] - 2026-04-15
+
+### Added
+
+-   `/conductor_chat` - Lightweight ceremony-free context mode
 -   Enhanced `/conductor_newTrack` discovery pipeline (gap analysis, cross-track
     awareness, devil's advocate)
 -   Individual `ask_question` calls for gap analysis and devil's advocate items
@@ -311,7 +529,7 @@ and this project adheres to
 -   Hub skill expanded with detailed artifact output conventions
 -   Sub-skills updated with per-item structured questioning
 
-## [0.2.1] - 2026-03-01
+## [0.2.0] - 2026-03-01
 
 ### Added
 
