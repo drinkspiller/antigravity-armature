@@ -3,12 +3,12 @@
 # Armature Plugin Installer
 # Installs Armature as a unified plugin for Antigravity, Gemini CLI, Claude Code, and Windsurf.
 #
-# Usage (from any google3 root):
-#   bash experimental/users/skyebot/antigravity_armature/install.sh
-#   bash experimental/users/skyebot/antigravity_armature/install.sh --dry_run
-#   bash experimental/users/skyebot/antigravity_armature/install.sh --force
-#   bash experimental/users/skyebot/antigravity_armature/install.sh --uninstall
-#   bash experimental/users/skyebot/antigravity_armature/install.sh --update
+# Usage:
+#   bash install.sh
+#   bash install.sh --dry_run
+#   bash install.sh --force
+#   bash install.sh --uninstall
+#   bash install.sh --update
 #
 # Target location:
 #   ~/.gemini/config/plugins/antigravity-armature/
@@ -29,12 +29,11 @@
 #     └── rules/
 #         ├── armature_protocol.md
 #         ├── armature_antigravity.md
-#         ├── armature_google3.md
 #         ├── armature_adr_preflight.md
 #         └── armature_cdd_protocols.md
 # =============================================================================
 
-# --- gbash with fallback for non-google3 environments ---
+# --- gbash with fallback ---
 if [[ -f /google/bin/releases/gbashr/gbash.sh ]]; then
   source /google/bin/releases/gbashr/gbash.sh
 else
@@ -128,7 +127,7 @@ SOURCE_ASSETS_DIR="${SCRIPT_DIR}/skills/arm-setup/assets"
 SUB_SKILL_NAMES=(arm-setup arm-new-track arm-implement arm-status arm-review arm-revert arm-drift arm-chat)
 # Rules files (always-on rule files for MVC architecture)
 SOURCE_RULES_DIR="${SCRIPT_DIR}/rules"
-RULE_FILE_NAMES=(armature_protocol.md armature_antigravity.md armature_google3.md)
+RULE_FILE_NAMES=(armature_protocol.md armature_antigravity.md)
 # Reference files (inert protocol extensions loaded on demand by skills)
 REFERENCE_FILE_NAMES=(armature_adr_preflight.md armature_cdd_protocols.md)
 # CHANGELOG for release notes extraction

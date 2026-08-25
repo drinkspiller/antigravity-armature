@@ -30,7 +30,7 @@
     "context_files": {
       "armature/product.md": "# Product Overview\n\nHigh-reliability backend services and client web components for enterprise communications.",
       "armature/tech-stack.md": "# Tech Stack\n\n- Backend: Go / gRPC\n- Frontend: TypeScript / React\n- Storage: Distributed Spanner / SQL",
-      "armature/terms.md": "# Ubiquitous Language & Symbol Registry\n\n- `UserController`: Legacy HTTP/REST endpoint handler for user profile and settings.\n- `UserService`: Target gRPC gRPC service definition for user management.\n- `UserProfile`: Core protobuf entity representing user credentials and preferences."
+      "armature/terms.md": "# Ubiquitous Language & Symbol Registry\n\n- `UserController`: Legacy HTTP/REST endpoint handler for user profile and settings.\n- `UserService`: Target gRPC service definition for user management.\n- `UserProfile`: Core protobuf entity representing user credentials and preferences."
     }
   },
   "openspec": {

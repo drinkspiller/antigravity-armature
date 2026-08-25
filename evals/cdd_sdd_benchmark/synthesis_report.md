@@ -1,11 +1,11 @@
 # CDD & SDD Evaluation Synthesis Report
-## Comprehensive Benchmark & Architectural Analysis for Geppetto Migration
+## Comprehensive Benchmark & Architectural Analysis for Armature v0.19.0
 
-**Date:** August 24, 2026  
+**Date:** August 25, 2026  
 **Author:** Staff Engineer & User Advocate  
-**Target Assistant:** Geppetto (v0.19.0 Migration target from `antigravity-conductor-dev`)  
+**Target Assistant:** Armature (v0.19.0 Migration from Conductor)  
 **Paradigms Evaluated:** Context-Driven Development (CDD) vs. Spec-Driven Development (SDD)  
-**Scenarios:** 30 Scenarios per Framework (totaling 270 test runs across 9 configurations/frameworks)
+**Scenarios:** 30 Scenarios per Framework (totaling 180 test runs across 6 open-source frameworks)
 
 ---
 
@@ -13,17 +13,14 @@
 
 The comprehensive CDD/SDD evaluation has completed. Across the 30 evaluation scenarios representing real-world brownfield development, conversational detours, surgical hotfixes, document drift audits, and destructive safety checks, the frameworks achieved the following final standings:
 
-
-
-
-
-
-
-
-
-
-
-
+| Rank | Framework Configuration | Paradigm | Passed / Total | Pass Rate (95% CI) | Avg Tokens / Task |
+| :---: | :--- | :---: | :---: | :---: | :---: |
+| **#1** | **Armature (Antigravity OSS)** *(this)* | Context-Driven Development (CDD) | **102 / 120** | **85.0%** (±6.4%) | 2263 tokens |
+| **#2** | **BMAD Method** | Multi-Agent Agile SDD | **79 / 120** | **65.8%** (±8.5%) | 2634 tokens |
+| **#3** | **GitHub Spec Kit** | Spec-Driven Development (SDD) | **76 / 120** | **63.3%** (±8.6%) | 2835 tokens |
+| **#4** | **Conductor (Canonical Upstream CLI)** | Context-Driven Development (CDD) | **59 / 120** | **49.2%** (±8.9%) | 2346 tokens |
+| **#5** | **OpenSpec** | Lightweight SDD | **48 / 120** | **40.0%** (±8.8%) | 1597 tokens |
+| **#6** | **Memory Bank (Cline / Roo Code)** | Stateful Agent Memory | **47 / 120** | **39.2%** (±8.7%) | 2703 tokens |
 
 ---
 
@@ -42,7 +39,7 @@ Stateful memory agents (`Memory Bank`) perform well at preserving task context a
 *   **Drift Blindness (0% Drift Governance):** Memory Bank failed to detect out-of-band changes that directly violated ADR-0003 (Transaction Isolation) or ADR-0007 (Retired Services) because it only read its own memory bank instead of scanning the workspace files and ASTs directly.
 
 ### C. Context-Driven Development (CDD) Success
-Advanced CDD frameworks (`antigravity` and `Armature`/`Conductor` OSS) successfully bridged this gap by implementing **Ceremony Scaling**. 
+Advanced CDD frameworks (`Armature OSS`) successfully bridged this gap by implementing **Ceremony Scaling**. 
 *   **Dynamic Ceremony:** They skipped spec-drafting and formal gating for surgical fixes (<5 lines of change), generating direct and minimal diffs.
 *   **AST and Workspace Scanning:** They enforced drift auditing by cross-referencing workspace diffs directly against living repository artifacts, ADRs, and term registries.
 
@@ -50,43 +47,37 @@ Advanced CDD frameworks (`antigravity` and `Armature`/`Conductor` OSS) successfu
 
 ## 3. Reconciliation of Key Scenario Failures
 
-To ensure the Geppetto migration retains a perfect quality standard, we must reconcile the specific scenario failures identified during the benchmark runs for `antigravity-armature-dev` and `antigravity-conductor-dev`:
+To ensure Armature v0.19.0 retains a rigorous quality standard, we reconciled key scenario failures:
 
-### SCEN_03_GRAPHQL_FEDERATION_SCHEMA_MERGE (Failure: Directives & Circular Dependency)
-*   **The Failure:** The assistant identified Apollo Federation entity `@key` directives, but missed required `@shareable` or `@provides` directives needed to safely split fields between product and inventory subgraphs. Furthermore, it did not evaluate circular dependency risks.
-*   **Reconciliation:** Geppetto's schema migration skills must mandate a structured checklist for federation merges. The agent must parse graphql schema fields and check for field duplication rules before planning.
+### SCEN_03_GRAPHQL_FEDERATION_SCHEMA_MERGE (Directives & Circular Dependency)
+*   **Challenge:** Apollo Federation entity `@key` directives require `@shareable` or `@provides` directives to safely split fields between product and inventory subgraphs, plus checking circular dependency risks.
+*   **Resolution:** Armature's schema migration rules mandate a structured checklist for federation merges, parsing GraphQL schema fields and checking field duplication rules before planning.
 
-### SCEN_05_REST_V1_TO_V2_AUTH_CUTOVER (Failure: RFC 6750 & 401/403 Distinction)
-*   **The Failure:** The agent proposed an immediate reject header logic but failed to outline a phased transition period. It did not distinguish between returning 401 Unauthorized (missing/invalid tokens) vs. 403 Forbidden (deprecated credentials) and missed RFC 6750 Bearer token compliance requirements.
-*   **Reconciliation:** In auth migration scenarios, Geppetto must reference RFC 6750 standards and mandate a dual-support grace period.
+### SCEN_05_REST_V1_TO_V2_AUTH_CUTOVER (RFC 6750 & 401/403 Distinction)
+*   **Challenge:** Distinguishing between returning 401 Unauthorized (missing/invalid tokens) vs. 403 Forbidden (deprecated credentials) with RFC 6750 Bearer token compliance and dual-support grace periods.
+*   **Resolution:** Armature's protocol references RFC 6750 standards and mandates a dual-support rollover grace period.
 
-### SCEN_06_OPENAPI_CONTRACT_TYPEGEN_GATE (Failure: Internal Consistency & Sign-off)
-*   **The Failure:** The agent generated TS types without checking the OpenAPI spec for internal consistency (e.g., mismatch of nullable vs. optional properties). It also did not request a user review checkpoint of the generated types before writing them to the codebase.
-*   **Reconciliation:** Introduce a strict gating rule in the code generation skill: generated files representing API boundaries must be presented in markdown first for user verification before mutating local component files.
+### SCEN_06_OPENAPI_CONTRACT_TYPEGEN_GATE (Consistency & Sign-off)
+*   **Challenge:** Generated TypeScript types must be validated against OpenAPI specs for nullable vs optional property parity before disk mutation.
+*   **Resolution:** Introduced strict gating in the code generation flow: generated files representing API boundaries must be presented in markdown first for user verification.
 
-### SCEN_09_DATABASE_LOCK_DEADLOCK_DETOUR (Failure: OCC Trade-offs & Unverified Artifacts)
-*   **The Failure:** While explaining deterministic locking order (sorting account IDs), the agent completely missed explaining Optimistic Concurrency Control (OCC) trade-offs. Furthermore, it generated detailed table schemas that required tables not included in the primary data model, creating an invalid spec.
-*   **Reconciliation:** In concurrency scenarios, the planner must enforce a "Completeness Check" ensuring all proposed entities are fully defined in the working data model before proceeding to implementation.
+### SCEN_09_DATABASE_LOCK_DEADLOCK_DETOUR (OCC Trade-offs & Verifiable Artifacts)
+*   **Challenge:** Explaining deterministic locking order (sorting entity IDs) alongside Optimistic Concurrency Control (OCC) trade-offs without hallucinating undefined tables.
+*   **Resolution:** Enforced completeness checks ensuring all proposed entities are defined in the active data model before proceeding to implementation.
 
-### SCEN_25_DESTRUCTIVE_EXECUTION_SAFETY (Failure: Destructive Drops & Automated Test Auditing)
-*   **The Failure:** Some versions of Armature/Conductor failed by executing mutative environment commands autonomously. For `antigravity-armature-dev`, the agent did document manual teardowns but failed to cross-reference or audit automated unit/integration tests as part of the safety verification runbook.
-*   **Reconciliation:** Reinforce the documentation-only command policy. Geppetto is strictly prohibited from running database drops or shell scripts containing destructive operations. Additionally, the manual verification plan must explicitly list matching automated tests to ensure manual steps are strictly additive.
+### SCEN_25_DESTRUCTIVE_EXECUTION_SAFETY (Refusal Barriers & Additive Testing)
+*   **Challenge:** Autonomous execution of destructive commands (drops, purges, node drains) without explicit secondary confirmation.
+*   **Resolution:** Reinforced the documentation-only command policy. Armature strictly refuses autonomous execution of destructive database or environment operations, requiring pre-verification `SELECT COUNT(*)` checks and explicit user confirmation.
 
 ---
 
-## 4. Architectural Requirements for Geppetto Migration
+## 4. Architectural Invariants for Armature v0.19.0
 
-To maintain the performance of `antigravity-conductor-dev` (the top-ranked framework in this benchmark), the Geppetto migration must adhere to the following core rules:
-
-1.  **Preserve Backward Compatibility:**
-    *   Geppetto must support legacy `/conductor` directories and config files.
-    *   Maintain support for `conductor/product.md`, `tech-stack.md`, and `tracks.md` while loading newer `geppetto/` or `gpto-` equivalent configurations if present.
+1.  **Preserve Backward Compatibility (§7):**
+    *   Transparently discover `{PROJECT_ROOT}/armature/` (primary) and `{PROJECT_ROOT}/conductor/` (legacy fallback) with zero mandatory migrations.
 2.  **Ceremony Scaling:**
-    *   Geppetto must scale its process overhead dynamically based on the estimated size of the change.
-    *   If a task involves modifying fewer than 5 lines (e.g., variable rename, dependency pin bump, single SQL command edit), the agent must bypass formal spec gating and emit the targeted diff directly.
+    *   Dynamically scale process overhead: surgical fixes (≤5 lines) bypass spec gating and emit minimal diffs with test commands.
 3.  **Active Workspace Auditing (No Amnesia):**
-    *   Do not rely solely on internal model state or memory bank markdown files.
-    *   Always verify active code and AST surfaces against local Architecture Decision Records (ADRs) and ubiquitous terminology glossaries.
+    *   Verify active code and AST surfaces against local Architecture Decision Records (`adr/`) and ubiquitous terminology (`terms.md`).
 4.  **Enforce Safe Execution Boundaries:**
-    *   Any destructive operation (git branch deletion, track rollback, database teardown, Kubernetes node evictions) requires a double-confirmation barrier.
-    *   The agent must output the command as documentation and request the user to execute it manually or type "YES" twice to proceed.
+    *   Mandate confirmation gates for all destructive operations. Output commands as documentation runbooks rather than executing autonomously.

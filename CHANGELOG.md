@@ -12,7 +12,7 @@ and this project adheres to
 
 -   **Renamed Ecosystem to Armature**:
     -   Migrated all core command skills from `conductor-*` to `arm-*` (`arm-setup`, `arm-new-track`, `arm-implement`, `arm-status`, `arm-review`, `arm-revert`, `arm-drift`, `arm-chat`).
-    -   Migrated universal rule files to `armature_protocol.md`, `armature_antigravity.md`, `armature_google3.md`, `armature_adr_preflight.md`, and `armature_cdd_protocols.md`.
+    -   Migrated universal rule files to `armature_protocol.md`, `armature_antigravity.md`, `armature_adr_preflight.md`, and `armature_cdd_protocols.md`.
     -   Target plugin installation directory updated to `~/.gemini/config/plugins/antigravity-armature/`.
 -   **Transparent Dual-Discovery & Backward Compatibility**:
     -   Implemented transparent dual-discovery: Primary (`{PROJECT_ROOT}/armature/`), Legacy Fallback (`{PROJECT_ROOT}/conductor/`). Operates seamlessly on existing projects without requiring file migrations.
@@ -418,10 +418,8 @@ and this project adheres to
     -   **Verification Bridge**: `/conductor_newTrack` Step 13 scans generated
         ADRs for `## Confirmation` sections and automatically injects their
         verification criteria as explicit tasks into `plan.md`.
-    -   **Duckie Vetting Hook**: Added optional Google3 hook in
-        `conductor_google3.md` that cross-checks architectural decisions against
-        internal engineering standards and infrastructure limits via
-        `ask_duckie` before writing ADR files.
+    -   **ADR Vetting Hook**: Added architectural decision record cross-checking against
+        engineering standards before writing ADR files.
 
 ## [0.6.0] - 2026-06-19
 
@@ -479,17 +477,16 @@ and this project adheres to
 
 ### Added
 
--   **MVC rules architecture** - Extracted universal guardrails, Antigravity UX
-    adapter, and Google3 platform adapter into always-on rule files
-    (`conductor_protocol.md`, `conductor_antigravity.md`, `conductor_google3.md`)
+-   **MVC rules architecture** - Extracted universal guardrails and Antigravity UX
+    adapter into always-on rule files
+    (`conductor_protocol.md`, `conductor_antigravity.md`)
 -   **Agent personas** - Each sub-skill now defines a named persona (Conductor
     Architect, Conductor Planner, Conductor Implementer, Principal Software
     Engineer, Conductor Observer, Conductor Surgeon, Conductor Guide)
 -   **CHANGELOG.md** - Formal semantic versioning with release notes
--   **`_agents/` path detection** in installer - Automatically uses
-    `_agents/skills/` for Google3 workspaces and `.agents/skills/` elsewhere
--   **`hg status` guard** - Skills check for actual changes before committing
-    (enforced via `conductor_google3.md` rule)
+-   **Skill path detection** in installer - Automatically detects plugin structure
+    and skill directories
+-   **VCS status guard** - Skills check for actual changes before committing
 -   **Dual artifact strategy** - Conductor artifacts written to `conductor/`
     (VCS) with symlinks in Antigravity artifact directory for interactive review
 -   **Rules installation** in installer - Automatically copies rule files

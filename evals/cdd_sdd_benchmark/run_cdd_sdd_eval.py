@@ -865,7 +865,7 @@ def generate_markdown_report(
         weakness = score_data.get("primary_weakness", "-")
         display_fw_name = fw_name
         if (
-            any(k in fw_name.lower() for k in ["antigravity", "google3"])
+            any(k in fw_name.lower() for k in ["armature_oss", "antigravity"])
             and "(this)" not in display_fw_name
         ):
           display_fw_name += " (this)"

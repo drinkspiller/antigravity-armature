@@ -12,7 +12,7 @@ task-specific logic.
 ## 0. Armature Project Directory (Dual-Root Support)
 
 The project context directory lives at `{PROJECT_ROOT}/armature/` (or legacy `{PROJECT_ROOT}/conductor/`) — the root of the
-user's project repository (NOT the Antigravity brain/artifacts directory). All
+user's project repository (NOT the Jetski brain/artifacts directory). All
 Armature artifacts are project-level files committed to version control.
 
 ```
@@ -66,7 +66,7 @@ Before executing ANY Armature command, resolve `{PROJECT_CONTEXT_DIR}` (either `
     proceeding (see `armature_cdd_protocols.md` §9).
 
 Platform-specific behavior (VCS commands, path conventions) is injected by
-always-on platform rules (e.g., `armature_google3.md`). Do not hardcode VCS
+always-on platform rules (e.g., `armature_antigravity.md`). Do not hardcode VCS
 commands in skill protocols.
 
 ## 1. Core Operational Guardrails
@@ -118,7 +118,7 @@ code change, or workflow transition:
 Whenever an Armature command produces structured output requiring user review -
 clarifying questions, reports, summaries, specs, plans, or confirmation prompts:
 
-1.  **Write as a Antigravity artifact** using `write_to_file`
+1.  **Write as a Jetski artifact** using `write_to_file`
 2.  **Present via `notify_user`** with `PathsToReview` pointing to the file
 3.  **Use appropriate ArtifactType**: `walkthrough` for reports/status,
     `implementation_plan` for specs/plans, `other` for questions/prompts
@@ -130,8 +130,8 @@ Artifact filenames follow: `arm_<command>_<context>.md`
 ## 4. VCS Operations
 
 Armature skills are VCS-agnostic by default. Platform-specific VCS behavior
-(Git, Git/Mercurial, g4/Git) is injected by platform rules (e.g.,
-`armature_google3.md`). When no platform rule overrides VCS behavior, default
+(Git) is injected by platform rules (e.g.,
+`armature_antigravity.md`). When no platform rule overrides VCS behavior, default
 to Git:
 
 -   `git status` to check for changes
@@ -178,10 +178,11 @@ first. Do NOT create empty commits.
     not modernize adjacent error comparisons, reformat error strings, or rename
     unrelated variables), and provide the exact test verification command in ≤1000
     tokens (do not exceed token boundaries).
--   **Proto schema evolution & GraphQL federation probing** — During Step 5 Inquiry
-    Depth Traversal (Failure Modes, Boundary Gaps, and Devil's Advocate) on
-    protocol, GraphQL federation, or protobuf migrations, explicitly analyze and
-    challenge schema directives (`@key`, `@shareable`, `@provides`), field
+-   **Proto schema evolution & GraphQL federation probing** — During Step 5
+    Decision-Tree Traversal & Ambiguity Resolution (Grill Engine: exploring
+    dependent failure modes, boundary edge cases, and adversarial challenges)
+    on protocol, GraphQL federation, or protobuf migrations, explicitly analyze
+    and challenge schema directives (`@key`, `@shareable`, `@provides`), field
     deprecation paths, gateway circular dependencies, and service downtime
     mitigation, as well as proto3 default zero-values vs unset fields in partial
     updates, wire-format breaks, and FieldMask requirements before generating plans.

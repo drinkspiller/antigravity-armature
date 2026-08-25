@@ -115,17 +115,17 @@ Armature installs as a unified plugin under `~/.gemini/config/plugins/antigravit
 ## Installation
 
 ```bash
-# From the google3 root of any workspace
-bash experimental/users/skyebot/antigravity_armature/install.sh
+# From the repository root
+bash install.sh
 
 # Preview what will happen (no files written)
-bash experimental/users/skyebot/antigravity_armature/install.sh --dry_run
+bash install.sh --dry_run
 
 # Overwrite without creating backups
-bash experimental/users/skyebot/antigravity_armature/install.sh --force
+bash install.sh --force
 
 # Update to latest version
-bash experimental/users/skyebot/antigravity_armature/install.sh --update
+bash install.sh --update
 ```
 
 ## Uninstall

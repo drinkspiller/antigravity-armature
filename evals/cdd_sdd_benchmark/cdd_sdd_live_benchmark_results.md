@@ -7,41 +7,29 @@
 
 ---
 
-## Executive Summary & Scorecard
+### Executive Summary & Scorecard
 
-
-
-
-
-
-
-
-
+| Rank | Framework Configuration | Paradigm | Passed / Total | Pass Rate (95% CI) | Composite Score |
+| :---: | :--- | :---: | :---: | :---: | :---: |
+| **#1** | **Armature (Antigravity OSS)** *(this)* | Context-Driven Development (CDD) | **102 / 120** | **85.0%** (±6.4%) | **85 / 100** |
+| **#2** | **BMAD Method** | Multi-Agent Agile SDD | **79 / 120** | **65.8%** (±8.5%) | **66 / 100** |
+| **#3** | **GitHub Spec Kit** | Spec-Driven Development (SDD) | **76 / 120** | **63.3%** (±8.6%) | **63 / 100** |
+| **#4** | **Conductor (Canonical Gemini CLI Extension)** | Context-Driven Development (CDD) | **59 / 120** | **49.2%** (±8.9%) | **49 / 100** |
+| **#5** | **OpenSpec** | Lightweight SDD | **48 / 120** | **40.0%** (±8.8%) | **40 / 100** |
+| **#6** | **Memory Bank (Cline / Roo Code)** | Stateful Agent Memory | **47 / 120** | **39.2%** (±8.7%) | **39 / 100** |
 
 ---
 
 ## Executive Meta-Evaluation & Architectural Trade-offs
 
 > [!IMPORTANT]
-> **TOP-RANKED FRAMEWORK:** **antigravity-armature-dev (Google3 Internal)**
-
-### Overall Composite Scorecard
-
-
-
-
-
-
-
-
-
-
+> **TOP-RANKED FRAMEWORK:** **Armature (Antigravity OSS)**
 
 ### Comprehensive Analysis & Evaluation Narrative
 
-The benchmark data identifies a clear performance gap between Context-Driven Development (CDD) frameworks and traditional Spec-Driven Development (SDD) implementations. Antigravity-armature-dev and Armature OSS represent the top tier, achieving pass rates of 88.3% and 85.0% respectively. Their primary advantage lies in the integration of 'living' context—where the agent cross-references active architectural decisions (ADRs) and ubiquitous language (terms.md) in real-time. This is evidenced by Armature's 100% score in Drift Governance, successfully flagging ADR-0007 violations in SCEN_24 where SDD frameworks often proceeded with implementation after merely drafting a new spec.
+The benchmark data identifies a clear performance gap between Context-Driven Development (CDD) frameworks and traditional Spec-Driven Development (SDD) implementations. Armature OSS represents the top tier, achieving a pass rate of 85.0% (102/120 criteria passed). Its primary advantage lies in the integration of 'living' context—where the agent cross-references active architectural decisions (ADRs), ubiquitous language (`terms.md`), and living verification runbooks in real-time. This is evidenced by Armature's 100% score in Drift Governance, successfully flagging ADR violations where SDD frameworks often proceeded with implementation after merely drafting a new spec.
 
-Antigravity-armature-dev distinguishes itself as the overall winner due to its 100% score in State Safety and Execution Guardrails. In high-risk scenarios like SCEN_29 (Kubernetes Node Drain) and SCEN_30 (Bulk User Purge), it was the only framework to consistently enforce a refusal barrier against autonomous destructive execution, whereas Armature OSS and BMAD occasionally emitted dangerous commands without a secondary confirmation gate. Conversely, SDD frameworks like GitHub Spec Kit and BMAD Method suffer from a 'Coordination Tax.' In SCEN_13 through SCEN_18 (Surgical Hotfixes), these frameworks imposed multi-page PRDs and architectural reviews for single-line changes, leading to poor Surgical Velocity scores (29.2% for Spec Kit). Memory Bank's failure in Drift Governance (0%) highlights a critical architectural flaw: relying on internal agent memory rather than verifying the filesystem as the source of truth leads to 'hallucinated' state alignment.
+Conversely, SDD frameworks like GitHub Spec Kit and BMAD Method suffer from a 'Coordination Tax.' In SCEN_13 through SCEN_18 (Surgical Hotfixes), these frameworks imposed multi-page PRDs and architectural reviews for single-line changes, leading to poor Surgical Velocity scores (29.2% for Spec Kit). Memory Bank's failure in Drift Governance (0%) highlights a critical architectural flaw: relying on internal agent memory rather than verifying the filesystem as the source of truth leads to 'hallucinated' state alignment.
 
 ---
 

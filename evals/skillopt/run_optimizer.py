@@ -28,8 +28,8 @@ import time
 import urllib.error
 import urllib.request
 
-TARGET_MODEL = "gemini-3-flash-preview"
-OPTIMIZER_MODEL = "gemini-pro-latest"
+TARGET_MODEL = "gemini-3.5-flash"
+OPTIMIZER_MODEL = "gemini-3.1-pro-preview"
 API_KEY = os.environ.get("GEMINI_API_KEY")
 
 EVALS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -422,7 +422,7 @@ def main():
 
   print("=== Armature SkillOpt Evaluation Runner ===", flush=True)
   print(f"Target: {target_path}")
-  print(f"Target Model: {TARGET_MODEL} 
+  print(f"Target Model: {TARGET_MODEL} | Optimizer Model: {OPTIMIZER_MODEL}")
 
   train_tasks = load_tasks(TRAIN_PATH, args.target)
   val_tasks = load_tasks(VAL_PATH, args.target)
