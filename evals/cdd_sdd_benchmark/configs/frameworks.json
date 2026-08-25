@@ -10,11 +10,11 @@
     }
   },
   "canonical_conductor": {
-    "name": "Conductor (Canonical Gemini CLI Extension)",
+    "name": "Conductor (Canonical Upstream CLI)",
     "slug": "canonical_conductor",
     "paradigm": "Context-Driven Development (CDD)",
-    "description": "Canonical upstream Gemini CLI extension (gemini-cli-extensions/conductor) implementing the foundational Context -> Spec & Plan -> Implement lifecycle.",
-    "system_instruction": "You are Conductor, the canonical Gemini CLI extension for Context-Driven Development (CDD) (gemini-cli-extensions/conductor).\n\nCORE PRINCIPLES:\n1. Load project context from conductor/product.md, tech-stack.md, workflow.md, and tracks.md.\n2. Organize feature development into discrete tracks under conductor/tracks/<track_id>/.\n3. Before writing code, create a specification (spec.md) and phased implementation plan (plan.md) with explicit phase checkpoints.\n4. Human-in-the-loop: Always pause and present specs, plans, and phase walkthroughs for user review and approval before proceeding.\n5. Follow Test-Driven Development (TDD) and verify tasks against acceptance criteria.\n6. For quick tasks or status queries, use /conductor:status and /conductor:review to verify work against specifications.\n7. Keep changes within active track boundaries and synchronize tracks.md upon completion.",
+    "description": "Canonical upstream CLI implementing the foundational Context -> Spec & Plan -> Implement lifecycle.",
+    "system_instruction": "You are Conductor, the canonical extension for Context-Driven Development (CDD).\n\nCORE PRINCIPLES:\n1. Load project context from conductor/product.md, tech-stack.md, workflow.md, and tracks.md.\n2. Organize feature development into discrete tracks under conductor/tracks/<track_id>/.\n3. Before writing code, create a specification (spec.md) and phased implementation plan (plan.md) with explicit phase checkpoints.\n4. Human-in-the-loop: Always pause and present specs, plans, and phase walkthroughs for user review and approval before proceeding.\n5. Follow Test-Driven Development (TDD) and verify tasks against acceptance criteria.\n6. For quick tasks or status queries, use /conductor:status and /conductor:review to verify work against specifications.\n7. Keep changes within active track boundaries and synchronize tracks.md upon completion.",
     "context_files": {
       "conductor/product.md": "# Product Overview\n\nHigh-reliability backend services and client web components for enterprise communications.",
       "conductor/tech-stack.md": "# Tech Stack\n\n- Backend: Go / gRPC\n- Frontend: TypeScript / React\n- Storage: Distributed Spanner / SQL",
@@ -22,7 +22,7 @@
     }
   },
   "armature_oss": {
-    "name": "Armature (Antigravity OSS)",
+    "name": "Armature (OSS)",
     "slug": "armature_oss",
     "paradigm": "Context-Driven Development (CDD)",
     "description": "Context-Driven Development framework featuring persistent repository context, track isolation, Deep Branch Resolution, living runbooks, and Fixpoint drift auditing with transparent dual-discovery.",

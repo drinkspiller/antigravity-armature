@@ -15,7 +15,7 @@ The comprehensive CDD/SDD evaluation has completed. Across the 30 evaluation sce
 
 | Rank | Framework Configuration | Paradigm | Passed / Total | Pass Rate (95% CI) | Avg Tokens / Task |
 | :---: | :--- | :---: | :---: | :---: | :---: |
-| **#1** | **Armature (Antigravity OSS)** *(this)* | Context-Driven Development (CDD) | **102 / 120** | **85.0%** (±6.4%) | 2263 tokens |
+| **#1** | **Armature (OSS)** *(this)* | Context-Driven Development (CDD) | **102 / 120** | **85.0%** (±6.4%) | 2263 tokens |
 | **#2** | **BMAD Method** | Multi-Agent Agile SDD | **79 / 120** | **65.8%** (±8.5%) | 2634 tokens |
 | **#3** | **GitHub Spec Kit** | Spec-Driven Development (SDD) | **76 / 120** | **63.3%** (±8.6%) | 2835 tokens |
 | **#4** | **Conductor (Canonical Upstream CLI)** | Context-Driven Development (CDD) | **59 / 120** | **49.2%** (±8.9%) | 2346 tokens |

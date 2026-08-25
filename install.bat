@@ -1,10 +1,10 @@
 @echo off
 setlocal EnableDelayedExpansion
 :: =============================================================================
-:: Antigravity Conductor Skills & Rules Installer (Windows)
+:: Armature (OSS) Skills & Rules Installer (Windows)
 :: =============================================================================
 
-set "VERSION=0.18.2"
+set "VERSION=0.19.0"
 set "FLAGS_dry_run=0"
 set "FLAGS_force=0"
 set "FLAGS_uninstall=0"
@@ -36,24 +36,25 @@ exit /b 0
 set "SCRIPT_DIR=%~dp0"
 if "%SCRIPT_DIR:~-1%"=="\" set "SCRIPT_DIR=%SCRIPT_DIR:~0,-1%"
 
-set "SOURCE_ASSETS_DIR=%SCRIPT_DIR%\skills\conductor-setup\assets"
+set "SOURCE_ASSETS_DIR=%SCRIPT_DIR%\skills\arm-setup\assets"
 set "SOURCE_RULES_DIR=%SCRIPT_DIR%\rules"
 
-set "TARGET_SKILLS_ROOT=%USERPROFILE%\.gemini\antigravity\skills"
-set "TARGET_RULES_ROOT=%USERPROFILE%\.gemini\antigravity\rules"
-set "TARGET_ASSETS_DIR=%TARGET_SKILLS_ROOT%\conductor-setup\assets"
-set "TARGET_MANIFEST_ROOT=%USERPROFILE%\.gemini\antigravity"
+set "TARGET_PLUGIN_DIR=%USERPROFILE%\.gemini\config\plugins\antigravity-armature"
+set "TARGET_SKILLS_ROOT=%TARGET_PLUGIN_DIR%\skills"
+set "TARGET_RULES_ROOT=%TARGET_PLUGIN_DIR%\rules"
+set "TARGET_ASSETS_DIR=%TARGET_SKILLS_ROOT%\arm-setup\assets"
+set "TARGET_MANIFEST_ROOT=%TARGET_PLUGIN_DIR%"
 
 echo.
 echo   ==================================================
-echo     Antigravity Conductor Installer (Windows) v%VERSION%
+echo     Armature (OSS) Installer (Windows) v%VERSION%
 echo   ==================================================
 echo.
 
 if "%FLAGS_update%"=="1" (
     set "FLAGS_force=1"
-    if exist "%TARGET_SKILLS_ROOT%\conductor-setup\.conductor_version" (
-        set /p INSTALLED_VERSION= < "%TARGET_SKILLS_ROOT%\conductor-setup\.conductor_version"
+    if exist "%TARGET_SKILLS_ROOT%\arm-setup\.armature_version" (
+        set /p INSTALLED_VERSION= < "%TARGET_SKILLS_ROOT%\arm-setup\.armature_version"
         if "!INSTALLED_VERSION!"=="%VERSION%" (
             echo Already up to date (v%VERSION%^)
             exit /b 0
@@ -69,90 +70,82 @@ if "%FLAGS_uninstall%"=="1" goto :do_uninstall
 
 :: Validate sources
 if not exist "%SOURCE_ASSETS_DIR%\workflow_template.md" ( echo [ERROR] Missing %SOURCE_ASSETS_DIR%\workflow_template.md & exit /b 1 )
+if not exist "%SOURCE_ASSETS_DIR%\adr_template.md" ( echo [ERROR] Missing %SOURCE_ASSETS_DIR%\adr_template.md & exit /b 1 )
 if not exist "%SOURCE_ASSETS_DIR%\manual_testing_template.md" ( echo [ERROR] Missing %SOURCE_ASSETS_DIR%\manual_testing_template.md & exit /b 1 )
-for %%S in (conductor-setup conductor-new-track conductor-implement conductor-status conductor-review conductor-revert conductor-chat) do (
+for %%S in (arm-setup arm-new-track arm-implement arm-status arm-review arm-revert arm-drift arm-chat) do (
     if not exist "%SCRIPT_DIR%\skills\%%S\SKILL.md" ( echo [ERROR] Missing %SCRIPT_DIR%\skills\%%S\SKILL.md & exit /b 1 )
 )
 
 if "%FLAGS_dry_run%"=="1" echo   [DRY RUN MODE - no files will be written]
 
-:: Cleanup deprecated sub-skills
-for %%O in (conductor_setup conductor_newTrack conductor_newTrack_grill conductor_newTrack_discovery conductor_implement conductor_status conductor_review conductor_revert conductor_chat conductor) do (
-    if exist "%TARGET_SKILLS_ROOT%\%%O" (
+:: Cleanup deprecated sub-skills & legacy conductor plugin directories
+for %%O in (conductor-setup conductor-new-track conductor-implement conductor-status conductor-review conductor-revert conductor-drift conductor-chat conductor) do (
+    if exist "%USERPROFILE%\.gemini\antigravity\skills\%%O" (
         if "%FLAGS_dry_run%"=="1" (
-            echo Would remove deprecated directory: %TARGET_SKILLS_ROOT%\%%O
+            echo Would remove legacy directory: %USERPROFILE%\.gemini\antigravity\skills\%%O
         ) else (
-            rmdir /s /q "%TARGET_SKILLS_ROOT%\%%O"
-            echo Removed deprecated directory: %TARGET_SKILLS_ROOT%\%%O
+            rmdir /s /q "%USERPROFILE%\.gemini\antigravity\skills\%%O"
+            echo Removed legacy directory: %USERPROFILE%\.gemini\antigravity\skills\%%O
         )
     )
 )
 
 :: Assets
 echo.
-echo --- Installing Conductor Assets ---
+echo --- Installing Armature Assets ---
 call :install_file "%SOURCE_ASSETS_DIR%\workflow_template.md" "%TARGET_ASSETS_DIR%\workflow_template.md"
 call :install_file "%SOURCE_ASSETS_DIR%\adr_template.md" "%TARGET_ASSETS_DIR%\adr_template.md"
 call :install_file "%SOURCE_ASSETS_DIR%\manual_testing_template.md" "%TARGET_ASSETS_DIR%\manual_testing_template.md"
 
 :: Version Stamp
 if "%FLAGS_dry_run%"=="1" (
-    echo Would write version file: .conductor_version
+    echo Would write version file: .armature_version
 ) else (
-    if not exist "%TARGET_SKILLS_ROOT%\conductor-setup" mkdir "%TARGET_SKILLS_ROOT%\conductor-setup"
-    echo %VERSION%> "%TARGET_SKILLS_ROOT%\conductor-setup\.conductor_version"
+    if not exist "%TARGET_SKILLS_ROOT%\arm-setup" mkdir "%TARGET_SKILLS_ROOT%\arm-setup"
+    echo %VERSION%> "%TARGET_SKILLS_ROOT%\arm-setup\.armature_version"
+    echo %VERSION%> "%TARGET_PLUGIN_DIR%\.armature_version"
     echo Wrote version stamp: v%VERSION%
 )
 
 :: Manifests
 echo.
-echo --- Installing Conductor Plugin Manifests ---
+echo --- Installing Armature Plugin Manifests ---
 if exist "%SCRIPT_DIR%\plugin.json" call :install_file "%SCRIPT_DIR%\plugin.json" "%TARGET_MANIFEST_ROOT%\plugin.json"
+if exist "%SCRIPT_DIR%\README.md" call :install_file "%SCRIPT_DIR%\README.md" "%TARGET_MANIFEST_ROOT%\README.md"
+if exist "%SCRIPT_DIR%\CHANGELOG.md" call :install_file "%SCRIPT_DIR%\CHANGELOG.md" "%TARGET_MANIFEST_ROOT%\CHANGELOG.md"
 if exist "%SCRIPT_DIR%\.claude-plugin\marketplace.json" call :install_file "%SCRIPT_DIR%\.claude-plugin\marketplace.json" "%TARGET_MANIFEST_ROOT%\.claude-plugin\marketplace.json"
 
 :: Sub-Skills
 echo.
-echo --- Installing Conductor Command Skills ---
-for %%S in (conductor-setup conductor-new-track conductor-implement conductor-status conductor-review conductor-revert conductor-chat conductor-drift) do (
+echo --- Installing Armature Command Skills ---
+for %%S in (arm-setup arm-new-track arm-implement arm-status arm-review arm-revert arm-drift arm-chat) do (
     call :install_file "%SCRIPT_DIR%\skills\%%S\SKILL.md" "%TARGET_SKILLS_ROOT%\%%S\SKILL.md"
 )
 
 :: Rules
 echo.
-echo --- Installing Conductor Rules ---
-for %%R in (conductor_protocol.md conductor_antigravity.md conductor_adr_preflight.md conductor_cdd_protocols.md) do (
+echo --- Installing Armature Rules ---
+for %%R in (armature_protocol.md armature_antigravity.md armature_adr_preflight.md armature_cdd_protocols.md) do (
     call :install_file "%SOURCE_RULES_DIR%\%%R" "%TARGET_RULES_ROOT%\%%R"
 )
 
 echo.
 echo --- Summary ---
-echo   Target:       antigravity
-echo   Skills root:  %TARGET_SKILLS_ROOT%\conductor-*\
+echo   Target:       antigravity-armature
+echo   Skills root:  %TARGET_SKILLS_ROOT%\arm-*\
 echo   Rules dir:    %TARGET_RULES_ROOT%
 if "%FLAGS_dry_run%"=="1" ( echo   Dry run complete. ) else ( echo   Installation complete! )
 call :check_for_updates
 exit /b 0
 
 :do_uninstall
-echo --- Uninstalling Conductor ---
-for %%S in (conductor-setup conductor-new-track conductor-implement conductor-status conductor-review conductor-revert conductor-chat) do (
-    if exist "%TARGET_SKILLS_ROOT%\%%S" (
-        if "%FLAGS_dry_run%"=="1" (
-            echo Would remove: %TARGET_SKILLS_ROOT%\%%S
-        ) else (
-            rmdir /s /q "%TARGET_SKILLS_ROOT%\%%S"
-            echo Removed: %TARGET_SKILLS_ROOT%\%%S
-        )
-    )
-)
-for %%R in (conductor_protocol.md conductor_antigravity.md conductor_adr_preflight.md conductor_cdd_protocols.md) do (
-    if exist "%TARGET_RULES_ROOT%\%%R" (
-        if "%FLAGS_dry_run%"=="1" (
-            echo Would remove: %TARGET_RULES_ROOT%\%%R
-        ) else (
-            del /q "%TARGET_RULES_ROOT%\%%R"
-            echo Removed: %TARGET_RULES_ROOT%\%%R
-        )
+echo --- Uninstalling Armature ---
+if exist "%TARGET_PLUGIN_DIR%" (
+    if "%FLAGS_dry_run%"=="1" (
+        echo Would remove: %TARGET_PLUGIN_DIR%
+    ) else (
+        rmdir /s /q "%TARGET_PLUGIN_DIR%"
+        echo Removed: %TARGET_PLUGIN_DIR%
     )
 )
 echo Uninstall complete.
@@ -160,16 +153,16 @@ exit /b 0
 
 :check_for_updates
 echo.
-if exist "%TARGET_SKILLS_ROOT%\conductor-setup\.conductor_version" (
-    set /p INSTALLED_VERSION= < "%TARGET_SKILLS_ROOT%\conductor-setup\.conductor_version"
+if exist "%TARGET_SKILLS_ROOT%\arm-setup\.armature_version" (
+    set /p INSTALLED_VERSION= < "%TARGET_SKILLS_ROOT%\arm-setup\.armature_version"
     if "!INSTALLED_VERSION!"=="%VERSION%" (
-        echo   [OK] antigravity: Up to date (v!INSTALLED_VERSION!^)
+        echo   [OK] antigravity-armature: Up to date (v!INSTALLED_VERSION!^)
     ) else (
-        echo   [NEW] antigravity: Update available - v!INSTALLED_VERSION! -^> v%VERSION%
+        echo   [NEW] antigravity-armature: Update available - v!INSTALLED_VERSION! -^> v%VERSION%
         echo   To update, run: install.bat --update
     )
 ) else (
-    echo   No existing Conductor installations found.
+    echo   No existing Armature installations found.
     echo   Run install.bat to install.
 )
 exit /b 0
@@ -213,3 +206,4 @@ if "%FLAGS_dry_run%"=="1" (
     echo Installed: %base_name%
 )
 exit /b 0
+

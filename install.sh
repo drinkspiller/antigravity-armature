@@ -1,7 +1,7 @@
 #!/bin/bash
 # =============================================================================
-# Armature Plugin Installer
-# Installs Armature as a unified plugin for Antigravity, Gemini CLI, Claude Code, and Windsurf.
+# Armature (OSS) Plugin Installer
+# Installs Armature (OSS) as a unified plugin for Antigravity CLI, Claude Code, and Windsurf.
 #
 # Usage:
 #   bash install.sh
@@ -108,18 +108,6 @@ gbash::init_google "$@"
 
 VERSION="0.19.0"
 
-# --- Toolsearch logging () ---
-
-TOOLLOG_LOGARGS=true
-TOOLLOG_METADATA=(
-  "version:${VERSION}"
-  "target:${FLAGS_target}"
-  "dry_run:$(( FLAGS_dry_run == FLAGS_TRUE ))"
-  "force:$(( FLAGS_force == FLAGS_TRUE ))"
-  "uninstall:$(( FLAGS_uninstall == FLAGS_TRUE ))"
-)
-
-
 # --- Resolve source directory (relative to this script) ---
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SOURCE_ASSETS_DIR="${SCRIPT_DIR}/skills/arm-setup/assets"
@@ -154,7 +142,7 @@ msg_skip()    { echo -e "  ${DIM}⏭️${NC}   ${DIM}$*${NC}"; }
 banner() {
   echo ""
   echo -e "${MAGENTA}  ╔══════════════════════════════════════════════════╗${NC}"
-  echo -e "${MAGENTA}  ║${NC}  ${BOLD}🦾 Armature Installer${NC}  ${DIM}v${VERSION}${NC}                   ${MAGENTA}║${NC}"
+  echo -e "${MAGENTA}  ║${NC}  ${BOLD}🦾 Armature (OSS) Installer${NC}  ${DIM}v${VERSION}${NC}             ${MAGENTA}║${NC}"
   echo -e "${MAGENTA}  ║${NC}  ${DIM}Structural Permanence for AI Coding Agents${NC}         ${MAGENTA}║${NC}"
   echo -e "${MAGENTA}  ╚══════════════════════════════════════════════════╝${NC}"
   echo ""

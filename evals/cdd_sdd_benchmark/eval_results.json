@@ -53,7 +53,7 @@
       }
     },
     "canonical_conductor": {
-      "name": "Conductor (Canonical Gemini CLI Extension)",
+      "name": "Conductor (Canonical Upstream CLI)",
       "paradigm": "Context-Driven Development (CDD)",
       "total_passed": 59,
       "total_criteria": 120,
@@ -249,7 +249,7 @@
       }
     },
     "armature_oss": {
-      "name": "Armature (Antigravity OSS)",
+      "name": "Armature (OSS)",
       "paradigm": "Context-Driven Development (CDD)",
       "total_passed": 102,
       "total_criteria": 120,
@@ -1722,7 +1722,7 @@
       }
     },
     "canonical_conductor": {
-      "name": "Conductor (Canonical Gemini CLI Extension)",
+      "name": "Conductor (Canonical Upstream CLI)",
       "paradigm": "Context-Driven Development (CDD)",
       "scenarios": {
         "SCEN_01_BROWNFIELD_PROTOCOL_MIGRATION": {
@@ -7410,7 +7410,7 @@
       }
     },
     "armature_oss": {
-      "name": "Armature (Antigravity OSS)",
+      "name": "Armature (OSS)",
       "paradigm": "Context-Driven Development (CDD)",
       "scenarios": {
         "SCEN_01_BROWNFIELD_PROTOCOL_MIGRATION": {
@@ -8833,7 +8833,7 @@
     }
   },
   "meta_analysis": {
-    "winner": "antigravity-armature-dev (Google3 Internal)",
+    "winner": "Armature (OSS)",
     "composite_scores": {
       "antigravity_armature_dev": {
         "score": 88,
