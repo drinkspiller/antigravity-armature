@@ -2,38 +2,23 @@
 
 > [!NOTE]
 > **Conductor is now Armature (v0.19.0)**  
-> Conductor has been officially rebranded to **Armature** — representing the internal precision steel skeleton that provides joint discipline and structural permanence to fluid, autonomous AI agents. Existing repositories with a `conductor/` directory continue operating seamlessly via Transparent Dual-Discovery with zero file migrations required.
+> Conductor has been officially rebranded to **Armature**. Existing repositories with a `conductor/` directory continue operating seamlessly via Transparent Dual-Discovery with zero file migrations required.
 
 ## Background
 
-**Armature** (formerly Antigravity Conductor) is an advanced Context-Driven Development (CDD) framework for Antigravity, Gemini CLI, Claude Code, and Windsurf. It manages the full lifecycle of software development tracks: context setup, multi-turn inquiry depth specification, phased planning, test-driven implementation, living manual testing runbooks, and continuous multi-tier drift auditing.
+**Armature** is a Context-Driven Development (CDD) framework for Antigravity, Gemini CLI, Claude Code, and Windsurf. It manages the full lifecycle of software development tracks: context setup, multi-turn inquiry depth specification, phased planning, test-driven implementation, living manual testing runbooks, and continuous multi-tier drift auditing.
 
-This project was originally forked from the canonical Gemini CLI Conductor (`github.com/gemini-cli-extensions/conductor`). While upstream Conductor focused on basic task planning and linear prompt orchestration, this codebase diverged substantially to pioneer Context-Driven Development (CDD). Over successive releases, it introduced living Architecture Decision Records (ADRs), ubiquitous domain glossaries (`terms.md`), interactive multi-dimension inquiry matrices, living manual verification runbooks, and automated multi-tier drift detection.
+This project was originally forked from Gemini CLI Conductor (`github.com/gemini-cli-extensions/conductor`). While upstream Conductor focused on basic task lists and prompt orchestration, this codebase diverged by integrating Context-Driven Development (CDD) workflows: living Architecture Decision Records (ADRs), domain glossaries (`terms.md`), interactive multi-dimension inquiry matrices, living manual verification runbooks, and automated drift detection.
 
-The rebrand from Conductor to **Armature** reflects this fundamental architectural divergence: shifting from an orchestral conductor waving a baton over a fluid model to an internal, precision-machined steel skeleton that gives autonomous agents structural permanence and joint discipline.
+## Structural Permanence & Joint Discipline
 
-## Motivation: Structural Permanence & Joint Discipline
+In stop-motion animation, puppets look soft and pliable on the outside, but their movement is held together by an internal steel armature with adjustable tension joints. Without the armature, studio heat turns clay into a puddle.
 
-Code adapts to physical reality. It changes when a compiler fails, an endpoint times out, or a database constraint complains. Code lives in the present.
-
-The things that actually rot, decay, and drift over time are the **documentation, the specifications, and the architectural decisions**.
-
-```
-Day 1:   Spec is written. Decision is recorded. Both are true.
-Day 3:   Code hits production reality. A workaround is added. The code adapts.
-Day 7:   The spec is now historical fiction. The decision is dead law.
-Week 3:  An AI agent arrives. It reads the fictional docs, believes them, and breaks the real code.
-```
-
-When an autonomous coding agent enters an existing codebase, it doesn't fail because it lacks capability. It fails because it reads stale documentation, believes outdated specs, and implements features against an architecture that ceased to exist three weeks ago.
-
-Without an internal structural skeleton, generative models and their documentation inevitably sag, deform, and drift apart.
+Autonomous agents without structural boundaries do the exact same thing. When an agent gets an execution loop, it moves fast. Without an internal structural skeleton, models deform architecture, accumulate synonyms, and drift off spec.
 
 **Antigravity Conductor is now Armature.**
 
-In stop-motion animation, puppets look soft and pliable on the outside, but their movement is held together by an internal steel armature with adjustable tension joints. Without the armature, studio heat turns the clay into an unrecoverable puddle.
-
-We replaced prompt wishes with an internal steel skeleton—giving agents full creative fluidity on the outside while anchoring documentation, specifications, and architectural decisions to deterministic codebase reality.
+We replaced prompt wishes with an internal steel skeleton—giving agents full creative fluidity on the outside while anchoring them to deterministic structural boundaries underneath.
 
 Armature preserves **transparent dual-discovery**:
 - **Primary (`armature/`)**: Greenfield projects initialized via `/arm-setup` create `armature/`.
