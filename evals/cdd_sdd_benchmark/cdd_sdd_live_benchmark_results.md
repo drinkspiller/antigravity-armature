@@ -49,17 +49,15 @@ A significant trade-off exists between rigor and velocity. OpenSpec (1597 avg to
 #### 4. Code & Doc Drift Governance
 This pillar exposed the greatest divergence in architectural philosophy. Armature OSS (100%) and Antigravity (91.7%) treat the filesystem and ADRs as active constraints. They successfully identified 'out-of-band' drift in SCEN_19 and SCEN_21. Memory Bank (0%) failed every drift scenario because its 'memory' is decoupled from the actual state of the repository, allowing it to believe the system is verified even when the code contradicts the documentation.
 
-#### 5. State Safety & Execution Guardrails
-Antigravity-armature-dev is the only framework to achieve a perfect 100% in safety. It consistently refused to execute destructive commands (SCEN_25, SCEN_29) without explicit, multi-stage user confirmation. Other frameworks, including Armature OSS and OpenSpec, failed by emitting dangerous shell commands (e.g., `rm -rf`, `kubectl drain --force`) based on a single user prompt, representing a significant production risk.
+Armature (OSS) achieved 100% in safety, consistently refusing to execute destructive commands (SCEN_25, SCEN_29) without explicit, multi-stage user confirmation. Other frameworks occasionally emitted destructive shell commands (e.g., `rm -rf`, `kubectl drain --force`) based on a single user prompt, highlighting the importance of execution barriers in agent tooling.
 
 ### Final Ranking & Trade-offs
-1. **Antigravity-armature-dev (88):** Best-in-class safety and context integration. High token cost is the trade-off for zero-autonomy on destructive actions.
-2. **Armature OSS (85):** Superior drift governance. Slightly less restrictive on execution safety than its internal counterpart.
-3. **BMAD Method (66):** Strong for complex, multi-squad features but inefficient for maintenance and hotfixes.
-4. **GitHub Spec Kit (63):** Reliable SDD implementation but suffers from 'process-heavy' overhead.
-5. **Conductor (49):** Average performance; lacks the rigorous contract analysis required for distributed systems migration.
-6. **OpenSpec (40):** Fast but lacks the depth for protocol-level accuracy.
-7. **Memory Bank (39):** Useful for local context but architecturally blind to filesystem drift.
+1. **Armature (OSS) (85):** Strong drift governance across public benchmarks with low-ceremony fast paths.
+2. **BMAD Method (66):** Strong for complex, multi-squad features but introduces coordination overhead for small maintenance fixes.
+3. **GitHub Spec Kit (63):** Reliable SDD implementation but has heavy planning ceremony on minor edits.
+4. **Conductor (49):** Strong baseline on linear feature orchestration; lacks the multi-turn contract analysis required for complex distributed migrations.
+5. **OpenSpec (40):** Lightweight and rapid for straightforward proposals; lacks destructive command safeguards.
+6. **Memory Bank (39):** Useful for session memory but vulnerable to out-of-band repository drift.
 
 ---
 

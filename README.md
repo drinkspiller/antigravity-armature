@@ -8,7 +8,7 @@
 
 **Armature (OSS)** is a Context-Driven Development (CDD) framework for Antigravity CLI, Claude Code, and Windsurf. It manages the full lifecycle of software development tracks: context setup, multi-turn inquiry depth specification, phased planning, test-driven implementation, living manual testing runbooks, and continuous multi-tier drift auditing.
 
-This project was originally forked from the upstream Conductor CLI extension (`github.com/gemini-cli-extensions/conductor`). While upstream Conductor focused on basic task lists and prompt orchestration, this codebase diverged by integrating Context-Driven Development (CDD) workflows: living Architecture Decision Records (ADRs), domain glossaries (`terms.md`), continuous decision-tree traversal, living manual verification runbooks, and automated drift detection.
+This project was inspired by and originally forked from the [Conductor](https://github.com/gemini-cli-extensions/conductor/) extension (`github.com/gemini-cli-extensions/conductor`), which pioneered structured track-based task orchestration and context-driven workflows for AI coding assistants. Armature (OSS) builds directly upon Conductor's foundational lifecycle, extending it with living Architecture Decision Records (ADRs), ubiquitous language domain glossaries (`terms.md`), continuous decision-tree traversal, living manual verification runbooks, and automated multi-tier drift auditing.
 
 ## Structural Permanence & Joint Discipline
 
@@ -75,7 +75,7 @@ Armature (OSS) is benchmarked against alternative Spec-Driven Development (SDD) 
 | **#1** | **Armature (OSS)** *(this)* | **85 / 100** | **85.0%** (102/120, ±6.4%) | 3038 tokens | 100% drift governance, continuous decision-tree traversal, and transparent dual-discovery. |
 | **#2** | **BMAD Method** | **66 / 100** | **65.8%** (79/120, ±8.5%) | 2634 tokens | Multi-agent role separation; high coordination overhead on micro-fixes. |
 | **#3** | **GitHub Spec Kit** | **63 / 100** | **63.3%** (76/120, ±8.6%) | 2835 tokens | Spec-first rigor with Constitution gating; heavy planning ceremony for minor edits. |
-| **#4** | **Conductor (Canonical Upstream CLI)** | **49 / 100** | **49.2%** (59/120, ±8.9%) | 2346 tokens | Fast on linear task lists; lacks multi-turn branch resolution and OCC analysis. |
+| **#4** | **Conductor (Canonical Upstream CLI)** | **49 / 100** | **49.2%** (59/120, ±8.9%) | 2346 tokens | Efficient linear track orchestration; lacks multi-turn branch resolution and OCC analysis. |
 | **#5** | **OpenSpec** | **40 / 100** | **40.0%** (48/120, ±8.8%) | 1597 tokens | Lightweight change proposals; lacks destructive command safeguards. |
 | **#6** | **Memory Bank (Cline / Roo Code)** | **39 / 100** | **39.2%** (47/120, ±8.7%) | 2703 tokens | Stateful markdown memory; vulnerable to out-of-band filesystem drift. |
 
