@@ -14,15 +14,26 @@ The rebrand from Conductor to **Armature** reflects this fundamental architectur
 
 ## Motivation: Structural Permanence & Joint Discipline
 
-> **8 modular skills, automatic drift detection, and precision structural joints.**
+Code adapts to physical reality. It changes when a compiler fails, an endpoint times out, or a database constraint complains. Code lives in the present.
 
-In stop-motion animation, puppets look soft and pliable on the outside, but their movement is held together by an internal steel armature with adjustable tension joints. Without the armature, studio heat turns clay into a puddle.
+The things that actually rot, decay, and drift over time are the **documentation, the specifications, and the architectural decisions**.
 
-Autonomous agents without structural boundaries do the exact same thing. When an agent gets an execution loop, it moves fast. Without an internal structural skeleton, models deform architecture, accumulate synonyms, and drift off spec.
+```
+Day 1:   Spec is written. Decision is recorded. Both are true.
+Day 3:   Code hits production reality. A workaround is added. The code adapts.
+Day 7:   The spec is now historical fiction. The decision is dead law.
+Week 3:  An AI agent arrives. It reads the fictional docs, believes them, and breaks the real code.
+```
+
+When an autonomous coding agent enters an existing codebase, it doesn't fail because it lacks capability. It fails because it reads stale documentation, believes outdated specs, and implements features against an architecture that ceased to exist three weeks ago.
+
+Without an internal structural skeleton, generative models and their documentation inevitably sag, deform, and drift apart.
 
 **Antigravity Conductor is now Armature.**
 
-We replaced prompt wishes with an internal steel skeleton—giving agents full creative fluidity on the outside while anchoring them to deterministic structural boundaries underneath.
+In stop-motion animation, puppets look soft and pliable on the outside, but their movement is held together by an internal steel armature with adjustable tension joints. Without the armature, studio heat turns the clay into an unrecoverable puddle.
+
+We replaced prompt wishes with an internal steel skeleton—giving agents full creative fluidity on the outside while anchoring documentation, specifications, and architectural decisions to deterministic codebase reality.
 
 Armature preserves **transparent dual-discovery**:
 - **Primary (`armature/`)**: Greenfield projects initialized via `/arm-setup` create `armature/`.
@@ -30,16 +41,21 @@ Armature preserves **transparent dual-discovery**:
 
 Context travels with the codebase and can be shared across the whole team.
 
-## Domain Modeling & Architecture Decision Records (ADRs)
+## Keeping Docs, Terms, and Decisions in Sync
 
-Armature integrates Bounded Context domain modeling and Architecture Decision Records (ADRs) into the track lifecycle. This fixes two common ways agent-managed codebases decay: vocabulary drift and unverified architecture.
+When agents write code, project context rots in three predictable ways. Armature stops all three:
 
-### How it Works
+### 1. Stopping Vocabulary Drift (Terms)
+When an agent calls an object `board` in one file, `canvas` in another, and `workspace` in a third, the codebase fills with synonyms that break search and ruin future prompts. Armature creates a project glossary (`terms.md`) that locks in canonical terms and explicitly bans synonyms.
 
-1. **Glossary (`terms.md`)**: Created during setup. It defines canonical terms and lists forbidden synonyms.
-2. **Architecture Decision Records (`adr/`)**: Written to `{PROJECT_CONTEXT_DIR}/adr/` as `NNNN-slug.md` using MADR format.
-3. **Living Manual Testing Runbooks (`manual_testing/<domain>.md`)**: Synchronized autonomously from active track runbooks during track closeout.
-4. **Automated 3-Tier Drift Auditor (`/arm-drift`)**: Audits documentation, AST symbols, and release packaging manifests across 3 tiers.
+### 2. Stopping Decision Drift (Decisions)
+Architectural trade-offs usually vanish into chat transcripts or forgotten design docs. Armature saves decisions as version-controlled markdown records in `adr/`. Every decision record includes an automated verification checklist that gets injected straight into implementation tasks—forcing the agent to prove it respected the architecture before marking work done.
+
+### 3. Stopping Documentation Drift (Docs & Specs)
+Static specs and runbooks become fiction the moment implementation hits a real edge case. Armature links specifications directly to living domain runbooks (`manual_testing/<domain>.md`). When a track finishes, verified test scenarios and behavior changes are synchronized automatically into the project documentation.
+
+### 4. Automated Drift Auditing (`/arm-drift`)
+`/arm-drift` is your codebase tripwire. It compares the real exported interfaces in your code against your docs, architectural decisions, and terms. If the code evolves in a way that turns your documentation into lies, Armature catches the divergence before you commit.
 
 ### The Operational Loop
 
