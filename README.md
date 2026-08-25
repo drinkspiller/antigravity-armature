@@ -26,6 +26,10 @@ Armature preserves **transparent dual-discovery**:
 
 Context travels with the codebase and can be shared across the whole team.
 
+### Why Code Alone Isn't the Single Source of Truth
+
+Code shows what syntax exists today, but never why it was built that way or what constraints must not be broken. Without architectural context, an AI agent treats legacy workarounds and technical debt as intentional design—and faithfully replicates them. Armature keeps architectural intent, domain terminology, and verification rules version-controlled right alongside the code.
+
 ## Keeping Docs, Terms, and Decisions in Sync
 
 When agents write code, project context rots in three predictable ways. Armature stops all three:
@@ -34,7 +38,7 @@ When agents write code, project context rots in three predictable ways. Armature
 When an agent calls an object `board` in one file, `canvas` in another, and `workspace` in a third, the codebase fills with synonyms that break search and ruin future prompts. Armature creates a project glossary (`terms.md`) that locks in canonical terms and explicitly bans synonyms.
 
 ### 2. Stopping Decision Drift (Decisions)
-Architectural trade-offs usually vanish into chat transcripts or forgotten design docs. Armature saves decisions as version-controlled markdown records in `adr/`. Every decision record includes an automated verification checklist that gets injected straight into implementation tasks—forcing the agent to prove it respected the architecture before marking work done.
+Code only records what survived; it never records the failed architectures that were tried and discarded. Without recorded decisions, an agent will see an un-cached query or a complex serialization loop and "helpfully" re-introduce a race condition the team spent weeks debugging. Armature records architectural trade-offs as version-controlled markdown files in `adr/`, each with an automated verification checklist injected into implementation tasks.
 
 ### 3. Stopping Documentation Drift (Docs & Specs)
 Static specs and runbooks become fiction the moment implementation hits a real edge case. Armature links specifications directly to living domain runbooks (`manual_testing/<domain>.md`). When a track finishes, verified test scenarios and behavior changes are synchronized automatically into the project documentation.
