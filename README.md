@@ -18,7 +18,7 @@ Autonomous agents without structural boundaries do the exact same thing. When an
 
 **Conductor is now Armature (OSS).**
 
-We replaced prompt wishes with an internal steel skeleton—giving agents full creative fluidity on the outside while anchoring them to deterministic structural boundaries underneath.
+Armature (OSS) provides this internal steel skeleton—giving agents full creative fluidity on the outside while anchoring them to deterministic structural boundaries underneath.
 
 Armature (OSS) preserves **transparent dual-discovery**:
 - **Primary (`armature/`)**: Greenfield projects initialized via `/arm-setup` create `armature/`.
