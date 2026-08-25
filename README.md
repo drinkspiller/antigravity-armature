@@ -1,23 +1,20 @@
 # Armature: Structural Permanence for AI Coding Agents
 
-**Go Links**
-
--   https://github.com/drinkspiller/antigravity-conductor
--   https://github.com/drinkspiller/antigravity-conductor (legacy alias)
-
-### Source Code
-
-./experimental/users/skyebot/antigravity_armature/
-
-## Background
-
-**Armature** (formerly Geppetto and Antigravity Conductor) is an advanced Context-Driven Development (CDD) framework for Antigravity, Gemini CLI, Claude Code, and Windsurf. It manages the full lifecycle of software development tracks: context setup, multi-turn inquiry depth specification, phased planning, test-driven implementation, living manual testing runbooks, and Fixpoint zero-drift auditing.
-
-This installer packages Armature as a **Antigravity Plugin** under `~/.gemini/config/plugins/antigravity-armature/` (with bundled command skills, rules, and setup assets).
+> [!NOTE]
+> **Conductor is now Armature (v0.19.0)**  
+> Conductor has been officially rebranded to **Armature** — representing the internal precision steel skeleton that provides joint discipline and structural permanence to fluid, autonomous AI agents. Existing repositories with a `conductor/` directory continue operating seamlessly via Transparent Dual-Discovery with zero file migrations required.
 
 ## Motivation: Structural Permanence & Joint Discipline
 
-Where legacy Conductor modeled agents as orchestral musicians reading a rigid score, **Armature** represents the internal, precision-machined steel ball-and-socket skeleton that gives structural permanence and joint discipline to fluid, autonomous AI agents. Without an armature, autonomous models warp and drift under pressure; with an armature, agents maintain rigorous alignment, reversible articulation, and unwavering specification fidelity.
+> **8 modular skills, automatic drift detection, and precision structural joints.**
+
+In stop-motion animation, puppets look soft and pliable on the outside, but their movement is held together by an internal steel armature with adjustable tension joints. Without the armature, studio heat turns clay into a puddle.
+
+Autonomous agents without structural boundaries do the exact same thing. When an agent gets an execution loop, it moves fast. Without an internal structural skeleton, models deform architecture, accumulate synonyms, and drift off spec.
+
+**Conductor is now Armature.**
+
+We replaced prompt wishes with an internal steel skeleton—giving agents full creative fluidity on the outside while anchoring them to deterministic structural boundaries underneath.
 
 Armature preserves **transparent dual-discovery**:
 - **Primary (`armature/`)**: Greenfield projects initialized via `/arm-setup` create `armature/`.
