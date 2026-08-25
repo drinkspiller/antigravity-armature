@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Conductor SkillOpt Evaluation & Optimization Runner.
+"""Armature SkillOpt Evaluation & Optimization Runner.
 
 A zero-external-dependency benchmarking and optimization runner for the
-Conductor skill suite. Evaluates skills against structured task suites and
+Armature skill suite. Evaluates skills against structured task suites and
 optionally optimizes instructions using Gemini model reflection.
 
 Usage:
@@ -10,12 +10,12 @@ Usage:
   python3 evals/skillopt/run_optimizer.py --eval_only
 
   # Run benchmark for a specific skill:
-  python3 evals/skillopt/run_optimizer.py
-  --target=skills/conductor-new-track/SKILL.md --eval_only
+  python3 evals/skillopt/run_optimizer.py \
+      --target=skills/arm-new-track/SKILL.md --eval_only
 
   # Run full optimization loop on a skill:
-  python3 evals/skillopt/run_optimizer.py
-  --target=skills/conductor-new-track/SKILL.md --optimize
+  python3 evals/skillopt/run_optimizer.py \
+      --target=skills/arm-new-track/SKILL.md --optimize
 """
 
 import argparse
@@ -28,12 +28,12 @@ import time
 import urllib.error
 import urllib.request
 
-TARGET_MODEL = "gemini-3-flash-preview"
-OPTIMIZER_MODEL = "gemini-pro-latest"
+TARGET_MODEL = "gemini-3.5-flash"
+OPTIMIZER_MODEL = "gemini-3.1-pro-preview"
 API_KEY = os.environ.get("GEMINI_API_KEY")
 
 EVALS_DIR = os.path.dirname(os.path.abspath(__file__))
-CONDUCTOR_ROOT = os.path.abspath(os.path.join(EVALS_DIR, "..", ".."))
+ARMATURE_ROOT = os.path.abspath(os.path.join(EVALS_DIR, "..", ".."))
 TRAIN_PATH = os.path.join(EVALS_DIR, "tasks", "train.jsonl")
 VAL_PATH = os.path.join(EVALS_DIR, "tasks", "val.jsonl")
 RESULTS_PATH = os.path.join(EVALS_DIR, "eval_results.json")
@@ -140,10 +140,10 @@ def load_tasks(filepath: str, target_skill: str = None):
 def resolve_skill_path(target_arg: str) -> str:
   if os.path.isabs(target_arg):
     return target_arg
-  direct_path = os.path.join(CONDUCTOR_ROOT, target_arg)
+  direct_path = os.path.join(ARMATURE_ROOT, target_arg)
   if os.path.exists(direct_path):
     return direct_path
-  skill_dir = os.path.join(CONDUCTOR_ROOT, "skills", target_arg, "SKILL.md")
+  skill_dir = os.path.join(ARMATURE_ROOT, "skills", target_arg, "SKILL.md")
   if os.path.exists(skill_dir):
     return skill_dir
   return direct_path
@@ -169,7 +169,7 @@ def evaluate_task(task: dict, default_skill_text: str, default_skill_name: str):
   target_skill_name = task.get("target_skill", default_skill_name)
 
   system_instruction = (
-      "You are an AI assistant executing instructions in the Conductor"
+      "You are an AI assistant executing instructions in the Armature"
       f" '{target_skill_name}' skill document"
       f" strictly:\n\n```markdown\n{skill_text}\n```\n\nFollow all guardrails,"
       " turn-ending barriers, step sequencing, and interaction protocols"
@@ -312,10 +312,10 @@ def validate_syntax_and_clip(
   matcher = difflib.SequenceMatcher(None, seed_lines, cand_lines)
   ratio = matcher.ratio()
   diff_pct = (1.0 - ratio) * 100
-  if diff_pct > 30.0:
+  if diff_pct > 20.0:
     return (
         False,
-        f"Edit distance too large: {diff_pct:.1f}% modified (limit is 30%)",
+        f"Edit distance too large: {diff_pct:.1f}% modified (limit is 20%)",
     )
 
   return True, f"Valid (diff: {diff_pct:.1f}%)"
@@ -339,7 +339,7 @@ def reflect_and_mutate(
       )
   )
 
-  reflection_prompt = f"""You are an expert prompt engineer and Skill Optimizer optimizing a Conductor skill markdown file.
+  reflection_prompt = f"""You are an expert prompt engineer and Skill Optimizer optimizing an Armature skill markdown file.
 
 Failed Task Traces & Violated Criteria:
 {json.dumps(failed_traces, indent=2)}
@@ -376,14 +376,14 @@ Requirements for Candidate Mutation:
 
 def main():
   parser = argparse.ArgumentParser(
-      description="Conductor SkillOpt Benchmarking & Optimization"
+      description="Armature SkillOpt Benchmarking & Optimization"
   )
   parser.add_argument(
       "--target",
       default="all",
       help=(
-          "Target skill path relative to conductor root or skill name (e.g."
-          " skills/conductor-new-track/SKILL.md, or 'all')"
+          "Target skill path relative to armature root or skill name (e.g."
+          " skills/arm-new-track/SKILL.md, or 'all')"
       ),
   )
   parser.add_argument(
@@ -420,7 +420,7 @@ def main():
     with open(target_path, "r", encoding="utf-8") as f:
       skill_text = f.read()
 
-  print("=== Conductor SkillOpt Evaluation Runner ===", flush=True)
+  print("=== Armature SkillOpt Evaluation Runner ===", flush=True)
   print(f"Target: {target_path}")
   print(f"Target Model: {TARGET_MODEL} | Optimizer Model: {OPTIMIZER_MODEL}")
 

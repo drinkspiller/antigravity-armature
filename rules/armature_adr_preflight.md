@@ -1,13 +1,13 @@
 # ADR & Glossary Preflight Interceptor
 
-> Loaded on demand by Conductor skills. Not an always-on rule.
+> Loaded on demand by Armature skills. Not an always-on rule.
 
-Whenever ANY Conductor skill is executed against an existing project:
+Whenever ANY Armature skill is executed against an existing project:
 
-1.  **Lazy Detection:** Check whether `{PROJECT_ROOT}/conductor/adr/` exists and
+1.  **Lazy Detection:** Check whether `{PROJECT_ROOT}/{PROJECT_CONTEXT_DIR}/adr/` exists and
     contains at least one `.md` file.
 2.  **Interception:** If no ADR files are found AND the project is brownfield
-    (contains source code or existing Conductor docs):
+    (contains source code or existing Armature / Conductor docs):
     -   Temporarily pause the invoked skill's primary protocol.
     -   Sweep existing documentation (`tech-stack.md`, `product.md`, legacy
         track `spec.md`, `README.md`, `docs/`) for architectural trade-offs.
@@ -17,7 +17,7 @@ Whenever ANY Conductor skill is executed against an existing project:
         `ask_question`: *"I swept your existing docs and found foundational
         decisions that predate our ADR system. Formalize them before we
         proceed?"*
-    -   Write accepted items to `conductor/adr/NNNN-slug.md` and initialize
+    -   Write accepted items to `{PROJECT_CONTEXT_DIR}/adr/NNNN-slug.md` and initialize
         `terms.md`.
     -   Upon completion (or if the user selects 'Skip'), immediately resume and
         execute the originally invoked skill command.

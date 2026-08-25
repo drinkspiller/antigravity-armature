@@ -1,202 +1,497 @@
 {
-  "target": "/usr/local/google/home/skyebot/Documents/antigravity-conductor/skills/conductor-implement/SKILL.md",
+  "target": "skills/arm-new-track/SKILL.md",
   "baseline": {
-    "train_score": 0.6923076923076923,
-    "val_score": 0.6666666666666666
+    "train_score": 0.8947368421052632,
+    "val_score": 0.9583333333333334
   },
   "train_results": [
     {
-      "task_id": "TRAIN_07_IMPLEMENT_AUTONOMOUS_MANUAL_TEST_SYNC",
-      "target_skill": "conductor-implement",
-      "category": "Autonomous Runbook Synchronization",
+      "task_id": "TRAIN_01_INTERRUPT_ASSET_FLOW",
+      "target_skill": "arm-new-track",
+      "category": "Conversational Interruption & Detour",
+      "score": 0.75,
+      "passed_count": 3,
+      "total_count": 4,
+      "eval_results": [
+        {
+          "criterion": "Does not skip exploring remaining open decision branches after resuming from the image handling detour.",
+          "passed": true,
+          "reason": "In Turn 3, the agent answers the user's detour question about image handling and immediately resumes the interview by re-asking the pending Question 2, ensuring no branches are skipped."
+        },
+        {
+          "criterion": "Does not execute write_to_file on canonical spec.md before completing all interactive branch resolution loops.",
+          "passed": true,
+          "reason": "The agent only invokes write_to_file for spec.md in Step 6, which occurs after all decision branches are resolved and confirmed in Step 5."
+        },
+        {
+          "criterion": "Synthesizes boundary dimensions (Error handling, Edge cases, Security, Performance, Accessibility, Testing) and adversarial stress tests inline.",
+          "passed": false,
+          "reason": "While the agent addresses performance and fallbacks in Turn 4, it fails to explicitly synthesize security, accessibility, testing, or adversarial stress tests inline during the interview, despite claiming they are resolved in the summary."
+        },
+        {
+          "criterion": "Asks questions one at a time using ask_question before materializing final spec.",
+          "passed": true,
+          "reason": "The agent strictly uses the ask_question tool to present one question per turn across Turns 1 through 5 before writing the spec in Step 6."
+        }
+      ],
+      "rollout_sample": "Here is the step-by-step execution trace of the `/arm-new-track` skill for the requested scenario. This trace details every action, step number, tool invocation, and exact output/question presented to the user, demonstrating strict adherence to the mandatory execution guardrails, turn-ending barriers, and detour recovery.\n\n---\n\n# Execution Trace: `/arm-new-track`\n\n**Project Root:** `labs/language/cc/`  \n**Project Context Directory:** `conductor`  \n**Track ID:** `cc-upgrade-page-webgl-glow`  \n**Track Type:** Feature  \n\n---\n\n## Step 1: Context Resolution & Setup Check\n\nThe agent resolves the project root and context directory and verifies that the core Armature configuration files exist.\n\n### Tool Invocation: File Verification\n```json\n// Simulated internal checks for required files\nfile_exists(\"labs/language/cc/conductor/product.md\") -> true\nfile_exists(\"labs/language/cc/conductor/tech-stack.md\") -> true\nfile_exists(\"labs/language/cc/conductor/workflow.md\") -> true\n```\n*Result: All files"
+    },
+    {
+      "task_id": "TRAIN_02_EARLY_DRAFT_CONVERGENCE",
+      "target_skill": "arm-new-track",
+      "category": "Premature Spec Finalization & Missing Barriers",
+      "score": 1.0,
+      "passed_count": 4,
+      "total_count": 4,
+      "eval_results": [
+        {
+          "criterion": "Does not treat user's 'draft the spec' command as authorization to immediately finalize or commit spec.md without resolving open decision branches.",
+          "passed": true,
+          "reason": "The agent explicitly triggers the 'Premature Draft Command Shielding' guardrail and refuses to materialize spec.md, stating that multiple critical dimensions remain unresolved."
+        },
+        {
+          "criterion": "Identifies unresolved operational branches (specifically webhook signature verification under Security and duplicate webhook delivery under Edge Cases).",
+          "passed": true,
+          "reason": "The agent lists 'Webhook Security & Verification' and 'Idempotency & Duplicate Delivery' among the open decision branches that must be resolved."
+        },
+        {
+          "criterion": "Poses the next targeted branch-resolving probe or adversarial stress challenge via ask_question.",
+          "passed": true,
+          "reason": "The agent uses the ask_question tool to present a targeted probe regarding 'Decision Branch 1: Webhook Security & Signature Verification' with specific options."
+        },
+        {
+          "criterion": "Holds canonical spec.md in memory during the planning phase instead of writing to disk prematurely.",
+          "passed": true,
+          "reason": "The agent explicitly states at the end of the rollout that it 'holds the specification state in memory' while waiting for the user's response."
+        }
+      ],
+      "rollout_sample": "Here is the step-by-step execution of the `/arm-new-track` protocol for your request, demonstrating how the **Armature Planner** strictly enforces the mandatory guardrails\u2014specifically **Premature Draft Command Shielding** and **Strict Interactive Discipline**\u2014when a user attempts to bypass the interactive interview.\n\n---\n\n### Step 1: Context Resolution & Setup Check\n- **Action:** Resolve `{PROJECT_ROOT}` and `{PROJECT_CONTEXT_DIR}`.\n- **Result:** \n  - `{PROJECT_ROOT}`: Current workspace root.\n  - `{PROJECT_CONTEXT_DIR}`: `labs/language/cc/conductor/`\n- **Tool Invocation (`file_exists` / `directory_exists` checks):**\n  - Verify existence of:\n    - `labs/language/cc/conductor/product.md` (Exists)\n    - `labs/language/cc/conductor/tech-stack.md` (Exists)\n    - `labs/language/cc/conductor/workflow.md` (Exists)\n\n### Step 2: Get Description & Infer Type\n- **Action:** Analyze the provided description: `\"add a new route /settings/billing with Stripe webhook handler.\"`\n- **Result:** \n  - **Inf"
+    },
+    {
+      "task_id": "TRAIN_03_COMPOUND_DIRECTIVE_SHIELDING",
+      "target_skill": "arm-new-track",
+      "category": "Compound Directive & Premature Plan Execution",
+      "score": 1.0,
+      "passed_count": 3,
+      "total_count": 3,
+      "eval_results": [
+        {
+          "criterion": "Shields against compound prompt and refuses to write code or generate plan.md during track creation.",
+          "passed": true,
+          "reason": "The agent explicitly detects the compound directive and states it must refuse to write code or generate plan.md prematurely."
+        },
+        {
+          "criterion": "Enforces sequential track creation workflow: Deep Grill -> Spec Approval -> Plan Generation -> Plan Approval.",
+          "passed": true,
+          "reason": "The agent explicitly states that all interactive track creation milestones, including the specification interview, specification approval, and plan approval, must be completed sequentially."
+        },
+        {
+          "criterion": "Halts before writing implementation code to disk.",
+          "passed": true,
+          "reason": "The agent halts its execution to invoke the `ask_question` tool for ambiguity resolution and does not output any file-writing actions for the implementation."
+        }
+      ],
+      "rollout_sample": "### \ud83d\udee1\ufe0f Compound Directive Shielding & Refusal Notice\n\nI have detected a compound directive requesting immediate implementation of a fix in `audio_service.ts` alongside track creation. Under the **Compound Directive Shielding** guardrail, **I must explicitly refuse to write code, implement the fix, or generate `plan.md` prematurely.** \n\nWe must first complete all interactive track creation milestones sequentially\u2014including the interactive specification interview, specification approval, and plan approval\u2014before any downstream execution or implementation can begin.\n\n---\n\n### Step-by-Step Execution Plan\n\n#### Step 1: Context Resolution & Setup Check\n*   **Action:** Resolve `{PROJECT_ROOT}` and `{PROJECT_CONTEXT_DIR}`.\n    *   `{PROJECT_ROOT}`: Current workspace root.\n    *   `{PROJECT_CONTEXT_DIR}`: `labs/language/cc/conductor`\n*   **Action:** Verify existence of required configuration files:\n    *   `labs/language/cc/conductor/product.md`\n    *   `labs/language/cc/conductor/tech-stack.md"
+    },
+    {
+      "task_id": "TRAIN_04_DOC_HEAVY_FEATURE_TRACK",
+      "target_skill": "arm-new-track",
+      "category": "Document-Heavy Feature Planning",
+      "score": 1.0,
+      "passed_count": 4,
+      "total_count": 4,
+      "eval_results": [
+        {
+          "criterion": "Ingests doc context and performs codebase reconnaissance.",
+          "passed": true,
+          "reason": "The agent extracts context from the user's description and performs codebase reconnaissance in Step 4 by reading tech-stack.md, product.md, scanning ADRs, and identifying relevant code paths."
+        },
+        {
+          "criterion": "Does NOT treat provided design doc as permission to skip user interview or gating.",
+          "passed": true,
+          "reason": "The agent initiates the 'Grill Engine' in Step 5 to systematically resolve architectural ambiguities rather than skipping straight to implementation."
+        },
+        {
+          "criterion": "Presents architectural trade-offs or probes invalidation strategy.",
+          "passed": true,
+          "reason": "The agent presents three distinct architectural options for the Change Stream consumer, detailing the trade-offs of each (e.g., managed Dataflow vs. custom daemon)."
+        },
+        {
+          "criterion": "Uses ask_question with single concise questions and ends turn.",
+          "passed": true,
+          "reason": "The agent invokes the `ask_question` tool with a single, focused question about the consumer architecture and ends its turn to wait for user input."
+        }
+      ],
+      "rollout_sample": "### Step 1: Context Resolution & Setup Check\n* **Action:** Resolved `{PROJECT_ROOT}` to the current working directory and `{PROJECT_CONTEXT_DIR}` to `armature`.\n* **Verification:** Checked for the existence of the following mandatory files:\n  * `armature/product.md` (Exists)\n  * `armature/tech-stack.md` (Exists)\n  * `armature/workflow.md` (Exists)\n* **Result:** Setup check passed.\n\n---\n\n### Step 2: Get Description & Infer Type\n* **User Description:** \"Create a new track for Spanner cache invalidation based on design doc: https://docs.google.com/document/d/example-cache-design. The doc covers TTLs, Spanner change streams, and Pub/Sub sync.\"\n* **Inferred Track Type:** `Feature` (Infrastructure/System Feature).\n\n---\n\n### Step 3: Duplicate Track Check & Initialization\n* **Action:** Scanned `armature/tracks/` directory for existing tracks.\n* **Result:** No conflicting tracks found.\n* **Track ID Generated:** `spanner-cache-invalidation`\n* **Action:** Created the track directory: `armature/tr"
+    },
+    {
+      "task_id": "TRAIN_05_MANUAL_TESTING_TIERED_CLASSIFICATION",
+      "target_skill": "arm-new-track",
+      "category": "Manual Testing Tiered Classification",
+      "score": 0.6666666666666666,
+      "passed_count": 2,
+      "total_count": 3,
+      "eval_results": [
+        {
+          "criterion": "Classifies track under Testing Strategy as requiring a full manual_testing.md runbook with persona matrices and step-by-step route verifications.",
+          "passed": true,
+          "reason": "The agent explicitly classified the testing strategy as requiring a full manual_testing.md runbook with persona matrices and sequential route test cases."
+        },
+        {
+          "criterion": "Holds spec in memory until all decision branches are complete before writing canonical spec.md.",
+          "passed": true,
+          "reason": "The agent correctly deferred writing the spec.md file while it uses ask_question to traverse decision branches."
+        },
+        {
+          "criterion": "Uses ask_question to resolve state synchronization and navigation guard branches.",
+          "passed": false,
+          "reason": "The agent used ask_question to resolve state synchronization (Branch 1) but did not ask about navigation guard branches in the provided rollout."
+        }
+      ],
+      "rollout_sample": "### Step 1: Context Resolution & Setup Check\n\n*   **Action:** Resolve `{PROJECT_ROOT}` and `{PROJECT_CONTEXT_DIR}`.\n    *   `{PROJECT_ROOT}`: `.` (Current working directory)\n    *   `{PROJECT_CONTEXT_DIR}`: `labs/language/cc/conductor`\n*   **Action:** Verify existence of mandatory configuration files.\n    *   `labs/language/cc/conductor/product.md` (Verified)\n    *   `labs/language/cc/conductor/tech-stack.md` (Verified)\n    *   `labs/language/cc/conductor/workflow.md` (Verified)\n\n---\n\n### Step 2: Get Description & Infer Type\n\n*   **Input Description:** \"build multi-step family invite wizard with Spanner member state transitions and route navigation guards.\"\n*   **Inferred Track Type:** `Feature` (Multi-step UI wizard, state machine transitions, and routing logic).\n\n---\n\n### Step 3: Duplicate Track Check & Initialization\n\n*   **Action:** Scan `labs/language/cc/conductor/tracks/` for conflicting track IDs. None found.\n*   **Action:** Generate unique `track_id`: `family-invite-wizard`.\n* "
+    },
+    {
+      "task_id": "TRAIN_06_MANUAL_TESTING_CHORE_SMOKE_CHECK",
+      "target_skill": "arm-new-track",
+      "category": "Lightweight Smoke Classification",
+      "score": 1.0,
+      "passed_count": 3,
+      "total_count": 3,
+      "eval_results": [
+        {
+          "criterion": "Classifies track under Testing Strategy as a pure refactor / utility requiring a concise smoke check rather than an exhaustive multi-persona runbook.",
+          "passed": true,
+          "reason": "The agent explicitly classifies the track as a 'Pure Refactor / Utility / Chore Track' and defines the strategy as a lightweight manual_testing.md with concise smoke and sanity checks."
+        },
+        {
+          "criterion": "Ensures testing plan prioritizes automated unit tests while recording minimal CLI/smoke verification steps in manual_testing.md.",
+          "passed": true,
+          "reason": "The testing strategy section prioritizes running or creating automated unit tests for 100% behavioral parity, alongside lightweight manual smoke/sanity checks."
+        },
+        {
+          "criterion": "Presents structured Convergence Summary and requests confirmation to materialize spec and lightweight manual testing runbook without unnecessary branch questions.",
+          "passed": true,
+          "reason": "The agent provides a detailed Convergence Summary and invokes the `ask_question` tool to request confirmation to materialize the spec and runbook, explicitly stating it is bypassing redundant questioning loops."
+        }
+      ],
+      "rollout_sample": "### Step 1: Context Resolution & Setup Check\n- **Action:** Resolve `{PROJECT_ROOT}` and `{PROJECT_CONTEXT_DIR}`.\n- **Verification:** Checked for the existence of:\n  - `{PROJECT_ROOT}/armature/product.md`\n  - `{PROJECT_ROOT}/armature/tech-stack.md`\n  - `{PROJECT_ROOT}/armature/workflow.md`\n- **Result:** All files verified. Setup check passed.\n\n---\n\n### Step 2: Get Description & Infer Type\n- **Description:** \"refactor internal date formatting utility functions in src/utils/date.ts to use date-fns v3\"\n- **Inferred Type:** Refactor / Utility / Chore Track.\n\n---\n\n### Step 3: Duplicate Track Check & Initialization\n- **Action:** Scan `{PROJECT_ROOT}/armature/tracks/` for conflicting track IDs.\n- **Result:** No conflicts found.\n- **Track ID Generated:** `refactor-date-utils-date-fns-v3`\n- **Directory Created:** `{PROJECT_ROOT}/armature/tracks/refactor-date-utils-date-fns-v3/`\n\n---\n\n### Step 4: Codebase Reconnaissance\n- **Action:** Read architectural context from `tech-stack.md` and `product.md"
+    },
+    {
+      "task_id": "TRAIN_17_INQUIRY_DEPTH_ANTI_EARLY_EXIT",
+      "target_skill": "arm-new-track",
+      "category": "Decision-Tree Traversal & Ambiguity Resolution",
+      "score": 0.6,
+      "passed_count": 3,
+      "total_count": 5,
+      "eval_results": [
+        {
+          "criterion": "Does not treat user's 'draft the spec' command as authorization to immediately finalize or write spec.md to disk without resolving open operational branches.",
+          "passed": true,
+          "reason": "The agent explicitly activates a 'Premature Draft Command Shielding' to block writing the spec until critical operational dimensions are resolved."
+        },
+        {
+          "criterion": "Traverses dependent child branches conditioned on immediate dialog and CSS filter invert (e.g. Lottie SVG filter repaint overhead, ToS check RPC latency/timeout race conditions).",
+          "passed": false,
+          "reason": "While the agent explores dialog dismissal, it fails to traverse technical branches conditioned on the CSS filter invert, such as Lottie SVG repaint overhead."
+        },
+        {
+          "criterion": "Explores failure recovery and boundary edge cases one-by-one rather than collapsing the interview into a rapid checklist sweep.",
+          "passed": true,
+          "reason": "The agent asks a single, focused question about the boundary edge case of dialog dismissal and ToS check cancellation rather than presenting a large checklist."
+        },
+        {
+          "criterion": "Presents codebase-grounded adversarial challenge against CSS filter invert or RPC latency assumptions.",
+          "passed": false,
+          "reason": "The agent passively accepts the user's CSS filter invert instruction in Step 4 without presenting any adversarial challenge regarding performance or implementation assumptions."
+        },
+        {
+          "criterion": "Poses the next targeted probe via ask_question and ends turn.",
+          "passed": true,
+          "reason": "The agent successfully formats its output to invoke the `ask_question` tool with a targeted probe and ends its turn."
+        }
+      ],
+      "rollout_sample": "### Step 1: Context Resolution & Setup Check\n* **Action:** Resolved `{PROJECT_ROOT}` to `labs/language/cc/` and `{PROJECT_CONTEXT_DIR}` to `conductor`.\n* **Action:** Verified that the following core files exist:\n  * `labs/language/cc/conductor/product.md`\n  * `labs/language/cc/conductor/tech-stack.md`\n  * `labs/language/cc/conductor/workflow.md`\n\n### Step 2: Get Description & Infer Type\n* **Description:** \"replace blank ToS check delay with immediate dialog showing looping Lottie progress animation with dark mode support.\"\n* **Inferred Type:** Feature\n\n### Step 3: Duplicate Track Check & Initialization\n* **Action:** Checked `labs/language/cc/conductor/tracks/` for conflicts. No conflicting tracks found.\n* **Action:** Generated unique `track_id`: `tos-check-lottie-dialog`.\n* **Action:** Initialized track directory: `labs/language/cc/conductor/tracks/tos-check-lottie-dialog/`.\n\n### Step 4: Codebase Reconnaissance\n* **Action:** Analyzed `tech-stack.md` and `product.md` for dialog patterns"
+    },
+    {
+      "task_id": "TRAIN_18_LEGACY_CONDUCTOR_DIR_NEW_TRACK",
+      "target_skill": "arm-new-track",
+      "category": "Backward Compatibility & Legacy Directory Discovery",
+      "score": 1.0,
+      "passed_count": 4,
+      "total_count": 4,
+      "eval_results": [
+        {
+          "criterion": "Discovers existing legacy conductor/ context directory using transparent dual-discovery.",
+          "passed": true,
+          "reason": "The agent explicitly resolves the project context directory to 'conductor' based on the repository contents."
+        },
+        {
+          "criterion": "Operates directly within conductor/ without error, creating conductor/tracks/<track_id>/.",
+          "passed": true,
+          "reason": "The agent successfully creates the new track directory at 'conductor/tracks/graphql-rate-limiting/'."
+        },
+        {
+          "criterion": "Does not create a redundant armature/ directory.",
+          "passed": true,
+          "reason": "The agent's output shows all operations occurring within the 'conductor/' directory with no mention of creating an 'armature/' directory."
+        },
+        {
+          "criterion": "Announces usage of legacy conductor context to the user.",
+          "passed": true,
+          "reason": "The agent informs the user in Step 1 that the context directory is resolved to 'conductor' because the repository only contains that directory."
+        }
+      ],
+      "rollout_sample": "### Step 1: Context Resolution & Setup Check\n* **Action:** Resolve `{PROJECT_ROOT}` and `{PROJECT_CONTEXT_DIR}`.\n  * `{PROJECT_ROOT}` is resolved to the workspace root (`.`).\n  * `{PROJECT_CONTEXT_DIR}` is resolved to `conductor` (as the repository contains only `conductor/`).\n* **Action:** Verify existence of core Armature files:\n  * `conductor/product.md` (Verified)\n  * `conductor/tech-stack.md` (Verified)\n  * `conductor/workflow.md` (Verified)\n  * `conductor/tracks.md` (Verified)\n* **Result:** All required files are present. Setup check passed.\n\n---\n\n### Step 2: Get Description & Infer Type\n* **Action:** Analyze the user's request: *\"add rate limiting to GraphQL query gateway\"*.\n* **Result:** \n  * **Description:** Add rate limiting to the GraphQL query gateway.\n  * **Inferred Track Type:** Feature (Operational Hardening / Infrastructure).\n\n---\n\n### Step 3: Duplicate Track Check & Initialization\n* **Action:** Scan `conductor/tracks/` directory for conflicting track names.\n* **Action:"
+    },
+    {
+      "task_id": "TRAIN_22_DATA_MIGRATION_INQUIRY_DEPTH",
+      "target_skill": "arm-new-track",
+      "category": "Decision-Tree Traversal & Ambiguity Resolution",
+      "score": 1.0,
+      "passed_count": 4,
+      "total_count": 4,
+      "eval_results": [
+        {
+          "criterion": "Conducts decision-tree exploration of competing architectural patterns (dual-writing vs Spanner change streams vs read-repair) before locking the migration path.",
+          "passed": true,
+          "reason": "The agent explicitly initiates a decision-tree traversal and asks a question comparing application-level dual-writes against Spanner Change Streams."
+        },
+        {
+          "criterion": "Explores data contract and write path dependencies before jumping to edge cases.",
+          "passed": true,
+          "reason": "The agent's first question focuses on the core write path and transaction strategy for the dual-write process rather than edge cases."
+        },
+        {
+          "criterion": "Poses the first targeted branch-probing question via ask_question and ends turn.",
+          "passed": true,
+          "reason": "The rollout concludes immediately after invoking the `ask_question` tool with a targeted multiple-choice question."
+        },
+        {
+          "criterion": "Holds spec.md in memory during Step 5 without writing to disk prematurely.",
+          "passed": true,
+          "reason": "The agent does not attempt to write or generate the `spec.md` file during Step 5, keeping the process in the exploration phase."
+        }
+      ],
+      "rollout_sample": "### Step 1: Context Resolution & Setup Check\n* **Action:** Resolve `{PROJECT_ROOT}` and `{PROJECT_CONTEXT_DIR}`.\n  * `{PROJECT_ROOT}`: `/workspace`\n  * `{PROJECT_CONTEXT_DIR}`: `labs/language/cc/conductor`\n* **Action:** Verify that the mandatory configuration files exist:\n  * `/workspace/labs/language/cc/conductor/product.md` (Exists)\n  * `/workspace/labs/language/cc/conductor/tech-stack.md` (Exists)\n  * `/workspace/labs/language/cc/conductor/workflow.md` (Exists)\n\n### Step 2: Get Description & Infer Type\n* **Action:** Extract description from the initial prompt: `\"migrate UserPreferences from Spanner JSON column to strongly-typed relational table with zero-downtime dual-writing.\"`\n* **Action:** Infer track type: `migration` (Feature/Migration).\n\n### Step 3: Duplicate Track Check & Initialization\n* **Action:** Scan `/workspace/labs/language/cc/conductor/tracks/` to ensure no conflicting track exists.\n* **Action:** Generate unique `track_id`: `user-preferences-spanner-migration`.\n* **Ac"
+    },
+    {
+      "task_id": "TRAIN_23_AUTH_PROTOCOL_INQUIRY_DEPTH",
+      "target_skill": "arm-new-track",
+      "category": "Decision-Tree Traversal & Ambiguity Resolution",
+      "score": 1.0,
+      "passed_count": 4,
+      "total_count": 4,
+      "eval_results": [
+        {
+          "criterion": "Shields against premature 'Draft the spec' command, holding spec.md in memory.",
+          "passed": true,
+          "reason": "The agent explicitly invokes the Premature Draft Command Shielding guardrail and states it will hold the specification state in memory instead of drafting the spec."
+        },
+        {
+          "criterion": "Traverses dependent child branches conditioned on BroadcastChannel leader election (e.g. leader crash during refresh in-flight, split-brain token race across multiple tabs).",
+          "passed": true,
+          "reason": "The agent identifies dependent child branches related to leader election, specifically addressing leader failover and crash recovery mid-refresh."
+        },
+        {
+          "criterion": "Explores security and failure invariants (401/403 retry loop vs session expiration, token redaction in logs).",
+          "passed": true,
+          "reason": "The agent explores security and failure invariants by listing open decision branches for token storage security and handling terminal refresh failures (401/403) to prevent infinite loops."
+        },
+        {
+          "criterion": "Poses targeted branch-probing question or adversarial challenge via ask_question and ends turn.",
+          "passed": true,
+          "reason": "The agent ends its turn by invoking the `ask_question` tool with a targeted branch-probing question about leader failover strategies."
+        }
+      ],
+      "rollout_sample": "### Step 1: Context Resolution & Setup Check\n- **Action:** Resolve `{PROJECT_ROOT}` and `{PROJECT_CONTEXT_DIR}`.\n  - `{PROJECT_ROOT}`: `labs/language/cc/conductor/`\n  - `{PROJECT_CONTEXT_DIR}`: `conductor` (or `armature` depending on local configuration; we will assume `conductor` for this path).\n- **Action:** Verify existence of core files:\n  - `labs/language/cc/conductor/conductor/product.md`\n  - `labs/language/cc/conductor/conductor/tech-stack.md`\n  - `labs/language/cc/conductor/conductor/workflow.md`\n  *(Verification passes based on scenario context).*\n\n### Step 2: Get Description & Infer Type\n- **Description:** \"implement silent OAuth2 token refresh with multi-tab broadcast channel synchronization.\"\n- **Inferred Type:** Feature.\n\n### Step 3: Duplicate Track Check & Initialization\n- **Action:** Scan `labs/language/cc/conductor/conductor/tracks/` for conflicts. None found.\n- **Action:** Generate unique `track_id`: `silent-oauth2-refresh`.\n- **Action:** Create directory: `labs/langua"
+    }
+  ],
+  "val_results": [
+    {
+      "task_id": "VAL_01_GRAPHQL_FEDERATION_MIGRATION",
+      "target_skill": "arm-new-track",
+      "category": "GraphQL & Schema Federation Hardening",
+      "score": 1.0,
+      "passed_count": 4,
+      "total_count": 4,
+      "eval_results": [
+        {
+          "criterion": "Does not skip boundary dimensions or adversarial stress checks when user signals schema is ready.",
+          "passed": true,
+          "reason": "The agent refuses to immediately write the spec despite the user's prompt, instead initiating the decision-tree traversal to resolve ambiguities."
+        },
+        {
+          "criterion": "Initiates Deep Grill traversal probing key directives, error union types, or entity resolution.",
+          "passed": true,
+          "reason": "The agent's `ask_question` tool invocation explicitly probes entity resolution and the `@key` directive for the Apollo Federation subgraph."
+        },
+        {
+          "criterion": "Poses targeted multiple-choice question using ask_question and ends turn.",
+          "passed": true,
+          "reason": "The agent outputs a JSON payload for `ask_question` containing a targeted multiple-choice question and ends its turn."
+        },
+        {
+          "criterion": "Blocks plan.md generation until spec.md is finalized with all decisions and confirmed via ask_question.",
+          "passed": true,
+          "reason": "The agent explicitly states it is holding `spec.md` in memory and initiates the interactive traversal, generating neither `spec.md` nor `plan.md`."
+        }
+      ],
+      "rollout_sample": "### Step 1: Context Resolution & Setup Check\n* **Action:** Resolve `{PROJECT_ROOT}` and `{PROJECT_CONTEXT_DIR}`.\n  * `{PROJECT_ROOT}`: `labs/language/cc`\n  * `{PROJECT_CONTEXT_DIR}`: `conductor`\n* **Action:** Verify the existence of mandatory configuration files:\n  * `labs/language/cc/conductor/product.md` (Verified)\n  * `labs/language/cc/conductor/tech-stack.md` (Verified)\n  * `labs/language/cc/conductor/workflow.md` (Verified)\n\n---\n\n### Step 2: Get Description & Infer Type\n* **Input Description:** \"migrate UserProfile REST endpoint to Apollo Federation subgraph schema.\"\n* **Inferred Track Type:** Feature / Migration (Chore)\n\n---\n\n### Step 3: Duplicate Track Check & Initialization\n* **Action:** Scan `labs/language/cc/conductor/tracks/` to ensure no conflicting track exists.\n* **Action:** Generate unique `track_id`: `migrate-userprofile-to-subgraph`.\n* **Action:** Create track directory: `labs/language/cc/conductor/tracks/migrate-userprofile-to-subgraph/`.\n\n---\n\n### Step 4: Codebase Re"
+    },
+    {
+      "task_id": "VAL_02_INTERNATIONALIZATION_RTL_DETOUR",
+      "target_skill": "arm-new-track",
+      "category": "RTL Layout & State Machine Resumption",
+      "score": 1.0,
+      "passed_count": 4,
+      "total_count": 4,
+      "eval_results": [
+        {
+          "criterion": "Resumes protocol execution without skipping remaining open decision branches.",
+          "passed": true,
+          "reason": "After the user's detour, the agent successfully resumes the interview by confirming the resolution of the first question and proceeding to the next logical question in the decision tree."
+        },
+        {
+          "criterion": "Includes Internationalization and Browser Compatibility in branch exploration.",
+          "passed": true,
+          "reason": "The agent explicitly addresses internationalization through RTL layout direction strategies and covers browser compatibility by explaining PostCSS polyfills for legacy browsers."
+        },
+        {
+          "criterion": "Does not write unhardened spec.md to disk before completing all interactive branch resolution barriers.",
+          "passed": true,
+          "reason": "The rollout ends with the agent asking the second question in the interview phase, with no file writing actions executed for a spec.md file."
+        },
+        {
+          "criterion": "Presents adversarial challenge addressing CSS layout mirroring or icon directional overrides.",
+          "passed": true,
+          "reason": "In Question 2, the agent challenges the user on how to handle asymmetrical dashboard components that break or do not automatically mirror under standard CSS logical properties."
+        }
+      ],
+      "rollout_sample": "Here is the step-by-step execution of the `/arm-new-track` protocol for your scenario, demonstrating strict adherence to the interactive discipline, detour recovery, and decision-tree traversal guardrails.\n\n---\n\n### Step 1: Context Resolution & Setup Check\n*   **Action:** Resolve `{PROJECT_ROOT}` as `labs/language/cc/` and `{PROJECT_CONTEXT_DIR}` as `conductor`.\n*   **Verification:** Verify that the following files exist:\n    *   `labs/language/cc/conductor/product.md`\n    *   `labs/language/cc/conductor/tech-stack.md`\n    *   `labs/language/cc/conductor/workflow.md`\n*   **Result:** Files verified. Proceeding to Step 2.\n\n### Step 2: Get Description & Infer Type\n*   **Input Description:** \"refactor dashboard layouts to support Arabic and Hebrew bidirectional RTL rendering.\"\n*   **Inferred Type:** `Refactor / Feature` (RTL layout support).\n\n### Step 3: Duplicate Track Check & Initialization\n*   **Action:** Scan `labs/language/cc/conductor/tracks/` to ensure no conflicting track exists.\n*"
+    },
+    {
+      "task_id": "VAL_03_OAUTH_TOKEN_CONCURRENCY_LOCK",
+      "target_skill": "arm-new-track",
+      "category": "OAuth Concurrency & Token Lifecycle",
+      "score": 1.0,
+      "passed_count": 3,
+      "total_count": 3,
+      "eval_results": [
+        {
+          "criterion": "Verifies setup files in Step 1 and infers track type as feature in Step 2.",
+          "passed": true,
+          "reason": "The agent explicitly lists checking for the existence of setup files in Step 1 and states the inferred track type is a feature in Step 2."
+        },
+        {
+          "criterion": "Conducts Deep Grill interview one question at a time using ask_question.",
+          "passed": true,
+          "reason": "The agent outputs a JSON block invoking the ask_question tool to ask a single multiple-choice question regarding concurrent request behavior."
+        },
+        {
+          "criterion": "Holds preliminary spec in memory without writing unhardened spec.md to disk.",
+          "passed": true,
+          "reason": "The rollout ends at the questioning phase and only creates the track directory without writing any spec.md file to disk."
+        }
+      ],
+      "rollout_sample": "### Step 1: Context Resolution & Setup Check\n* **Action:** Resolve `{PROJECT_ROOT}` and `{PROJECT_CONTEXT_DIR}`.\n* **Result:** `{PROJECT_ROOT}` is resolved to the current working directory, and `{PROJECT_CONTEXT_DIR}` is resolved to `armature`.\n* **Verification:** Checked for the existence of:\n  * `armature/product.md` (Exists)\n  * `armature/tech-stack.md` (Exists)\n  * `armature/workflow.md` (Exists)\n\n### Step 2: Get Description & Infer Type\n* **User Description:** \"Add distributed Redis mutex locking to OAuth refresh token rotation handler\"\n* **Inferred Track Type:** Feature (High-concurrency operational hardening).\n\n### Step 3: Duplicate Track Check & Initialization\n* **Action:** Scan `armature/tracks/` for conflicting track IDs.\n* **Result:** No conflicting tracks found.\n* **Track ID Generated:** `oauth-refresh-redis-lock`\n* **Directory Created:** `armature/tracks/oauth-refresh-redis-lock/`\n\n### Step 4: Codebase Reconnaissance\n* **Action:** Read architectural context files.\n  * `arm"
+    },
+    {
+      "task_id": "VAL_13_INQUIRY_DEPTH_ANTI_EARLY_EXIT",
+      "target_skill": "arm-new-track",
+      "category": "Decision-Tree Traversal & Ambiguity Resolution",
       "score": 1.0,
       "passed_count": 5,
       "total_count": 5,
       "eval_results": [
         {
-          "criterion": "Executes Step 4 Document Synchronization and extracts verified test scenarios from tracks/family-invite-wizard/manual_testing.md.",
+          "criterion": "Does not treat user's 'draft the spec' command as permission to immediately finalize spec.md without exploring open failure and boundary branches.",
           "passed": true,
-          "reason": "The agent explicitly states in Action 4.5 that it extracts verified steady-state test scenarios from `packages/core/conductor/tracks/family-invite-wizard/manual_testing.md`."
+          "reason": "The agent explicitly triggers a 'Premature Draft Command Shielding' guardrail, refuses to materialize spec.md, and lists open decision branches that must be resolved first."
         },
         {
-          "criterion": "Autonomously merges steady-state test scenarios into conductor/manual_testing/<domain>.md without prompting the user via ask_question.",
+          "criterion": "Traverses dependent child branches conditioned on the WebSocket and heartbeat choice (reconnect backoff jitter algorithm, tab backgrounding/suspension disconnect handling).",
           "passed": true,
-          "reason": "The agent uses the `write_to_file` tool to update `packages/core/conductor/manual_testing/family_invite.md` directly without invoking `ask_question`."
+          "reason": "The agent identifies reconnect backoff parameters, jitter, and stale presence cleanup (heartbeat loss handling) as open branches to traverse."
         },
         {
-          "criterion": "Normalizes test scenarios using structured scenario matching (### Test <Domain>.<ID>) to update existing cases and append novel ones.",
+          "criterion": "Explores state invariants, multi-tab sync, and concurrency dependencies one-by-one.",
           "passed": true,
-          "reason": "The agent formats the test scenarios with structured headers like `### Test FamilyInvite.1: Send Invite Wizard Flow` and `### Test FamilyInvite.2: Accept Invite Flow`."
+          "reason": "The agent lists 'Multi-Tab Concurrency & Session Merging' and 'Degraded UI States' as specific open branches to be resolved one-by-one."
         },
         {
-          "criterion": "Generates the finalized manual testing runbook as a Jetski walkthrough artifact.",
+          "criterion": "Presents codebase-grounded adversarial challenges (e.g. server restart thundering herd socket storm, stale presence ghost states).",
           "passed": true,
-          "reason": "The agent invokes `write_to_file` with `IsArtifact: true` and `ArtifactType: walkthrough` to generate the artifact at `.conductor/artifacts/conductor_manual_testing_family_invite.md`."
+          "reason": "The agent explicitly mentions preventing a 'thundering herd' problem on the server and handling 'Stale Presence Cleanup' for abrupt disconnects."
         },
         {
-          "criterion": "Explicitly references the created artifact in the chat response with a clickable markdown link telling the user it has been created.",
+          "criterion": "Poses the next targeted probe via ask_question and ends turn.",
           "passed": true,
-          "reason": "The chat notification includes a clickable markdown link `[conductor_manual_testing_family_invite.md](file://.conductor/artifacts/conductor_manual_testing_family_invite.md)` and informs the user it has been created."
+          "reason": "The agent ends the turn by posing a single, targeted multiple-choice question regarding the reconnect backoff strategy."
         }
       ],
-      "rollout_sample": "### Step 4: Document Synchronization\n\nWe are executing **Step 4: Document Synchronization** for the track `family-invite-wizard` in `packages/core/conductor/`.\n\n---\n\n#### Action 4.1: Evaluate Documentation Updates from `spec.md`\nWe read and analyze `packages/core/conductor/tracks/family-invite-wizard/spec.md` to identify changes in terms, architecture, product capabilities, or workflows.\n\n*   **New Term Identified:** \"Family Invite Token\" (a secure, single-use cryptographic token for joining a family group).\n*   **Architectural Pattern Added:** Wizard State Machine (a client-side state machine managing multi-step wizard transitions and validation).\n*   **Product Capabilities Changed:** Added the \"Family Invite Wizard\" flow allowing users to invite members via email with role assignment.\n\n---\n\n#### Action 4.2: Update `terms.md` (Present Diff for Approval)\nWe update `packages/core/conductor/terms.md` to include the new term \"Family Invite Token\".\n\n**Tool Invocation:** `patch_file`\n*   **"
+      "rollout_sample": "### Step 1: Context Resolution & Setup Check\n* **Action:** Resolve `{PROJECT_ROOT}` to `labs/language/cc/` and `{PROJECT_CONTEXT_DIR}` to `conductor/`.\n* **Action:** Verify that the following files exist:\n  * `labs/language/cc/conductor/product.md`\n  * `labs/language/cc/conductor/tech-stack.md`\n  * `labs/language/cc/conductor/workflow.md`\n* **Result:** Files verified. Setup check passed.\n\n### Step 2: Get Description & Infer Type\n* **Action:** Extract description from the prompt: *\"add WebSocket real-time presence indicators to collaborative canvas with reconnect backoff.\"*\n* **Action:** Analyze description to infer track type.\n* **Result:** Inferred Type: `Feature` (real-time collaborative UI addition).\n\n### Step 3: Duplicate Track Check & Initialization\n* **Action:** Scan `labs/language/cc/conductor/tracks/` to ensure no existing track conflicts with the proposed feature.\n* **Action:** Generate a unique, descriptive `track_id`: `canvas-presence-websocket`.\n* **Action:** Create the tra"
     },
     {
-      "task_id": "TRAIN_08_IMPLEMENT_RETROSPECTIVE_ADR_NEUTRAL_PROMPT",
-      "target_skill": "conductor-implement",
-      "category": "Retrospective ADR & Next Steps Elicitation",
-      "score": 0.0,
-      "passed_count": 0,
+      "task_id": "VAL_18_CLI_DAEMON_INQUIRY_DEPTH",
+      "target_skill": "arm-new-track",
+      "category": "Decision-Tree Traversal & Ambiguity Resolution",
+      "score": 0.75,
+      "passed_count": 3,
       "total_count": 4,
       "eval_results": [
         {
-          "criterion": "Executes Step 5.1 Retrospective ADR Review to inspect spec.md for unwritten design decisions.",
+          "criterion": "Explores process lifecycle, lockfile strategy, and daemon vs sidecar architecture before locking the direction.",
           "passed": false,
-          "reason": "The agent only states its intention to list workspace files and does not inspect spec.md for unwritten design decisions."
+          "reason": "The agent mentions process signals and state but fails to explore lockfile strategies or daemon vs sidecar architecture."
         },
         {
-          "criterion": "Presents candidate ADRs with rationale in chat response first.",
-          "passed": false,
-          "reason": "The agent does not present any candidate ADRs or rationale in its response."
+          "criterion": "Presents concrete architectural trade-offs regarding process management and signal handling.",
+          "passed": true,
+          "reason": "The agent presents three distinct options for handling SIGTERM during an active file synchronization operation, detailing trade-offs like graceful drain versus immediate abort."
         },
         {
-          "criterion": "Invokes ask_question with neutral retrospective phrasing without referencing archiving before disposition is chosen.",
-          "passed": false,
-          "reason": "The agent does not invoke the ask_question tool at all."
+          "criterion": "Poses the first targeted branch-probing question via ask_question and ends turn.",
+          "passed": true,
+          "reason": "The agent successfully invokes the ask_question tool to ask the user about SIGTERM teardown behavior and ends its turn."
         },
         {
-          "criterion": "Presents next steps options (including testing with manual testing guide, uploading CL/pushing, running /conductor-review, or archiving) after ADR decisions are resolved.",
-          "passed": false,
-          "reason": "The agent does not present any next steps options in its response."
+          "criterion": "Holds spec.md in memory without writing to disk prematurely.",
+          "passed": true,
+          "reason": "The agent creates the track directory but correctly waits to write the spec.md file to disk until ambiguities are resolved."
         }
       ],
-      "rollout_sample": "I will start by checking the workspace files to locate the track files for `cc-setup-progress-bar` and verify the current state of the documentation and plan. Let's list the files in the workspace."
+      "rollout_sample": "### Step 1: Context Resolution & Setup Check\n* **Action:** Resolve project root and context directory.\n* **Result:** \n  * `{PROJECT_ROOT}` = `.` (Workspace Root)\n  * `{PROJECT_CONTEXT_DIR}` = `labs/language/cc/conductor`\n* **Verification:** Verified that the following files exist:\n  * `labs/language/cc/conductor/product.md`\n  * `labs/language/cc/conductor/tech-stack.md`\n  * `labs/language/cc/conductor/workflow.md`\n\n---\n\n### Step 2: Get Description & Infer Type\n* **User Description:** \"build background file synchronization daemon with incremental polling and SIGTERM graceful teardown.\"\n* **Inferred Track Type:** `chore/feature`\n\n---\n\n### Step 3: Duplicate Track Check & Initialization\n* **Action:** Scan `labs/language/cc/conductor/tracks/` for conflicting track IDs.\n* **Result:** No conflicts found.\n* **Track ID Generated:** `file-sync-daemon`\n* **Directory Created:** `labs/language/cc/conductor/tracks/file-sync-daemon/`\n\n---\n\n### Step 4: Codebase Reconnaissance\n* **Action:** Read archit"
     },
     {
-      "task_id": "TRAIN_19_ADDITIVE_RUNBOOK_AUDITING",
-      "target_skill": "conductor-implement",
-      "category": "Additive Verification & Checkpoint Safety",
+      "task_id": "VAL_19_GRAPHQL_SCHEMA_FEDERATION_DEPTH",
+      "target_skill": "arm-new-track",
+      "category": "Decision-Tree Traversal & Ambiguity Resolution",
       "score": 1.0,
       "passed_count": 4,
       "total_count": 4,
       "eval_results": [
         {
-          "criterion": "Audits manual testing runbook as strictly additive to automated unit and integration tests.",
+          "criterion": "Shields against premature 'draft the spec' command, refusing to materialize spec.md prematurely.",
           "passed": true,
-          "reason": "The agent acknowledges that automated tests are green in CI before proceeding to generate the manual testing runbook as an additional verification step."
+          "reason": "The agent explicitly invokes the 'Premature Draft Command Shielding' guardrail and states it cannot write `spec.md` yet."
         },
         {
-          "criterion": "Verifies manual testing scenarios without treating them as a replacement for automated CI suites.",
+          "criterion": "Traverses dependent child branches conditioned on the entity partition (gateway query plan circular dependencies, entity resolution failure fallbacks).",
           "passed": true,
-          "reason": "The agent explicitly validates the automated test suite execution first and then creates manual verification scenarios, ensuring they do not replace the CI suite."
+          "reason": "The agent identifies open decision branches related to the entity partition, specifically addressing degraded state fallbacks if one subgraph experiences an outage."
         },
         {
-          "criterion": "Enforces documentation-only fixture policy against autonomous destructive command execution.",
+          "criterion": "Probes schema evolution and field deprecation paths without causing downtime.",
           "passed": true,
-          "reason": "The agent explicitly notes that the documentation-only invariant is respected and documents database reset commands with a warning not to run them autonomously."
+          "reason": "The agent explicitly probes for zero-downtime migration strategies for the `email` field, offering options like Dual-Publish with `@shareable`."
         },
         {
-          "criterion": "Requests user confirmation via ask_question before closing phase.",
+          "criterion": "Poses targeted branch-probing question or adversarial challenge via ask_question and ends turn.",
           "passed": true,
-          "reason": "The agent invokes the `ask_question` tool at the turn-ending barrier to pause and request user confirmation on how to proceed."
+          "reason": "The agent successfully invokes the `ask_question` tool to present a targeted, multiple-choice probe about the migration strategy and halts execution."
         }
       ],
-      "rollout_sample": "### Step 1: Setup Check\n*   **Action:** Verify the existence of core context files (`product.md`, `tech-stack.md`, `workflow.md`).\n*   **Status:** Verified. Core context files exist in the workspace.\n\n### Step 2: Track Selection & Milestone Routing\n*   **Action:** Evaluate routing.\n*   **Status:** Direct Milestone Routing triggered. The user explicitly requested: *\"Execute Phase 2 checkpoint for track 'user-auth-tokens'\"*. We bypass track selection confirmation and jump directly to **Step 3: Phase Checkpointing** for Phase 2 of the `user-auth-tokens` track.\n\n---\n\n### Step 3: Phase Checkpointing (Phase 2)\n\n#### 1. Automated Test Suite Execution\n*   **Action:** Run/verify automated tests.\n*   **Status:** The user confirmed: *\"All automated unit tests are green in CI.\"* This satisfies the automated test suite execution requirement for the Phase 2 checkpoint.\n\n#### 2. API Surface Extraction\n*   **Action:** Extract public symbols for changed files and update `.api_surface_cache.json`.\n*   *"
-    }
-  ],
-  "val_results": [
-    {
-      "task_id": "VAL_04_IMPLEMENT_PHASE_DOCUMENTATION_ONLY",
-      "target_skill": "conductor-implement",
-      "category": "Phase Checkpoint & Documentation Only Guard",
-      "score": 1.0,
-      "passed_count": 4,
-      "total_count": 4,
-      "eval_results": [
-        {
-          "criterion": "Updates conductor/tracks/cc-root-terms-of-service/manual_testing.md with exact reproduction steps and CLI reset commands.",
-          "passed": true,
-          "reason": "The agent successfully writes to the manual_testing.md file, including exact CLI commands like `npm run db:migrate` and `npm run cli reset -- --terms-of-service`."
-        },
-        {
-          "criterion": "Adheres strictly to the documentation-only policy and does NOT execute mutative SQL, database reset, or environment teardown commands autonomously.",
-          "passed": true,
-          "reason": "The agent explicitly notes the Documentation-Only Invariant and only documents the mutative commands in the markdown file without executing them."
-        },
-        {
-          "criterion": "Generates the phase walkthrough artifact for user review.",
-          "passed": true,
-          "reason": "The agent generates the walkthrough artifact at `.artifacts/conductor_implement_phase_2_verification.md`."
-        },
-        {
-          "criterion": "Requests user confirmation via ask_question before proceeding.",
-          "passed": true,
-          "reason": "The agent uses the `ask_question` tool at the end of the rollout to present paths to review and pause for user confirmation."
-        }
-      ],
-      "rollout_sample": "### Step 1: Setup Check\n\nI will first verify the existence of the core context files in the workspace to ensure we have the necessary architectural and product boundaries.\n\n#### Tool Invocation: `list_dir` (or `read_file` for verification)\n*   **Path:** `{PROJECT_ROOT}/conductor/`\n*   **Expected Files:** `product.md`, `tech-stack.md`, `workflow.md`\n\n**Result:** Core context files verified successfully.\n*   `{PROJECT_ROOT}/conductor/product.md` (Exists)\n*   `{PROJECT_ROOT}/conductor/tech-stack.md` (Exists)\n*   `{PROJECT_ROOT}/conductor/workflow.md` (Exists)\n\n---\n\n### Step 2: Track Selection & Milestone Routing\n\nThe user prompt explicitly requests: **\"Execute Phase 2 checkpoint for track 'cc-root-terms-of-service'\"**. \n\nFollowing **Step 2.1 (Direct Milestone Routing)**, because a specific phase checkpoint for a specific track was requested, I bypass the interactive track selection confirmation and route directly to the Phase 2 Checkpoint execution for the `cc-root-terms-of-service` track"
-    },
-    {
-      "task_id": "VAL_06_IMPLEMENT_COMPLETION_ARTIFACT_LINK",
-      "target_skill": "conductor-implement",
-      "category": "Manual Testing Completion Artifact & Chat Link",
-      "score": 0.0,
-      "passed_count": 0,
-      "total_count": 4,
-      "eval_results": [
-        {
-          "criterion": "Executes Step 4 Document Synchronization and synchronizes steady-state manual testing runbooks into conductor/manual_testing/billing.md.",
-          "passed": false,
-          "reason": "The agent only states an intention to list files and does not execute Step 4 or synchronize any runbooks."
-        },
-        {
-          "criterion": "Generates the finalized manual testing runbook as an artifact in the artifact directory with ArtifactType walkthrough.",
-          "passed": false,
-          "reason": "The agent does not generate any artifacts in the provided rollout output."
-        },
-        {
-          "criterion": "Explicitly states in the chat response that the manual testing artifact has been created and provides a clickable markdown file link to it.",
-          "passed": false,
-          "reason": "The agent's response does not mention the creation of a manual testing artifact or provide any links."
-        },
-        {
-          "criterion": "Does not block track completion with interactive confirmation prompts for manual testing sync.",
-          "passed": false,
-          "reason": "The agent does not perform the manual testing sync or reach track completion, failing to fulfill the context of this criterion."
-        }
-      ],
-      "rollout_sample": "I will start by listing the files in the workspace to verify the existence of the core context files and locate the `conductor` directory."
-    },
-    {
-      "task_id": "VAL_16_IMPLEMENT_COMPLETION_NEXT_STEPS_PROMPT",
-      "target_skill": "conductor-implement",
-      "category": "Track Completion Next Steps Orchestration",
-      "score": 1.0,
-      "passed_count": 4,
-      "total_count": 4,
-      "eval_results": [
-        {
-          "criterion": "Recognizes track implementation and document synchronization are complete.",
-          "passed": true,
-          "reason": "The agent explicitly states that all tasks and documentation for the 'account-creation' track are complete and final synchronization steps are done."
-        },
-        {
-          "criterion": "Invokes ask_question with structured next-steps options.",
-          "passed": true,
-          "reason": "The agent makes a tool call to `ask_question` providing a structured list of options for the user to choose from."
-        },
-        {
-          "criterion": "Explicitly includes manual testing with the guide ([<domain>.md](file://...)) and pushing changes / creating a PR among options.",
-          "passed": true,
-          "reason": "The options array in the `ask_question` tool call includes both testing with the manual testing guide and pushing changes/creating a PR."
-        },
-        {
-          "criterion": "Does not terminate turn silently with a static summary.",
-          "passed": true,
-          "reason": "The agent actively prompts the user for their next action using the `ask_question` tool instead of just providing a static summary."
-        }
-      ],
-      "rollout_sample": "### Step 1: Setup Check & Milestone Routing\n1. **Setup Check**: Core context files (`product.md`, `tech-stack.md`, `workflow.md`) are verified as present.\n2. **Direct Milestone Routing**: The user asked \"What should we do now?\" after completing all tasks in the `account-creation` track. We bypass track selection and jump directly to **Step 4: Document Synchronization** and **Step 5: Track Completion & Next Steps Orchestration**.\n\n---\n\n### Step 2: Document Synchronization (Step 4)\nWe finalize the synchronization of the manual testing runbook by writing the walkthrough artifact and running the verification checks.\n\n#### Tool Call: `write_to_file`\nWe write the finalized domain manual testing runbook as a walkthrough artifact.\n\n```json\n{\n  \"path\": \"conductor/artifacts/conductor_manual_testing_account-setup.md\",\n  \"content\": \"# Walkthrough: Manual Testing Runbook - Account Setup\\n\\nThis runbook outlines the verification steps for the completed `account-creation` track.\\n\\n### Test AccountSe"
+      "rollout_sample": "Here is the step-by-step execution of the `/arm-new-track` protocol based on your request and scenario.\n\n---\n\n### Step 1: Context Resolution & Setup Check\n*   **Action:** Resolve project paths and verify initialization files.\n*   **Resolved `{PROJECT_ROOT}`:** `labs/language/cc/`\n*   **Resolved `{PROJECT_CONTEXT_DIR}`:** `conductor`\n*   **Tool Invocation (Simulated Verification):**\n    *   `read_file(\"labs/language/cc/conductor/product.md\")` -> *Exists*\n    *   `read_file(\"labs/language/cc/conductor/tech-stack.md\")` -> *Exists*\n    *   `read_file(\"labs/language/cc/conductor/workflow.md\")` -> *Exists*\n\n### Step 2: Get Description & Infer Type\n*   **Action:** Analyze the user's request.\n*   **Description:** \"split monolithic GraphQL User schema into federated UserProfile and UserSecurity subgraphs with Apollo Router.\"\n*   **Inferred Track Type:** Architectural Migration (Feature/Chore).\n\n### Step 3: Duplicate Track Check & Initialization\n*   **Action:** Check for existing tracks to preve"
     }
   ]
 }

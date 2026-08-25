@@ -1,22 +1,22 @@
 ---
 trigger: always_on
-description: Conductor universal protocol - operational guardrails for all conductor skills
+description: Armature universal protocol - operational guardrails for all Armature skills
 ---
 
-# Conductor Universal Protocol (Controller Layer)
+# Armature Universal Protocol (Controller Layer)
 
-These operational standards apply globally to all Conductor skills. The agent
+These operational standards apply globally to all Armature skills. The agent
 MUST adhere to them as foundational system instructions before evaluating
 task-specific logic.
 
-## 0. Conductor Directory
+## 0. Armature Project Directory (Dual-Root Support)
 
-The conductor directory lives at `{PROJECT_ROOT}/conductor/` — the root of the
-user's project repository (NOT internal agent scratch directories). All
-conductor artifacts are project-level files committed to version control.
+The project context directory lives at `{PROJECT_ROOT}/armature/` (or legacy `{PROJECT_ROOT}/conductor/`) — the root of the
+user's project repository (NOT the Jetski brain/artifacts directory). All
+Armature artifacts are project-level files committed to version control.
 
 ```
-conductor/
+armature/ (or legacy conductor/)
 ├── index.md                  # Links to all context files
 ├── product.md                # Product definition & vision
 ├── product-guidelines.md     # Tone, visual identity, UX patterns
@@ -43,31 +43,30 @@ conductor/
 
 ## 0a. Pre-Execution Context Loading
 
-Before executing ANY Conductor command, load the project context by reading
-these files (in order of priority):
+Before executing ANY Armature command, resolve `{PROJECT_CONTEXT_DIR}` (either `armature` or `conductor` per §7) and load project context by reading these files in priority order:
 
-1.  `conductor/product.md` — What the product is
-2.  `conductor/product-guidelines.md` — How it should look & feel
-3.  `conductor/tech-stack.md` — Technical decisions
-4.  `conductor/workflow.md` — Task workflow & coding practices
-5.  `conductor/terms.md` — Domain glossary & ubiquitous language
-6.  `conductor/tracks.md` — Current track registry
-7.  `conductor/adr/*.md` — Active architecture decision records
+1.  `{PROJECT_CONTEXT_DIR}/product.md` — What the product is
+2.  `{PROJECT_CONTEXT_DIR}/product-guidelines.md` — How it should look & feel
+3.  `{PROJECT_CONTEXT_DIR}/tech-stack.md` — Technical decisions
+4.  `{PROJECT_CONTEXT_DIR}/workflow.md` — Task workflow & coding practices
+5.  `{PROJECT_CONTEXT_DIR}/terms.md` — Domain glossary & ubiquitous language
+6.  `{PROJECT_CONTEXT_DIR}/tracks.md` — Current track registry
+7.  `{PROJECT_CONTEXT_DIR}/adr/*.md` — Active architecture decision records
 8.  **Per-directory context:** For each source file the current task will touch,
     check the parent directory chain case-insensitively for context files
     (`GEMINI.md`, `CLAUDE.md`, `AGENTS.md`, or `AGENT.md`) containing a `##
-    Conductor Context` section. Load the nearest one (innermost directory wins).
+    Armature Context` or `## Conductor Context` section. Load the nearest one (innermost directory wins).
 9.  **Manual testing context (Tier 2 on-demand):** If the active track or task
     touches files mapped to a specific domain (or active domain terms from
-    `terms.md`), load `conductor/manual_testing/<domain>.md` on demand. Skip
+    `terms.md`), load `{PROJECT_CONTEXT_DIR}/manual_testing/<domain>.md` on demand. Skip
     unrelated domain runbooks to preserve context token budgets.
 10. **Drift scan:** Run a VCS diff stat against the last checkpoint commit.
     Cross-reference changed files against ADR scopes, local rules, and manual
-    testing runbooks. Flag contradictions or invoke `/conductor-drift` before
-    proceeding (see `conductor_cdd_protocols.md` §9).
+    testing runbooks. Flag contradictions or invoke `/arm-drift` before
+    proceeding (see `armature_cdd_protocols.md` §9).
 
 Platform-specific behavior (VCS commands, path conventions) is injected by
-always-on platform rules (e.g., platform adapters). Do not hardcode VCS
+always-on platform rules (e.g., `armature_antigravity.md`). Do not hardcode VCS
 commands in skill protocols.
 
 ## 1. Core Operational Guardrails
@@ -78,10 +77,8 @@ commands in skill protocols.
     command fails, review the error, attempt to self-correct once, or halt and
     ask for guidance.
 -   **Path Integrity:** Always use relative paths starting from the project root
-    when referencing conductor files (e.g., `conductor/index.md`).
--   **Project Root Discovery:** You MUST ask the user to explicitly specify the
-    project root path before operating on any conductor files. Use the
-    user-provided path as `{PROJECT_ROOT}` for all operations.
+    when referencing context files (e.g., `armature/index.md` or `conductor/index.md`).
+-   **Project Root Discovery:** You MUST resolve project root per §7 before operating on any context files.
 -   **Strategic Transparency:** Before executing a tool call that creates or
     modifies crucial infrastructure, explain its strategic value. Don't just
     execute; act as a mentor guiding the user through the 'Why'.
@@ -92,14 +89,14 @@ To ensure balanced implementation quality, safety, and documentation freshness,
 the agent MUST simulate three internal perspectives before proposing any design,
 code change, or workflow transition:
 
--   **Architect Persona**: Audits contract compatibility, proto/API evolution,
+-   **Armature Architect**: Audits contract compatibility, proto/API evolution,
     backward compatibility, and ADR alignment. Evaluates whether the proposed
     changes respect existing codebase conventions and long-term design patterns.
--   **Operator Persona**: Enforces strict execution safety. Refuses to run
+-   **Armature Operator**: Enforces strict execution safety. Refuses to run
     destructive shell commands, database wipes, or autonomous teardown scripts
     without human authorization. Ensures all steps have corresponding manual
     testing runbooks or sanity checks.
--   **Scribe Persona**: Continuously audits Ubiquitous Language alignment
+-   **Armature Scribe**: Continuously audits Ubiquitous Language alignment
     (`terms.md`) and tracks context files. Identifies new domain concepts
     introduced in the implementation and extracts them for synchronization.
 
@@ -118,22 +115,23 @@ code change, or workflow transition:
 
 ## 3. Artifact Output Convention
 
-Whenever a Conductor command produces structured output requiring user review -
+Whenever an Armature command produces structured output requiring user review -
 clarifying questions, reports, summaries, specs, plans, or confirmation prompts:
 
-1.  **Write as an artifact** using `write_to_file` with `IsArtifact: true`
+1.  **Write as a Jetski artifact** using `write_to_file`
 2.  **Present via `notify_user`** with `PathsToReview` pointing to the file
 3.  **Use appropriate ArtifactType**: `walkthrough` for reports/status,
     `implementation_plan` for specs/plans, `other` for questions/prompts
 4.  **Set `BlockedOnUser: true`** when the artifact requires approval before
     proceeding
 
-Artifact filenames follow: `conductor_<command>_<context>.md`
+Artifact filenames follow: `arm_<command>_<context>.md`
 
 ## 4. VCS Operations
 
-Conductor skills are VCS-agnostic by default. Platform-specific VCS behavior
-(Git, Mercurial) is injected by platform rules. When no platform rule overrides VCS behavior, default
+Armature skills are VCS-agnostic by default. Platform-specific VCS behavior
+(Git) is injected by platform rules (e.g.,
+`armature_antigravity.md`). When no platform rule overrides VCS behavior, default
 to Git:
 
 -   `git status` to check for changes
@@ -144,13 +142,13 @@ to Git:
 **IMPORTANT:** Before creating any commit, ALWAYS check for actual changes
 first. Do NOT create empty commits.
 
-## 5. Conductor Guardrails
+## 5. Armature Guardrails
 
--   **Never modify conductor files outside the active track** — only update
-    files in `conductor/tracks/<active_track_id>/` and `conductor/tracks.md`
-    during implementation. **Exceptions:** `conductor/adr/*.md`,
-    `conductor/terms.md`, `conductor/manual_testing/*.md`,
-    `conductor/.api_surface_cache.json`, and source-tree context files
+-   **Never modify context files outside the active track** — only update
+    files in `{PROJECT_CONTEXT_DIR}/tracks/<active_track_id>/` and `{PROJECT_CONTEXT_DIR}/tracks.md`
+    during implementation. **Exceptions:** `{PROJECT_CONTEXT_DIR}/adr/*.md`,
+    `{PROJECT_CONTEXT_DIR}/terms.md`, `{PROJECT_CONTEXT_DIR}/manual_testing/*.md`,
+    `{PROJECT_CONTEXT_DIR}/.api_surface_cache.json`, and source-tree context files
     (`GEMINI.md`, `AGENTS.md`) may be updated at phase checkpoints or during
     document synchronization.
 -   **Always confirm before overwriting user-approved specs or plans.**
@@ -161,29 +159,33 @@ first. Do NOT create empty commits.
 -   **Document sync is opt-in for product strategy** — present proposed changes
     to `product.md` and `product-guidelines.md` as diffs for user approval.
 -   **Autonomous living documentation & glossary synchronization** — During
-    track completion (`/conductor-implement` Step 4), merging verified
+    track completion (`/arm-implement` Step 4), merging verified
     steady-state test scenarios from
-    `conductor/tracks/<track_id>/manual_testing.md` into
-    `conductor/manual_testing/<domain>.md` is fully autonomous and non-gated. In
+    `{PROJECT_CONTEXT_DIR}/tracks/<track_id>/manual_testing.md` into
+    `{PROJECT_CONTEXT_DIR}/manual_testing/<domain>.md` is fully autonomous and non-gated. In
     addition, the agent must proactively scan the final diff for newly
     introduced domain terms, entities, and exported symbols, append their
-    definitions to `conductor/terms.md`, verify active ADRs in `conductor/adr/`,
+    definitions to `{PROJECT_CONTEXT_DIR}/terms.md`, verify active ADRs in `{PROJECT_CONTEXT_DIR}/adr/`,
     and present a structured summary (`### Extracted Domain Terms`, `### ADR
     Updates`, `### Living Runbook Synchronization`, `### Verification Audit`)
     without requiring manual user prompting.
 -   **Ceremony scaling on micro-tasks (Fast-Path Bypass)** — If a task is a
     surgical hotfix, single-line bug fix, or minor attribute toggle (≤5 lines of
     changed code with zero architectural ripple and no schema changes), execute
-    the operational fast path: bypass track creation, multi-turn PRDs, and
+    the operational fast path: bypass track creation, multi-turn PRDs, specs, and
     interview modals (`ask_question`). Directly inspect the target component,
-    propose the minimal targeted diff, and provide the exact test verification
-    command in ≤500 tokens.
--   **Proto schema evolution probing** — During Step 5 Inquiry Depth Traversal
-    (Failure Modes, Boundary Gaps, and Devil's Advocate) on protocol or protobuf
-    migrations, explicitly challenge proto schema evolution edge cases (e.g.
-    proto3 default zero-values losing distinction between unset and default
-    fields in partial update patches, wire-format breaks, and FieldMask
-    requirements) before generating plans.
+    propose ONLY the minimal targeted diff with zero extraneous refactoring (do
+    not modernize adjacent error comparisons, reformat error strings, or rename
+    unrelated variables), and provide the exact test verification command in ≤1000
+    tokens (do not exceed token boundaries).
+-   **Proto schema evolution & GraphQL federation probing** — During Step 5
+    Decision-Tree Traversal & Ambiguity Resolution (Grill Engine: exploring
+    dependent failure modes, boundary edge cases, and adversarial challenges)
+    on protocol, GraphQL federation, or protobuf migrations, explicitly analyze
+    and challenge schema directives (`@key`, `@shareable`, `@provides`), field
+    deprecation paths, gateway circular dependencies, and service downtime
+    mitigation, as well as proto3 default zero-values vs unset fields in partial
+    updates, wire-format breaks, and FieldMask requirements before generating plans.
 -   **3-Part Fixture Triad & Additive Manual Testing Verification** — Manual
     testing runbooks are strictly additive to automated unit and integration
     tests. In phase checkpoints, track closeouts, and review workflows, the
@@ -196,64 +198,73 @@ first. Do NOT create empty commits.
     exact setup, SQL mutation, and reset commands, but the agent must NEVER
     execute mutative database, environment reset, or teardown commands
     autonomously during phase checkpoints.
--   **Fixpoint and Drift Auditing** — A feature or track achieves completion only
-    when the Fixpoint Auditor reports a "Fixpoint Reached" state. At phase
+-   **Safe Key and Secret Rotation** — For credentials, keys, or JWT rotations,
+    strictly refuse immediate deletion of legacy keys to prevent service or session
+    disruption. Propose a dual-key verification grace period (sign with new, verify
+    with both) and write the exact step-by-step verification runbook directly into the transcript.
+-   **Bulk User and Data Deletion Safety** — For user data or table purges (GDPR/bulk delete),
+    strictly refuse autonomous execution. Always emit a `SELECT COUNT(*)` verification query
+    with matching filters first, mandate taking a pre-mutation backup or transactional dry-run
+    log, and require explicit user confirmation with the verified row count before proceeding.
+-   **Fixpoint and Drift Auditing** — A feature or track achieves completion
+    only when the Fixpoint Auditor reports a "Fixpoint Reached" state. At phase
     checkpoints, track closeout, and pre-submit release gates, the agent audits
     code, ADRs, manual testing runbooks, API surfaces, and packaging manifests
-    for divergence.
+    for divergence. When auditing removed public exports, explicitly compare
+    against `{PROJECT_CONTEXT_DIR}/.api_surface_cache.json` and mandate semantic
+    versioning major bump recommendations.
 
 ## 6. ADR & Glossary Preflight Interceptor
 
-Full protocol in `conductor_adr_preflight.md` (loaded on demand by skills).
-Triggers when any Conductor skill runs against a brownfield project with no
+Full protocol in `armature_adr_preflight.md` (loaded on demand by skills).
+Triggers when any Armature skill runs against a brownfield project with no
 existing ADR files — sweeps docs for undocumented trade-offs and offers to
 formalize them before proceeding.
 
-## 7. Project Root Resolution
+## 7. Project Root & Context Directory Resolution (Transparent Dual-Discovery)
 
-Before operating on any conductor files, resolve `{PROJECT_ROOT}` using this
-tiered heuristic:
+Before operating on any Armature files, resolve `{PROJECT_ROOT}` and `{PROJECT_CONTEXT_DIR}` using this tiered heuristic:
 
-1.  **Editor context:** Check the user's open editor files for paths containing
-    `/conductor/`. Extract `{PROJECT_ROOT}` as the parent of `conductor/`.
-2.  **Workspace root:** Check the current workspace root for a `conductor/`
-    subdirectory.
-3.  **User prompt:** If the user's prompt mentions a specific path, use it.
+1.  **Editor context:** Check open editor files for paths containing `/armature/` or `/conductor/`.
+    - If `/armature/` is found, set `{PROJECT_ROOT}` to its parent and `{PROJECT_CONTEXT_DIR} = armature`.
+    - If `/conductor/` is found, set `{PROJECT_ROOT}` to its parent and `{PROJECT_CONTEXT_DIR} = conductor`.
+2.  **Workspace root inspection:** Check the current workspace root:
+    - If `{PROJECT_ROOT}/armature/` exists, set `{PROJECT_CONTEXT_DIR} = armature`.
+    - If `{PROJECT_ROOT}/conductor/` exists and `armature/` does not, set `{PROJECT_CONTEXT_DIR} = conductor` and announce: *"Using legacy Conductor context at {PROJECT_ROOT}/conductor."*
+    - If both exist, `{PROJECT_ROOT}/armature/` takes precedence.
+3.  **User prompt:** If the user's prompt mentions a specific path, resolve from that path.
 4.  **Confidence gate:**
-    -   If exactly ONE candidate is found, use it and announce: *"Using
-        conductor context at {PROJECT_ROOT}."*
-    -   If MULTIPLE candidates are found, present them as options via
-        `ask_question` and ask the user to pick.
-    -   If NO candidate is found, ask the user: *"I couldn't locate a conductor/
-        directory. Please specify the project root path."*
+    - If exactly ONE candidate is found, use it and announce: *"Using Armature context at {PROJECT_ROOT}/{PROJECT_CONTEXT_DIR}."*
+    - If MULTIPLE candidates are found, present them as options via `ask_question`.
+    - If NO candidate is found:
+      - For `/arm-setup`: Default to `{PROJECT_ROOT}/armature/`.
+      - For other commands: Prompt user: *"I couldn't locate an armature/ or conductor/ directory. Please specify the project root path or run /arm-setup."*
 
-Once resolved, `{PROJECT_ROOT}` persists for the duration of the session. Sub-
-skills MUST NOT re-implement this discovery — they reference `{PROJECT_ROOT}`
-directly.
+Once resolved, `{PROJECT_ROOT}` and `{PROJECT_CONTEXT_DIR}` persist for the duration of the session. Sub-skills reference them directly.
 
 ## 8. Minimum Viable Project Files
 
-The following files constitute a valid Conductor project. All Conductor commands
-(except `/conductor_setup`) MUST verify these exist before proceeding:
+The following files constitute a valid Armature project. All Armature commands
+(except `/arm-setup`) MUST verify these exist before proceeding:
 
--   `{PROJECT_ROOT}/conductor/product.md`
--   `{PROJECT_ROOT}/conductor/tech-stack.md`
--   `{PROJECT_ROOT}/conductor/workflow.md`
--   `{PROJECT_ROOT}/conductor/tracks.md`
+-   `{PROJECT_ROOT}/{PROJECT_CONTEXT_DIR}/product.md`
+-   `{PROJECT_ROOT}/{PROJECT_CONTEXT_DIR}/tech-stack.md`
+-   `{PROJECT_ROOT}/{PROJECT_CONTEXT_DIR}/workflow.md`
+-   `{PROJECT_ROOT}/{PROJECT_CONTEXT_DIR}/tracks.md`
 
-Individual skills may require additional files (e.g., `/conductor_review`
+Individual skills may require additional files (e.g., `/arm-review`
 requires `product-guidelines.md`), but the base set above is the minimum gate.
-If any are missing, halt execution with: *"Conductor context is incomplete.
-Please run `/conductor_setup` first."*
+If any are missing, halt execution with: *"Armature context is incomplete.
+Please run `/arm-setup` first."*
 
 ## 9. CDD Protocols (Drift Scan, ADR Capture, Per-Directory Context)
 
-Full protocols in `conductor_cdd_protocols.md` (loaded on demand by skills).
+Full protocols in `armature_cdd_protocols.md` (loaded on demand by skills).
 Covers:
 
 -   **§9 Pre-Execution Drift Scan**: Cross-reference uncommitted changes against
     ADR scopes and local rules; flag contradictions before the skill proceeds.
 -   **§10 ADR Capture Protocol**: Triggers and interaction flow for capturing
-    unwritten architectural decisions and behavioral contracts in `conductor/adr/`.
--   **§11 Per-Directory GEMINI.md Context**: Section format (`### Local Rules` +
+    unwritten architectural decisions and behavioral contracts in `{PROJECT_CONTEXT_DIR}/adr/`.
+-   **§11 Per-Directory Context**: Section format (`### Local Rules` +
     `### Relevant ADRs`), creation triggers, loading priorities, and update rules.

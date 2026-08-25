@@ -159,27 +159,27 @@ review.
 
 ## Verification Matrix
 
-| Act     | Trigger               | Target Mechanism       | Verification   |
-|         |                       |                        | Assertion      |
-| :------ | :-------------------- | :--------------------- | :------------- |
-| **I**   | `/conductor_newTrack` | `conductor_protocol.md | Preflight trap |
-|         | on legacy repo        | §6`                    | pauses track,  |
-|         |                       |                        | sweeps docs,   |
-|         |                       |                        | writes         |
-|         |                       |                        | ADR-0001       |
-| **II**  | Non-standard design   | `newTrack §7`          | 3-part gate    |
-|         | choice                |                        | writes         |
-|         |                       |                        | ADR-0002;      |
-|         |                       |                        | captures       |
-|         |                       |                        | domain noun in |
-|         |                       |                        | `terms.md`     |
-| **III** | `plan.md` generation  | `newTrack §13`         | ADR            |
-|         |                       |                        | `Confirmation` |
-|         |                       |                        | checkbox       |
-|         |                       |                        | injected as    |
-|         |                       |                        | Phase task     |
-| **IV**  | Code contradicts ADR  | `conductor_review      | Review catches |
-|         |                       | §2.4`                  | spatial drift; |
-|         |                       |                        | forces code    |
-|         |                       |                        | fix or ADR     |
-|         |                       |                        | amendment      |
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

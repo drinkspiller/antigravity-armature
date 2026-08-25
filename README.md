@@ -1,93 +1,126 @@
-# Antigravity Conductor Skills
+# Armature (OSS): Structural Permanence for AI Coding Agents
+
+> [!NOTE]
+> **Conductor is now Armature (OSS) (v0.19.0)**  
+> Conductor has been officially rebranded to **Armature (OSS)**. Existing repositories with a `conductor/` directory continue operating seamlessly via Transparent Dual-Discovery with zero file migrations required.
 
 ## Background
 
-[Gemini CLI Conductor](https://github.com/gemini-cli-extensions/conductor) is a
-Gemini CLI extension that enables Context-Driven Development. It manages the
-full lifecycle of software development tracks: context setup, specification,
-planning, implementation, and review.
+**Armature (OSS)** is a Context-Driven Development (CDD) framework for Antigravity CLI, Claude Code, and Windsurf. It manages the full lifecycle of software development tracks: context setup, multi-turn inquiry depth specification, phased planning, test-driven implementation, living manual testing runbooks, and continuous multi-tier drift auditing.
 
-This installer packages **Antigravity Skills** (with rules and setup assets) that
-bring Conductor's capabilities to Antigravity.
+This project was inspired by and originally forked from the [Conductor](https://github.com/gemini-cli-extensions/conductor/) extension (`github.com/gemini-cli-extensions/conductor`), which pioneered structured track-based task orchestration and context-driven workflows for AI coding assistants. Armature (OSS) builds directly upon Conductor's foundational lifecycle, extending it with living Architecture Decision Records (ADRs), ubiquitous language domain glossaries (`terms.md`), continuous decision-tree traversal, living manual verification runbooks, and automated multi-tier drift auditing.
 
-## Motivation
+## Structural Permanence & Joint Discipline
 
-Standard IDE-based AI agents are powerful, but store their plans, context, and
-knowledge on the developer's machine. The intelligence accumulated during
-development **doesn't travel with the code and is invisible to teammates**.
+In stop-motion animation, puppets look soft and pliable on the outside, but their movement is held together by an internal steel armature with adjustable tension joints. Without the armature, studio heat turns clay into a puddle.
 
-Conductor takes a different approach: **context is a managed artifact that lives
-alongside your code.** Specs, plans, and progress live alongside the project
-source in a `conductor/` directory as self-updating, curated knowledge
-artifacts. Context travels with the codebase and can be shared by the whole
-team.
+Autonomous agents without structural boundaries do the exact same thing. When an agent gets an execution loop, it moves fast. Without an internal structural skeleton, models deform architecture, accumulate synonyms, and drift off spec.
 
-Agents and engineers both draw from a common knowledge base, so the AI
-understands the codebase, and so do the developers. Centralized technical
-constraints (style guides, workflow rules, tech-stack choices) guide every agent
-interaction's adherence to the team's practices and preferences. And all present
-and future work benefits from the evolving project context — it gets smarter
-over time, not stale.
+**Conductor is now Armature (OSS).**
 
-By installing Conductor as an Antigravity Skill, you get both: Antigravity's visual,
-powerful agentic coding tools and session-level knowledge, *plus* shared project
-context that the whole team can use.
+Armature (OSS) provides this internal steel skeleton—giving agents full creative fluidity on the outside while anchoring them to deterministic structural boundaries underneath.
 
-## Evaluation results & benchmark
+Armature (OSS) preserves **transparent dual-discovery**:
+- **Primary (`armature/`)**: Greenfield projects initialized via `/arm-setup` create `armature/`.
+- **Legacy Fallback (`conductor/`)**: Projects with existing `conductor/` directories continue operating seamlessly with zero file migrations required.
 
-Conductor is benchmarked against alternative Spec-Driven Development (SDD) and Context-Driven Development (CDD) frameworks across 10 real-world engineering scenarios (40 test criteria) using blinded LLM-as-Judge evaluation and deterministic token/safety bounds.
+Context travels with the codebase and can be shared across the whole team.
 
-| Framework | Paradigm | Criteria Passed | Pass Rate (95% CI) | Avg Tokens / Task | Scenarios |
-| :--- | :--- | :---: | :---: | :---: | :---: |
-| **BMAD Method** | Multi-Agent Agile SDD | **33 / 40** | **82.5%** (±11.8% (70.7%–94.3%)) | 2007 tokens | 10 |
-| **Conductor (Antigravity OSS) (this)** | Context-Driven Development (CDD) | **32 / 40** | **80.0%** (±12.4% (67.6%–92.4%)) | 1802 tokens | 10 |
-| **GitHub Spec Kit** | Spec-Driven Development (SDD) | **31 / 40** | **77.5%** (±12.9% (64.6%–90.4%)) | 2376 tokens | 10 |
-| **Conductor (Canonical Gemini CLI Extension)** | Context-Driven Development (CDD) | **24 / 40** | **60.0%** (±15.2% (44.8%–75.2%)) | 2265 tokens | 10 |
-| **OpenSpec** | Lightweight SDD | **16 / 40** | **40.0%** (±15.2% (24.8%–55.2%)) | 1132 tokens | 10 |
-| **Memory Bank (Cline / Roo Code)** | Stateful Agent Memory | **12 / 40** | **30.0%** (±14.2% (15.8%–44.2%)) | 1304 tokens | 10 |
+### Why Code Alone Isn't the Single Source of Truth
 
-Full reports and test documentation:
-- [Evaluation suite guide](evals/README.md)
-- [Live benchmark Markdown report](evals/cdd_sdd_benchmark/cdd_sdd_live_benchmark_results.md)
+Code shows what syntax exists today, but never why it was built that way or what constraints must not be broken. Without architectural context, an AI agent treats legacy workarounds and technical debt as intentional design—and faithfully replicates them. Armature (OSS) keeps architectural intent, domain terminology, and verification rules version-controlled right alongside the code.
+
+## Keeping Docs, Terms, and Decisions in Sync
+
+When agents write code, project context rots in three predictable ways. Armature (OSS) stops all three:
+
+### 1. Stopping Vocabulary Drift (Terms)
+When an agent calls an object `board` in one file, `canvas` in another, and `workspace` in a third, the codebase fills with synonyms that break search and ruin future prompts. Armature (OSS) creates a project glossary (`terms.md`) that locks in canonical terms and explicitly bans synonyms.
+
+### 2. Stopping Decision Drift (Decisions)
+Code only records what survived; it never records the failed architectures that were tried and discarded. Without recorded decisions, an agent will see an un-cached query or a complex serialization loop and "helpfully" re-introduce a race condition the team spent weeks debugging. Armature (OSS) records architectural trade-offs as version-controlled markdown files in `adr/`, each with an automated verification checklist injected into implementation tasks.
+
+### 3. Stopping Documentation Drift (Docs & Specs)
+Static specs and runbooks become fiction the moment implementation hits a real edge case. Armature (OSS) links specifications directly to living domain runbooks (`manual_testing/<domain>.md`). When a track finishes, verified test scenarios and behavior changes are synchronized automatically into the project documentation.
+
+### 4. Automated Drift Auditing (`/arm-drift`)
+`/arm-drift` is your codebase tripwire. It compares the real exported interfaces in your code against your docs, architectural decisions, and terms. If the code evolves in a way that turns your documentation into lies, Armature (OSS) catches the divergence before you commit.
+
+### The Operational Loop
+
+```
+/arm-setup     →  Initialize glossary (terms.md), adr/ dir,
+                  manual_testing/ dir, per-directory context (brownfield)
+/arm-new-track →  Continuous decision-tree traversal & Grill Engine; synthesize spec & manual_testing.md
+                  Enforce glossary terms in spec; gate decisions → ADRs
+                  Translate ADR Confirmation blocks → plan.md tasks
+                  Capture ADRs from Devil's Advocate challenges
+/arm-implement →  Execute plan including ADR verification & manual test updates
+                  Auto-extract API surfaces at phase boundaries
+                  Auto-synchronize steady-state runbooks → manual_testing/<domain>.md
+                  Capture ADRs from implementation guards
+/arm-review    →  Audit code against ADRs, automated tests, and manual runbook
+/arm-drift     →  Audit documentation consistency, API surfaces, and packaging
+                  Reconcile mechanical drift automatically and guide semantic fixes
+/arm-chat      →  Rapid context ingestion without ceremony or approval gates
+/arm-revert    →  VCS-aware surgical task, phase, or track rollback
+```
+
+## Evaluation Results & Benchmark
+
+Armature (OSS) is benchmarked against alternative Spec-Driven Development (SDD) and Context-Driven Development (CDD) frameworks across a 30-scenario stratified engineering battery (120 criteria across 5 pillars) using live model rollouts and LLM Meta-Judging.
+
+| Rank | Framework | Composite Score | Pass Rate (95% CI) | Avg Tokens / Task | Key Takeaway |
+| :---: | :--- | :---: | :---: | :---: | :--- |
+| **#1** | **Armature (OSS)** *(this)* | **85 / 100** | **85.0%** (102/120, ±6.4%) | 3038 tokens | 100% drift governance, continuous decision-tree traversal, and transparent dual-discovery. |
+| **#2** | **BMAD Method** | **66 / 100** | **65.8%** (79/120, ±8.5%) | 2634 tokens | Multi-agent role separation; high coordination overhead on micro-fixes. |
+| **#3** | **GitHub Spec Kit** | **63 / 100** | **63.3%** (76/120, ±8.6%) | 2835 tokens | Spec-first rigor with Constitution gating; heavy planning ceremony for minor edits. |
+| **#4** | **Conductor (Canonical Upstream CLI)** | **49 / 100** | **49.2%** (59/120, ±8.9%) | 2346 tokens | Efficient linear track orchestration; lacks multi-turn branch resolution and OCC analysis. |
+| **#5** | **OpenSpec** | **40 / 100** | **40.0%** (48/120, ±8.8%) | 1597 tokens | Lightweight change proposals; lacks destructive command safeguards. |
+| **#6** | **Memory Bank (Cline / Roo Code)** | **39 / 100** | **39.2%** (47/120, ±8.7%) | 2703 tokens | Stateful markdown memory; vulnerable to out-of-band filesystem drift. |
 
 ## What Gets Installed
 
+Armature (OSS) installs as a unified plugin under `~/.gemini/config/plugins/antigravity-armature/`:
+
 ### Plugin Manifest & Skills
 
-File                   | Location                                              | Purpose
----------------------- | ----------------------------------------------------- | -------
-`plugin.json`          | `~/.gemini/antigravity/`                              | Plugin package manifest (name, version, metadata)
-`marketplace.json`     | `~/.gemini/antigravity/.claude-plugin/`               | Claude Code plugin manifest
-`conductor-setup/`     | `~/.gemini/antigravity/skills/conductor-setup/`       | `/conductor-setup` — Initialize project context (persona: Conductor Architect)
-`workflow_template.md` | `~/.gemini/antigravity/skills/conductor-setup/assets/`| Bundled project workflow template copied during `/conductor-setup`
-`adr_template.md`      | `~/.gemini/antigravity/skills/conductor-setup/assets/`| Bundled project ADR template copied during `/conductor-setup`
-`manual_testing_template.md` | `~/.gemini/antigravity/skills/conductor-setup/assets/`| Bundled domain manual testing runbook template copied during `/conductor-setup`
-`.conductor_version`   | `~/.gemini/antigravity/skills/conductor-setup/`       | Version stamp for update detection
-`conductor-new-track/` | `~/.gemini/antigravity/skills/conductor-new-track/`   | `/conductor-new-track` — Start a new feature or bug fix (persona: Conductor Planner)
-`conductor-implement/` | `~/.gemini/antigravity/skills/conductor-implement/`   | `/conductor-implement` — Execute plan tasks sequentially (persona: Conductor Implementer)
-`conductor-status/`    | `~/.gemini/antigravity/skills/conductor-status/`      | `/conductor-status` — View project progress (persona: Conductor Observer)
-`conductor-review/`    | `~/.gemini/antigravity/skills/conductor-review/`      | `/conductor-review` — Review work against spec (persona: Principal Software Engineer)
-`conductor-revert/`    | `~/.gemini/antigravity/skills/conductor-revert/`      | `/conductor-revert` — Undo work via VCS-aware revert (persona: Conductor Surgeon)
-`conductor-chat/`      | `~/.gemini/antigravity/skills/conductor-chat/`        | `/conductor-chat` — Ceremony-free context mode (persona: Conductor Guide)
-`conductor-drift/`     | `~/.gemini/antigravity/skills/conductor-drift/`       | `/conductor-drift` — Audit and reconcile drift across docs, code, and packaging (persona: Conductor Fixpoint Auditor)
+| File | Location in `~/.gemini/config/plugins/antigravity-armature/` | Agent Persona | Purpose |
+| :--- | :--- | :--- | :--- |
+| `plugin.json` | `plugin.json` | — | Plugin package manifest (name, version, metadata) |
+| `marketplace.json` | `.claude-plugin/marketplace.json` | — | Claude Code plugin manifest |
+| `arm-setup/` | `skills/arm-setup/` | Armature Architect | `/arm-setup` — Initialize project context, glossary, ADR directory, and living runbooks |
+| `workflow_template.md` | `skills/arm-setup/assets/` | — | Bundled project workflow template copied during `/arm-setup` |
+| `adr_template.md` | `skills/arm-setup/assets/` | — | Bundled project ADR template copied during `/arm-setup` |
+| `manual_testing_template.md` | `skills/arm-setup/assets/` | — | Bundled manual testing guide template copied during `/arm-setup` |
+| `.armature_version` | `.armature_version` | — | Version stamp for update detection |
+| `arm-new-track/` | `skills/arm-new-track/` | Armature Planner | `/arm-new-track` — Start a new feature or bug fix with continuous decision-tree elicitation |
+| `arm-implement/` | `skills/arm-implement/` | Armature Implementer | `/arm-implement` — Execute plan tasks sequentially with phase checkpoint drift audits |
+| `arm-status/` | `skills/arm-status/` | Armature Observer | `/arm-status` — View project trajectory with ambient contract health monitoring |
+| `arm-review/` | `skills/arm-review/` | Armature Reviewer | `/arm-review` — Multi-dimensional review against living runbooks and ADRs |
+| `arm-revert/` | `skills/arm-revert/` | Armature Surgeon | `/arm-revert` — Surgical rollbacks with destructive operation shielding |
+| `arm-drift/` | `skills/arm-drift/` | Armature Drift Auditor | `/arm-drift` — Continuous 3-tier drift auditing across docs, interfaces, and packaging |
+| `arm-chat/` | `skills/arm-chat/` | Armature Guide | `/arm-chat` — Ceremony-free context ingestion with automatic glossary sync |
 
 ### Rules (MVC Architecture)
 
-| File                         | Location                        | Purpose           |
-| ---------------------------- | ------------------------------- | ----------------- |
-| `conductor_protocol.md`      | `~/.gemini/antigravity/rules/`  | Always-on: directory structure, context loading, guardrails, interaction standards |
-| `conductor_antigravity.md`   | `~/.gemini/antigravity/rules/`  | Always-on: Antigravity platform UI adapter (`ask_question`, artifact rendering) |
-| `conductor_adr_preflight.md` | `~/.gemini/antigravity/rules/`  | On-demand: ADR preflight interceptor for brownfield projects |
-| `conductor_cdd_protocols.md` | `~/.gemini/antigravity/rules/`  | On-demand: Drift scan, ADR capture, per-directory context |
+| File | Type | Location in `~/.gemini/config/plugins/antigravity-armature/` | Purpose |
+| :--- | :--- | :--- | :--- |
+| `armature_protocol.md` | Core Model | `rules/` | Always-on: directory structure, transparent dual-discovery (§7), guardrails, interaction standards |
+| `armature_antigravity.md` | View / Controller Adapter | `rules/` | Always-on: Antigravity CLI and multi-agent interaction adapter (`ask_question`, artifact rendering) |
+| `armature_adr_preflight.md` | Dynamic Interceptor | `rules/` | On-demand: ADR preflight interceptor for brownfield projects |
+| `armature_cdd_protocols.md` | CDD Engine | `rules/` | On-demand: Drift scan, ADR capture, per-directory context rules |
+
+### Supported Agent Environments
+
+- **Antigravity / Antigravity CLI**: Installs to `~/.gemini/config/plugins/antigravity-armature/` (auto-discovered via plugin registry).
+- **Claude Code**: Discoverable via `.claude-plugin/marketplace.json` or `.agents/skills/`.
+- **Windsurf**: Discoverable via `.windsurf/` or `.agents/rules/`.
 
 ## Installation
 
-You can run the installer script on Mac/Linux or Windows.
-
-### Mac, Linux, and WSL
-
 ```bash
-# Standard installation
+# From the repository root
 bash install.sh
 
 # Preview what will happen (no files written)
@@ -95,104 +128,50 @@ bash install.sh --dry_run
 
 # Overwrite without creating backups
 bash install.sh --force
+
+# Update to latest version
+bash install.sh --update
 ```
 
-### Windows (CMD or PowerShell)
+### Windows Installation
 
-```bat
-:: Standard installation
+```cmd
 install.bat
-
-:: Preview what will happen (no files written)
-install.bat --dry_run
-
-:: Overwrite without creating backups
-install.bat --force
 ```
 
 ## Uninstall
 
-**Mac, Linux, and WSL:**
 ```bash
 bash install.sh --uninstall
 ```
 
-**Windows:**
-```bat
-install.bat --uninstall
-```
-
 ## Flags
 
-Flag          | Description
-------------- | --------------------------------------------------------
-`--dry_run`   | Preview changes without writing or deleting files
-`--force`     | Overwrite existing files without creating `.bak` backups
-`--update`    | Update to the latest version (implies `--force`)
-`--uninstall` | Remove all installed Conductor files
-`--help`      | Show usage information
+| Flag | Description |
+| :--- | :--- |
+| `--dry_run` | Preview changes without writing or deleting files |
+| `--force` | Overwrite existing files without creating `.bak` backups |
+| `--uninstall` | Remove all installed Armature plugin and legacy files |
+| `--update` | Update to the latest version (implies `--force`) |
+| `--target=<path>` | Custom install target directory (defaults to `~/.gemini/config/plugins/antigravity-armature`) |
+| `--release_notes` | Show release notes for the current version from `CHANGELOG.md` |
+| `--help` | Show usage information |
 
-## Checking for Updates
+## Usage
 
-The `--update` flag checks if your installed version is current and, if not,
-performs the update automatically (implying `--force`):
-
-```bash
-bash install.sh --update
-```
-
-If already up to date, it exits immediately. A version check also runs
-automatically at the end of every regular install.
-
-## Usage After Installation
-
-In Antigravity, typing `/` opens an autocomplete dropdown listing available workflows. The conductor commands are available globally once installed:
+Once installed, the `/arm-*` commands are available globally in chat:
 
 ```
-/conductor-setup          # Initialize a project's conductor/ context
-/conductor-new-track       # Create a new feature or bug fix track
-/conductor-implement      # Execute the current track's plan
-/conductor-status         # View progress across all tracks
-/conductor-review         # Review completed work against spec
-/conductor-revert         # Undo work from a track, phase, or task
-/conductor-chat           # Ingest conductor knowledge, then go — no tracks or gates.
-                          # Ideal for asking how things work, exploring the codebase
-                          # with full context, or diving into lightweight implementations
-                          # that don't warrant a dedicated track.
+/arm-setup          # Initialize a project's armature/ context (or adopt legacy conductor/)
+/arm-new-track      # Create a new feature or bug fix track via continuous decision trees
+/arm-implement      # Execute the current track's plan with incremental drift checks
+/arm-status         # View progress across all tracks
+/arm-review         # Review completed work against spec and living runbooks
+/arm-revert         # Undo work from a track, phase, or task
+/arm-drift          # Run 3-tier continuous drift audit
+/arm-chat           # Ingest project knowledge, then proceed with task directly
 ```
-
-### Via Natural Language
-
-The Conductor skill is also attached as a global skill, so you can invoke it
-with **natural language** instead of workflow commands. For example:
-
-> *"Start a new track for adding dark mode support to the settings page"*
-
-> *"Show me the current status of all my tracks"*
-
-> *"Implement the next task in the active track"*
-
-> *"Review the work I've done on the current track against the spec"*
-
-Antigravity will automatically read the Conductor skill and execute the
-appropriate command based on your prompt.
-
-## Evaluation & Live Benchmark Results
-
-Antigravity Conductor is continuously evaluated against industry agent development frameworks using the live CDD & SDD benchmark suite (`evals/cdd_sdd_benchmark/`):
-
-| Framework | Paradigm | Criteria Passed | Pass Rate (95% CI) | Avg Tokens / Task | Scenarios |
-| :--- | :--- | :---: | :---: | :---: | :---: |
-| **BMAD Method** | Multi-Agent Agile SDD | **33 / 40** | **82.5%** (±11.8% (70.7%–94.3%)) | 2007 tokens | 10 |
-| **Conductor (Antigravity OSS) (this)** | Context-Driven Development (CDD) | **32 / 40** | **80.0%** (±12.4% (67.6%–92.4%)) | 1802 tokens | 10 |
-| **GitHub Spec Kit** | Spec-Driven Development (SDD) | **31 / 40** | **77.5%** (±12.9% (64.6%–90.4%)) | 2376 tokens | 10 |
-| **Conductor (Canonical Gemini CLI Extension)** | Context-Driven Development (CDD) | **24 / 40** | **60.0%** (±15.2% (44.8%–75.2%)) | 2265 tokens | 10 |
-| **OpenSpec** | Lightweight SDD | **16 / 40** | **40.0%** (±15.2% (24.8%–55.2%)) | 1132 tokens | 10 |
-| **Memory Bank (Cline / Roo Code)** | Stateful Agent Memory | **12 / 40** | **30.0%** (±14.2% (15.8%–44.2%)) | 1304 tokens | 10 |
-
-*Evaluated across 10 complex engineering scenarios using blinded LLM-as-Judge scoring with `gemini-3-flash-preview`. Full details in [`evals/cdd_sdd_benchmark/cdd_sdd_live_benchmark_results.md`](evals/cdd_sdd_benchmark/cdd_sdd_live_benchmark_results.md).*
 
 ## Version
 
-Current: **v0.17.0**
-
+Current: **v0.19.0** — See [CHANGELOG.md](CHANGELOG.md) for release notes.
