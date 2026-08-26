@@ -11,7 +11,7 @@
 #   bash install.sh --update
 #
 # Target location:
-#   ~/.gemini/config/plugins/antigravity-armature/
+#   ~/.gemini/config/plugins/armature-cdd/
 #     ├── plugin.json
 #     ├── .claude-plugin/marketplace.json
 #     ├── README.md
@@ -97,7 +97,7 @@ DEFINE_bool dry_run false "Preview changes without writing files"
 DEFINE_bool force false "Overwrite existing files without backup"
 DEFINE_bool uninstall false "Remove all installed files"
 DEFINE_bool update false "Update to the latest version (implies --force)"
-DEFINE_string target "global" "Install target: global (default, ~/.gemini/config/plugins/antigravity-armature)"
+DEFINE_string target "global" "Install target: global (default, ~/.gemini/config/plugins/armature-cdd)"
 DEFINE_bool release_notes false "Show release notes for the current version"
 
 parse_flags "$@"
@@ -207,7 +207,7 @@ select_target() {
   case "$target_choice" in
     global|antigravity|antigravity|"")
       INSTALL_TARGET="global"
-      TARGET_PLUGIN_DIR="${HOME}/.gemini/config/plugins/antigravity-armature"
+      TARGET_PLUGIN_DIR="${HOME}/.gemini/config/plugins/armature-cdd"
       TARGET_SKILLS_ROOT="${TARGET_PLUGIN_DIR}/skills"
       TARGET_RULES_ROOT="${TARGET_PLUGIN_DIR}/rules"
       TARGET_MANIFEST_ROOT="${TARGET_PLUGIN_DIR}"
@@ -215,9 +215,9 @@ select_target() {
     gemini_coder)
       msg_warn "Gemini Coder has been retired in favor of AI IDEs."
       msg_info "AI IDEs automatically reads plugins from ~/.gemini/config/plugins/."
-      msg_info "Installing to global plugin directory: ${HOME}/.gemini/config/plugins/antigravity-armature"
+      msg_info "Installing to global plugin directory: ${HOME}/.gemini/config/plugins/armature-cdd"
       INSTALL_TARGET="global"
-      TARGET_PLUGIN_DIR="${HOME}/.gemini/config/plugins/antigravity-armature"
+      TARGET_PLUGIN_DIR="${HOME}/.gemini/config/plugins/armature-cdd"
       TARGET_SKILLS_ROOT="${TARGET_PLUGIN_DIR}/skills"
       TARGET_RULES_ROOT="${TARGET_PLUGIN_DIR}/rules"
       TARGET_MANIFEST_ROOT="${TARGET_PLUGIN_DIR}"
@@ -309,12 +309,10 @@ install_file() {
 
 migrate_legacy_conductor_plugin() {
   local legacy_paths=(
-    "${HOME}/.gemini/config/plugins/antigravity-geppetto"
+    "${HOME}/.gemini/config/plugins/antigravity-armature"
     "${HOME}/.gemini/config/plugins/antigravity-conductor"
     "${HOME}/.gemini/extensions/conductor"
     "${HOME}/.gemini/antigravity-cli/plugins/conductor"
-    "${HOME}/.gemini/extensions/geppetto"
-    "${HOME}/.gemini/antigravity-cli/plugins/geppetto"
   )
 
   local found_legacy_plugins=()
@@ -326,16 +324,16 @@ migrate_legacy_conductor_plugin() {
 
   local enablement_file="${HOME}/.gemini/extensions/extension-enablement.json"
   local has_enablement_entry=0
-  if [[ -f "$enablement_file" ]] && (grep -q '"conductor"' "$enablement_file" || grep -q '"geppetto"' "$enablement_file"); then
+  if [[ -f "$enablement_file" ]] && grep -q '"conductor"' "$enablement_file"; then
     has_enablement_entry=1
   fi
 
   if [[ ${#found_legacy_plugins[@]} -gt 0 || $has_enablement_entry -eq 1 ]]; then
-    section "🔄 Legacy Conductor/Geppetto Plugin & Extension Cleanup"
+    section "🔄 Legacy Conductor Plugin & Extension Cleanup"
 
     echo ""
     if [[ ${#found_legacy_plugins[@]} -gt 0 ]]; then
-      msg_warn "Found ${#found_legacy_plugins[@]} legacy plugin/extension installation(s). Migrating to antigravity-armature..."
+      msg_warn "Found ${#found_legacy_plugins[@]} legacy plugin/extension installation(s). Migrating to armature-cdd..."
       for p in "${found_legacy_plugins[@]}"; do
         if [[ "${FLAGS_dry_run}" -eq "${FLAGS_TRUE}" ]]; then
           msg_info "${YELLOW}[dry-run]${NC} Would remove legacy directory: ${CYAN}${p}${NC}"
@@ -357,7 +355,7 @@ try:
   with open(p, 'r') as f:
     data = json.load(f)
   changed = False
-  for key in ['conductor', 'geppetto']:
+  for key in ['conductor']:
     if key in data:
       del data[key]
       changed = True
@@ -388,8 +386,8 @@ try:
     data = json.load(f)
   if 'plugins' not in data:
     data['plugins'] = {}
-  data['plugins']['antigravity-armature'] = {'enabled': True}
-  for key in ['antigravity-conductor', 'antigravity-geppetto']:
+  data['plugins']['armature-cdd'] = {'enabled': True}
+  for key in ['antigravity-armature', 'antigravity-conductor']:
     if key in data['plugins']:
       del data['plugins'][key]
   with open(p, 'w') as f:

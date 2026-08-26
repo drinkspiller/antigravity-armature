@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to Armature (formerly Antigravity Conductor) will be documented in this file.
+All notable changes to Armature will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to
@@ -15,6 +15,10 @@ and this project adheres to
     -   Replaced box-drawing borders with cyan framed bookend banners to eliminate character width alignment discrepancies.
     -   Left-aligned all status, key-value, and header rows at column 0.
     -   Standardized update command to `git pull && bash install.sh --update`.
+-   **Repository & Plugin Rebrand to armature-cdd**:
+    -   Renamed public GitHub repository from `antigravity-armature` to `armature-cdd` (`drinkspiller/armature-cdd`) to emphasize universal Context-Driven Development across all agent environments.
+    -   Updated default global plugin installation target directory to `~/.gemini/config/plugins/armature-cdd/`.
+    -   Added `antigravity-armature` to legacy plugin migration routines in `install.sh` to seamlessly clean up prior installations.
 
 ## [0.19.0] - 2026-08-24
 
