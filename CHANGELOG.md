@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.19.1] - 2026-08-26
+
+### Changed
+
+-   **Installer CLI Output Hierarchy**:
+    -   Restyled terminal output across `install.sh` to follow the 6-role CLI output hierarchy.
+    -   Replaced box-drawing borders with cyan framed bookend banners to eliminate character width alignment discrepancies.
+    -   Left-aligned all status, key-value, and header rows at column 0.
+    -   Standardized update command to `git pull && bash install.sh --update`.
+
 ## [0.19.0] - 2026-08-24
 
 ### Changed

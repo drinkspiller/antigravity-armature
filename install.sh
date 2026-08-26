@@ -33,69 +33,65 @@
 #         └── armature_cdd_protocols.md
 # =============================================================================
 
-# --- gbash with fallback ---
-if [[ -f /google/bin/releases/gbashr/gbash.sh ]]; then
-  source /google/bin/releases/gbashr/gbash.sh
-else
-  FLAGS_TRUE=0
-  FLAGS_FALSE=1
-  _DEFINED_FLAGS=()
-  _DEFINED_STRING_FLAGS=()
+# --- Command line flag definitions ---
+FLAGS_TRUE=0
+FLAGS_FALSE=1
+_DEFINED_FLAGS=()
+_DEFINED_STRING_FLAGS=()
 
-  DEFINE_bool() {
-    local name="$1" default="$2" desc="$3"
-    if [[ "$default" == "true" ]]; then
-      eval "FLAGS_${name}=${FLAGS_TRUE}"
-    else
-      eval "FLAGS_${name}=${FLAGS_FALSE}"
-    fi
-    _DEFINED_FLAGS+=("$name")
-  }
+DEFINE_bool() {
+  local name="$1" default="$2" desc="$3"
+  if [[ "$default" == "true" ]]; then
+    eval "FLAGS_${name}=${FLAGS_TRUE}"
+  else
+    eval "FLAGS_${name}=${FLAGS_FALSE}"
+  fi
+  _DEFINED_FLAGS+=("$name")
+}
 
-  DEFINE_string() {
-    local name="$1" default="$2" desc="$3"
-    eval "FLAGS_${name}='${default}'"
-    _DEFINED_STRING_FLAGS+=("$name")
-  }
+DEFINE_string() {
+  local name="$1" default="$2" desc="$3"
+  eval "FLAGS_${name}='${default}'"
+  _DEFINED_STRING_FLAGS+=("$name")
+}
 
-  gbash::init_google() {
-    while [[ $# -gt 0 ]]; do
-      case "$1" in
-        --help|-h|--helpfull)
-          for flag in "${_DEFINED_FLAGS[@]}"; do
-            eval "local val=\${FLAGS_${flag}}"
-            local default_str="false"
-            [[ "$val" -eq "${FLAGS_TRUE}" ]] && default_str="true"
-            printf "  --%-20s (default: %s)\n" "${flag}" "${default_str}"
-          done
-          for flag in "${_DEFINED_STRING_FLAGS[@]}"; do
-            eval "local val=\${FLAGS_${flag}}"
-            printf "  --%-20s (default: '%s')\n" "${flag}=<value>" "${val}"
-          done
-          exit 0
-          ;;
-        --no*)
-          local flag_name="${1#--no}"
-          flag_name="${flag_name//-/_}"
-          eval "FLAGS_${flag_name}=${FLAGS_FALSE}"
-          ;;
-        --*=*)
-          local flag_name="${1%%=*}"
-          flag_name="${flag_name#--}"
-          flag_name="${flag_name//-/_}"
-          local flag_value="${1#*=}"
-          eval "FLAGS_${flag_name}='${flag_value}'"
-          ;;
-        --*)
-          local flag_name="${1#--}"
-          flag_name="${flag_name//-/_}"
-          eval "FLAGS_${flag_name}=${FLAGS_TRUE}"
-          ;;
-      esac
-      shift
-    done
-  }
-fi
+parse_flags() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --help|-h|--helpfull)
+        for flag in "${_DEFINED_FLAGS[@]}"; do
+          eval "local val=\${FLAGS_${flag}}"
+          local default_str="false"
+          [[ "$val" -eq "${FLAGS_TRUE}" ]] && default_str="true"
+          printf "  --%-20s (default: %s)\n" "${flag}" "${default_str}"
+        done
+        for flag in "${_DEFINED_STRING_FLAGS[@]}"; do
+          eval "local val=\${FLAGS_${flag}}"
+          printf "  --%-20s (default: '%s')\n" "${flag}=<value>" "${val}"
+        done
+        exit 0
+        ;;
+      --no*)
+        local flag_name="${1#--no}"
+        flag_name="${flag_name//-/_}"
+        eval "FLAGS_${flag_name}=${FLAGS_FALSE}"
+        ;;
+      --*=*)
+        local flag_name="${1%%=*}"
+        flag_name="${flag_name#--}"
+        flag_name="${flag_name//-/_}"
+        local flag_value="${1#*=}"
+        eval "FLAGS_${flag_name}='${flag_value}'"
+        ;;
+      --*)
+        local flag_name="${1#--}"
+        flag_name="${flag_name//-/_}"
+        eval "FLAGS_${flag_name}=${FLAGS_TRUE}"
+        ;;
+    esac
+    shift
+  done
+}
 
 DEFINE_bool dry_run false "Preview changes without writing files"
 DEFINE_bool force false "Overwrite existing files without backup"
@@ -104,9 +100,10 @@ DEFINE_bool update false "Update to the latest version (implies --force)"
 DEFINE_string target "global" "Install target: global (default, ~/.gemini/config/plugins/antigravity-armature)"
 DEFINE_bool release_notes false "Show release notes for the current version"
 
-gbash::init_google "$@"
+parse_flags "$@"
 
-VERSION="0.19.0"
+
+VERSION="0.19.1"
 
 # --- Resolve source directory (relative to this script) ---
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -121,34 +118,45 @@ REFERENCE_FILE_NAMES=(armature_adr_preflight.md armature_cdd_protocols.md)
 # CHANGELOG for release notes extraction
 SOURCE_CHANGELOG="${SCRIPT_DIR}/CHANGELOG.md"
 
-# --- Color helpers ---
-RED='\033[0;31m'
+# ── Color System (cli-output-hierarchy) ─────────────────────────────
+#   BOLD     = structural labels, headings, emphasis
+#   DIM      = secondary/explanatory text
+#   CYAN     = actionable values (URLs, commands, version names, paths)
+#   GREEN    = safe/positive states (success, enabled, included)
+#   YELLOW   = caution, attention-needed (warnings, skipped, stripped)
+#   RED BOLD = danger only (errors, emergency gates, destructive actions)
+# ────────────────────────────────────────────────────────────────────
+BOLD='\033[1m'
+DIM='\033[2m'
+CYAN='\033[0;36m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
-BLUE='\033[0;34m'
-MAGENTA='\033[0;35m'
-CYAN='\033[0;36m'
-WHITE='\033[1;37m'
-DIM='\033[2m'
-BOLD='\033[1m'
+RED='\033[0;31m'
+RESET='\033[0m'
 NC='\033[0m'
 
-msg_info()    { echo -e "  ${CYAN}📋${NC}  $*"; }
-msg_success() { echo -e "  ${GREEN}✅${NC}  $*"; }
-msg_warn()    { echo -e "  ${YELLOW}⚠️${NC}   $*"; }
-msg_error()   { echo -e "  ${RED}❌${NC}  $*"; }
-msg_skip()    { echo -e "  ${DIM}⏭️${NC}   ${DIM}$*${NC}"; }
+msg_info()    { echo -e "📋  $*"; }
+msg_success() { echo -e "${GREEN}✅${RESET}  $*"; }
+msg_warn()    { echo -e "${YELLOW}⚠️${RESET}  $*"; }
+msg_error()   { echo -e "${RED}${BOLD}❌  $*${RESET}"; }
+msg_skip()    { echo -e "${DIM}⏭️   $*${RESET}"; }
 
 banner() {
   echo ""
-  echo -e "${MAGENTA}  ╔══════════════════════════════════════════════════╗${NC}"
-  echo -e "${MAGENTA}  ║${NC}  ${BOLD}🦾 Armature (OSS) Installer${NC}  ${DIM}v${VERSION}${NC}             ${MAGENTA}║${NC}"
-  echo -e "${MAGENTA}  ║${NC}  ${DIM}Structural Permanence for AI Coding Agents${NC}         ${MAGENTA}║${NC}"
-  echo -e "${MAGENTA}  ╚══════════════════════════════════════════════════╝${NC}"
+  echo -e "${CYAN}══════════════════════════════════════════════════════${RESET}"
+  echo -e "${BOLD}Armature (OSS) Installer${RESET}  ${CYAN}v${VERSION}${RESET}"
+  echo -e "${DIM}Structural Permanence for AI Coding Agents${RESET}"
+  echo -e "${CYAN}══════════════════════════════════════════════════════${RESET}"
   echo ""
 }
 
-section() { echo -e "\n${BLUE}━━━${NC} ${BOLD}$*${NC} ${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"; }
+section() {
+  echo ""
+  echo -e "${BOLD}$*${RESET}"
+  echo -e "${CYAN}══════════════════════════════════════════════════════${RESET}"
+  echo ""
+}
+
 
 # --- Validate source files exist ---
 validate_sources() {
@@ -287,11 +295,12 @@ install_file() {
   fi
 
   if [[ "${FLAGS_dry_run}" -eq "${FLAGS_TRUE}" ]]; then
-    msg_info "${YELLOW}[dry-run]${NC} Would install: ${GREEN}${base_name}${NC}"
+    msg_info "${YELLOW}[dry-run]${RESET} Would install: ${CYAN}${base_name}${RESET}"
   else
     cp "$source" "$target"
-    msg_success "Installed: ${GREEN}${base_name}${NC}  →  ${DIM}${target}${NC}"
+    msg_success "Installed: ${CYAN}${base_name}${RESET}  →  ${DIM}${target}${RESET}"
   fi
+
 }
 
 # =============================================================================
@@ -317,12 +326,13 @@ migrate_legacy_conductor_plugin() {
 
   local enablement_file="${HOME}/.gemini/extensions/extension-enablement.json"
   local has_enablement_entry=0
-  if [[ -f "$enablement_file" ]] && (grep -q '"conductor"' "$enablement_file" |
+  if [[ -f "$enablement_file" ]] && (grep -q '"conductor"' "$enablement_file" || grep -q '"geppetto"' "$enablement_file"); then
     has_enablement_entry=1
   fi
 
-  if [[ ${#found_legacy_plugins[@]} -gt 0 |
+  if [[ ${#found_legacy_plugins[@]} -gt 0 || $has_enablement_entry -eq 1 ]]; then
     section "🔄 Legacy Conductor/Geppetto Plugin & Extension Cleanup"
+
     echo ""
     if [[ ${#found_legacy_plugins[@]} -gt 0 ]]; then
       msg_warn "Found ${#found_legacy_plugins[@]} legacy plugin/extension installation(s). Migrating to antigravity-armature..."
@@ -576,20 +586,21 @@ check_for_updates() {
 
   if [[ -f "$version_file" ]]; then
     local installed_version
-    installed_version=$(cat "$version_file" 2>/dev/null 
+    installed_version=$(cat "$version_file" 2>/dev/null | tr -d '[:space:]')
 
     if [[ "$installed_version" == "$latest_version" ]]; then
-      msg_success "Armature plugin is up to date (${WHITE}v${installed_version}${NC})"
+      msg_success "Armature plugin is up to date (${CYAN}v${installed_version}${RESET})"
     else
-      echo -e "  ${YELLOW}🆕${NC}  Update available: ${DIM}v${installed_version}${NC} → ${GREEN}v${latest_version}${NC}"
+      echo -e "${YELLOW}⚠️  Update available:${RESET} ${DIM}v${installed_version}${RESET} → ${CYAN}v${latest_version}${RESET}"
     fi
   else
-    msg_info "Armature plugin installed at ${CYAN}${TARGET_PLUGIN_DIR}${NC}"
+    msg_info "Armature plugin installed at ${CYAN}${TARGET_PLUGIN_DIR}${RESET}"
   fi
   echo ""
-  echo -e "  ${DIM}To update to the latest version at any time, run:${NC}"
-  echo -e "  ${CYAN}bash experimental/users/skyebot/antigravity_armature/install.sh --update${NC}"
+  echo -e "${DIM}To update to the latest version at any time, run:${RESET}"
+  echo -e "${CYAN}git pull && bash install.sh --update${RESET}"
 }
+
 
 # =============================================================================
 # Main flow
@@ -627,7 +638,7 @@ if [[ "${FLAGS_update}" -eq "${FLAGS_TRUE}" ]]; then
   fi
 
   if [[ -f "$version_file" ]]; then
-    installed_version=$(cat "$version_file" 2>/dev/null 
+    installed_version=$(cat "$version_file" 2>/dev/null | tr -d '[:space:]')
     if [[ "$installed_version" == "$VERSION" ]]; then
       msg_success "Already up to date (${WHITE}v${VERSION}${NC})"
       exit 0
@@ -743,31 +754,36 @@ done
 sync_config_json_plugins
 
 # --- Summary ---
-section "📊 Summary"
-echo ""
-echo -e "  ${DIM}Version:${NC}       ${WHITE}${VERSION}${NC}"
-echo -e "  ${DIM}Source:${NC}        ${CYAN}${SCRIPT_DIR}${NC}"
-echo -e "  ${DIM}Plugin dir:${NC}    ${CYAN}${TARGET_PLUGIN_DIR}${NC}"
-echo -e "  ${DIM}Skills:${NC}        ${CYAN}${TARGET_SKILLS_ROOT}/arm-*/${NC}"
-echo -e "  ${DIM}Rules:${NC}         ${CYAN}${TARGET_RULES_ROOT}/*.md${NC}"
-echo -e "  ${DIM}Files:${NC}         ${WHITE}${#ALL_TARGET_FILES[@]}${NC} total"
+section "Summary"
+echo -e "${BOLD}Version:${RESET}     ${CYAN}${VERSION}${RESET}"
+echo -e "${BOLD}Source:${RESET}      ${CYAN}${SCRIPT_DIR}${RESET}"
+echo -e "${BOLD}Plugin dir:${RESET}  ${CYAN}${TARGET_PLUGIN_DIR}${RESET}"
+echo -e "${BOLD}Skills:${RESET}      ${CYAN}${TARGET_SKILLS_ROOT}/arm-*/${RESET}"
+echo -e "${BOLD}Rules:${RESET}       ${CYAN}${TARGET_RULES_ROOT}/*.md${RESET}"
+echo -e "${BOLD}Files:${RESET}       ${CYAN}${#ALL_TARGET_FILES[@]} total${RESET}"
 echo ""
 
 check_for_updates
 
 # --- Optional dependency check ---
 if ! command -v sg &>/dev/null; then
-  echo -e "  ${YELLOW}[optional]${NC} ast-grep (sg) not found"
-  echo -e "           API surface extraction will use regex fallback."
-  echo -e "           For higher-quality glossary suggestions, install ast-grep:"
-  echo -e "           ${CYAN}https://ast-grep.github.io/guide/quick-start.html${NC}"
+  echo -e "${YELLOW}⚠️   ast-grep (sg) not found${RESET}"
+  echo -e "   ${DIM}API surface extraction will use regex fallback.${RESET}"
+  echo -e "   ${DIM}For higher-quality glossary suggestions, install ast-grep:${RESET}"
+  echo -e "   ${CYAN}https://ast-grep.github.io/guide/quick-start.html${RESET}"
   echo ""
 fi
 
 if [[ "${FLAGS_dry_run}" -eq "${FLAGS_TRUE}" ]]; then
-  echo -e "  ${YELLOW}🔍 Dry run complete. Re-run without --dry_run to apply changes.${NC}"
+  echo -e "${YELLOW}${BOLD}══════════════════════════════════════════════════════${RESET}"
+  echo -e "${YELLOW}${BOLD}🔍 Dry run complete${RESET}  ${DIM}re-run without --dry_run to apply changes${RESET}"
+  echo -e "${YELLOW}${BOLD}══════════════════════════════════════════════════════${RESET}"
 else
-  echo -e "  ${GREEN}🚀 Installation complete! You're ready to build with precision.${NC}"
-  echo -e "  ${DIM}💡 If IDE or the web UI is already open, reload the tab (${WHITE}Cmd+R${DIM} / ${WHITE}F5${DIM}) to refresh the slash menu.${NC}"
+  echo -e "${GREEN}${BOLD}══════════════════════════════════════════════════════${RESET}"
+  echo -e "${GREEN}${BOLD}✅ Armature (OSS) Installer${RESET}  ${DIM}complete${RESET}"
+  echo -e "${GREEN}${BOLD}══════════════════════════════════════════════════════${RESET}"
+  echo ""
+  echo -e "${DIM}💡 If IDE or the web UI is already open, reload the tab (${BOLD}Cmd+R${DIM} / ${BOLD}F5${DIM}) to refresh the slash menu.${RESET}"
 fi
 echo ""
+
