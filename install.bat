@@ -39,7 +39,7 @@ if "%SCRIPT_DIR:~-1%"=="\" set "SCRIPT_DIR=%SCRIPT_DIR:~0,-1%"
 set "SOURCE_ASSETS_DIR=%SCRIPT_DIR%\skills\arm-setup\assets"
 set "SOURCE_RULES_DIR=%SCRIPT_DIR%\rules"
 
-set "TARGET_PLUGIN_DIR=%USERPROFILE%\.gemini\config\plugins\antigravity-armature"
+set "TARGET_PLUGIN_DIR=%USERPROFILE%\.gemini\config\plugins\armature-cdd"
 set "TARGET_SKILLS_ROOT=%TARGET_PLUGIN_DIR%\skills"
 set "TARGET_RULES_ROOT=%TARGET_PLUGIN_DIR%\rules"
 set "TARGET_ASSETS_DIR=%TARGET_SKILLS_ROOT%\arm-setup\assets"
@@ -131,7 +131,7 @@ for %%R in (armature_protocol.md armature_antigravity.md armature_adr_preflight.
 
 echo.
 echo --- Summary ---
-echo   Target:       antigravity-armature
+echo   Target:       armature-cdd
 echo   Skills root:  %TARGET_SKILLS_ROOT%\arm-*\
 echo   Rules dir:    %TARGET_RULES_ROOT%
 if "%FLAGS_dry_run%"=="1" ( echo   Dry run complete. ) else ( echo   Installation complete! )
@@ -156,9 +156,9 @@ echo.
 if exist "%TARGET_SKILLS_ROOT%\arm-setup\.armature_version" (
     set /p INSTALLED_VERSION= < "%TARGET_SKILLS_ROOT%\arm-setup\.armature_version"
     if "!INSTALLED_VERSION!"=="%VERSION%" (
-        echo   [OK] antigravity-armature: Up to date (v!INSTALLED_VERSION!^)
+        echo   [OK] armature-cdd: Up to date (v!INSTALLED_VERSION!^)
     ) else (
-        echo   [NEW] antigravity-armature: Update available - v!INSTALLED_VERSION! -^> v%VERSION%
+        echo   [NEW] armature-cdd: Update available - v!INSTALLED_VERSION! -^> v%VERSION%
         echo   To update, run: install.bat --update
     )
 ) else (

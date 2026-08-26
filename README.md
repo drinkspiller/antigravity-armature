@@ -49,7 +49,7 @@ Install Armature globally across your development environments:
 
 ```bash
 # Install fresh via curl
-curl -fsSL https://raw.githubusercontent.com/drinkspiller/antigravity-armature/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/drinkspiller/armature-cdd/main/install.sh | bash
 
 # Or update an existing installation
 bash install.sh --update
@@ -157,7 +157,7 @@ Armature installs as a modular plugin bundle containing skills, rule protocols, 
 
 ### Supported Environments
 
-- **Antigravity / Antigravity CLI**: Installs to `~/.gemini/config/plugins/antigravity-armature/` (auto-discovered via plugin registry).
+- **Antigravity / Antigravity CLI**: Installs to `~/.gemini/config/plugins/armature-cdd/` (auto-discovered via plugin registry).
 - **Claude Code**: Discoverable via `.claude-plugin/marketplace.json` or `.agents/skills/`.
 - **Windsurf**: Discoverable via `.windsurf/` or `.agents/rules/`.
 - **Custom / Other Harnesses**: Use `--target=<path>` to install to any custom plugin or skills directory.
@@ -191,7 +191,7 @@ bash install.sh --uninstall
 | `--force` | Overwrite existing files without creating `.bak` backups |
 | `--uninstall` | Remove all installed Armature plugin and legacy files |
 | `--update` | Update to the latest version (implies `--force`) |
-| `--target=<path>` | Custom install target directory (defaults to Antigravity global plugin directory `~/.gemini/config/plugins/antigravity-armature`) |
+| `--target=<path>` | Custom install target directory (defaults to global plugin directory `~/.gemini/config/plugins/armature-cdd`) |
 | `--release_notes` | Show release notes for the current version from `CHANGELOG.md` |
 | `--help` | Show usage information |
 
