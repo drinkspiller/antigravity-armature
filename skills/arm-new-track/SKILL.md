@@ -16,9 +16,25 @@ resolving all open branches and ambiguities.
     (`spec.md`, `plan.md`) or write code in a single autonomous turn. Every
     track requires step-by-step user alignment.
 -   **Synchronous Turn-Ending Barrier:** You MUST invoke `ask_question` and end
-    your turn at Step 5 (Branch Resolution Probes), Step 6 (Spec Approval), and
-    Step 7 (Plan Approval). Do not proceed to subsequent steps until the user
-    responds.
+    your turn at Step 5 (Leaf Probes & Convergence Gate), Step 6 (Spec
+    Approval), and Step 7 (Plan Approval). Do not proceed to subsequent steps
+    until the user responds.
+-   **Mandatory Decision Tree Ledger:** In EVERY turn of Step 5, you MUST output
+    a visible `### Decision Tree Ledger` block showing root branches and their
+    spawned child leaves with explicit `[ ]` (OPEN) and `[x]` (Resolved)
+    markers.
+-   **Anti-Dictation Invariant (Zero Un-Queried Decisions):** You MUST NEVER
+    assert or output declarative technical specifications, UI layouts, button
+    behaviors, countdown cancel rules, or lifecycle state transitions in
+    markdown for topics that have not been confirmed by the user. Every
+    technical detail is an unresolved leaf ambiguity that MUST be posed via
+    `ask_question`.
+-   **Child Leaf Spawning Invariant (Hierarchical Sub-Tree Probing):** Selecting
+    an option at the root of a branch does NOT close the branch. Every
+    architectural choice MUST immediately spawn child leaf ambiguities (failure
+    modes, token/resource bounds, state transitions, concurrency races) that
+    must be probed one-by-one. A root branch CANNOT transition to `[x]` while
+    child leaves remain `[ ]`.
 -   **Compound Directive Shielding:** If the user invokes `/arm-new-track`
     alongside other instructions (e.g., `/diagnose`, `Fix`, or implementation
     tasks), you MUST explicitly refuse to write code or generate `plan.md`
@@ -26,27 +42,21 @@ resolving all open branches and ambiguities.
     before starting downstream execution.
 -   **Premature Draft Command Shielding:** If the user issues commands like
     "Draft the spec", "Looks good, write the spec", or "Proceed to drafting"
-    while decision branches, operational failure modes, or architectural
-    ambiguities remain unresolved, you MUST NOT materialize `spec.md`
-    immediately. Explicitly state which decision branches and operational
-    dimensions remain open and pose the next targeted probe via `ask_question`.
--   **Anti-Early-Exit & Branch Completeness Invariant:** You MUST NEVER
-    terminate the interview prematurely after only happy-path questions. Walk
-    down every branch of the design tree, resolving dependencies and operational
-    edge cases one-by-one until no ambiguities remain.
--   **No Autonomous Skipping:** The presence of extensive context (e.g., chat
-    logs, design docs, bug descriptions, or codebase reconnaissance) informs
-    your questions and recommendations, but NEVER excuses skipping the
-    interactive interview.
+    while decision branches or child leaves remain `[ ]` (OPEN), you MUST NOT
+    materialize `spec.md` immediately. List the remaining open leaves in the
+    ledger and pose the next targeted probe via `ask_question`.
+-   **Anti-Early-Exit & Natural Convergence:** The interview concludes ONLY when
+    every branch and child leaf in the Decision Tree Ledger is marked `[x]`
+    (Resolved) with zero open items. There are zero arbitrary question quotas;
+    exhaustiveness is governed strictly by leaf resolution.
 -   **Pre-Materialization Hardening Barrier:** You MUST hold specification state
     in memory during Step 5. Canonical `spec.md` is only materialized on disk in
-    Step 6 after all decision branches, failure modes, and adversarial
-    challenges reach resolved decisions and the user confirms the Convergence
-    Summary.
+    Step 6 after all branches and child leaves in the ledger are confirmed by
+    the user.
 -   **Interruption & Detour Recovery:** If the user asks side questions,
     clarifies requirements, or explores asset tangents mid-traversal, answer the
-    inquiry and resume traversing the open branches. NEVER leap to Plan
-    Generation or VCS Commit.
+    inquiry, update the ledger, and resume traversing open leaves. NEVER leap to
+    Plan Generation or VCS Commit.
 
 ## Protocol
 
@@ -92,53 +102,89 @@ resolving all open branches and ambiguities.
     -   Use findings to inform the spec questions in the next step — questions
         must reference specific codebase context.
 
-5.  **Continuous Decision-Tree Traversal & Ambiguity Resolution (Grill Engine):**
+5.  **Recursive Decision-Tree Grill Engine (Hierarchical Leaf Traversal):**
 
-    Conduct a rigorous, one-question-at-a-time interview with the user about
-    every aspect of their task until you have reached a shared understanding and
-    resolved all open design branches, dependencies, and ambiguities:
+    Conduct an exhaustive, one-question-at-a-time interview with the user. The
+    interview operates as an active recursive decision tree where choosing an
+    option at the root of a branch NEVER closes the branch—it actively spawns
+    child leaf ambiguities that must be probed down into concrete operational
+    child leaves until zero ambiguity remains in that area:
 
-    -   **Decision-Tree Traversal Philosophy**:
-        -   Walk down each branch of the design tree, resolving dependencies
-            between decisions one-by-one.
-        -   Do NOT guess, assume, or settle for high-level approximations.
-        -   If a question can be answered by exploring the codebase, explore the
-            codebase instead.
+    -   **Mandatory Decision Tree Ledger Block**:
 
-    -   **Traverse All Unresolved Branches & Operational Layers**:
-        -   *Architectural & UX Foundations*: Core trigger mechanisms, user
-            journeys, competing UI/API patterns, component boundaries, data
-            contracts, and explicit scope exclusions.
-        -   *Process & Protocol Architecture*: Lockfile strategy, multi-instance
-            concurrency, daemon vs sidecar boundaries, process signal handling
-            (`SIGTERM` graceful drain vs `SIGKILL` orphan cleanup), and network
-            polling vs event-driven triggers.
-        -   *Proto/Schema Evolution & Backward Compatibility*: Zero-downtime field
-            migrations, deprecation schedules, default zero-value handling,
-            FieldMasks, and gateway schema federation directives (`@key`,
-            `__resolveReference`).
-        -   *Operational Hardening & Failure Recovery*: Dependent failure modes,
-            network outages, timeout thresholds, degraded fallback UI states,
-            retry backoff strategies, and abort/cancellation cascades.
-        -   *Boundary Interactions & Concurrency*: Navigation interrupts (ESC,
-            backdrop, route teardown in-flight), double-submit debounce/guards,
-            duplicate delivery/idempotency, multi-tab sync, cache invalidation,
-            leader election crash recovery, session expiration.
-        -   *State Invariants, Security & Accessibility*: Webhook signatures,
-            PII redaction, auth token handling (distinguishing 401 retry loops
-            from 403 terminal rejections), log token scrubbing, database
-            transaction atomicity, ARIA live regions for async state, focus
-            trapping/restoration, screen reader visibility (`aria-hidden`).
+        -   In EVERY turn of Step 5, you MUST output a visible `### Decision
+            Tree Ledger` block at the top of your markdown response.
+        -   Format:
 
-    -   **Active Adversarial Probing (Devil's Advocate)**:
-        -   Actively challenge fragile assumptions, breaking proto/schema
-            evolutions, concurrency hazards, and cascading failures across the
-            active decision branches until the solution is hardened against edge
-            conditions.
-        -   When specific technical choices are proposed (e.g., CSS filters,
-            distributed locks, polling loops, WebSocket heartbeats), mount
-            direct adversarial challenges grounded in the operational risks,
-            concurrency hazards, and performance trade-offs of those choices.
+            ```markdown
+            ### Decision Tree Ledger
+            - [x] Branch 1: <Root Topic> (<Confirmed approach>)
+              - [x] Leaf 1.1: <Failure / Error Mode> (<Confirmed decision>)
+              - [x] Leaf 1.2: <Concurrency / State Boundary> (<Confirmed decision>)
+            - [ ] Branch 2: <Root Topic> (<Confirmed approach>)
+              - [ ] Leaf 2.1: <Token / Resource Bound> (OPEN — probing now)
+              - [ ] Leaf 2.2: <Contradiction / Conflict Policy> (OPEN)
+            - [ ] Branch 3: <Root Topic> (OPEN)
+            ```
+        -   Track state accurately: `[ ]` indicates an unresolved root or child
+            leaf; `[x]` indicates a confirmed decision.
+
+    -   **Child Leaf Spawning Invariant & Pruning Heuristics (Hierarchical Sub-Tree Probing):**
+
+        -   When the user selects an architectural direction for a root branch,
+            do NOT advance to the next root branch.
+        -   The chosen option MUST actively spawn all high-value Tier 1 child
+            leaf probes covering the operational realities of that choice until
+            all architectural ambiguities in the branch are resolved:
+            -   **Tier 1 (Mandatory Operational Probes — Interrogate
+                Interactively):**
+                -   *Failure Modes & Error Recovery*: Network drops, rater/RPC
+                    failures, timeout thresholds, degraded fallback states,
+                    retry backoff strategies, abort/cancellation cascades.
+                -   *Resource & Payload Bounds*: Token ceilings, candidate
+                    truncation, payload transport limits, rate limits, cache
+                    invalidation.
+                -   *UI Controls & State Transitions*: Visual status feedback
+                    (WIP spinners, disabled states), button layout, countdown
+                    cancel triggers, 1-click master copy actions.
+                -   *State Invariants & Concurrency*: Multi-tab broadcast races,
+                    tie-breaker handling, parallel dispatch synchronization,
+                    leader election crashes.
+                -   *Schema & Proto Evolution*: FieldMasks, optional presence vs
+                    default zero-values, circular query plans, gateway fallback
+                    nulls.
+            -   **Tier 2 (Deferred Implementation Details — Prune from
+                Interview):**
+                -   Pure cosmetic styling (exact pixel padding, hex colors, font
+                    weights).
+                -   Micro-copy or minor text wording variations.
+                -   Internal non-exported helper function naming. *Rule:* Do NOT
+                    spawn interactive interview questions for Tier 2 items.
+                    Defer them as sensible defaults in the implementation plan
+                    to prevent interview fatigue and turn exhaustion.
+        -   A root branch CANNOT be marked `[x]` while any of its Tier 1 child
+            leaves remain `[ ]` (OPEN).
+
+    -   **Anti-Dictation Invariant (Zero Un-Queried Decisions):**
+
+        -   You are STRICTLY FORBIDDEN from asserting or outputting declarative
+            implementation designs, button placements, countdown rules, or
+            lifecycle state transitions in markdown for topics that have not
+            been confirmed via `ask_question`.
+        -   If an implementation detail exists (e.g., how the countdown cancels,
+            what buttons appear on the winner card, what text the prompt
+            injects), it is an **unresolved leaf ambiguity**. It MUST be posed
+            to the user via `ask_question`, never asserted as an unconfirmed
+            fait accompli.
+
+    -   **Active Adversarial Probing (Devil's Advocate):**
+
+        -   Actively challenge fragile assumptions, concurrency hazards, and
+            cascading failures as child leaf probes across the active decision
+            branches until the solution is hardened against edge conditions.
+        -   Ground challenges in concrete operational risks (e.g., SVG filter
+            repaint overhead, distributed lock TTL drift, split-brain token
+            races, proto3 default zero-value collisions).
 
     -   **Testing Strategy Classification**: Classify manual testing depth:
         -   *Interactive / Stateful / Route / API Tracks*: Full `manual_testing.md`
@@ -165,12 +211,18 @@ resolving all open branches and ambiguities.
         -   If a decision introduces domain terminology, offer to record it in
             `{PROJECT_CONTEXT_DIR}/terms.md`.
 
-    -   **Convergence Summary & Modal Confirmation Gate**:
-        -   When all branches of the design tree have been explored and all
-            operational ambiguities, failure modes, and adversarial challenges
-            are fully resolved, present a structured **Convergence Summary** in
-            markdown synthesizing all settled decisions.
-        -   Call `ask_question`: "All decision branches, failure modes, and adversarial challenges are resolved. Ready to materialize the specification and manual testing runbook?"
+    -   **Natural Convergence & Modal Confirmation Gate**:
+
+        -   There are zero arbitrary question quotas; exhaustiveness is governed
+            strictly by the Decision Tree Ledger.
+        -   The interview concludes if and only if EVERY branch and child leaf
+            in the Decision Tree Ledger is marked `[x]` (Resolved) with zero
+            open items.
+        -   ONLY THEN, present a structured **Convergence Summary** in markdown
+            synthesizing all settled decisions.
+        -   Call `ask_question`: "All decision branches and child leaves are
+            resolved. Ready to materialize the specification and manual testing
+            runbook?"
         -   **MANDATORY:** End your turn and wait for explicit confirmation.
 
 6.  **Spec & Manual Testing Materialization & Final Confirmation:**
