@@ -6,6 +6,43 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.19.2] - 2026-08-28
+
+### Added
+
+-   **Multi-Turn Trajectory Evaluation Harness
+    (`evals/skillopt/run_trajectory_eval.py`)**:
+    -   Implemented a 5-metric multi-turn benchmark runner evaluating
+        interactive conversational trajectories across stratified domains.
+    -   Deterministic evaluation metrics for Mean Leaf Depth Ratio ($D_L \ge
+        1.5$), Dictation Violation Count ($V_D = 0$), Decision Tree Ledger
+        Fidelity ($F_L \ge 80\%$), Premature Materialization Guard, and Natural
+        Convergence Validation.
+    -   Seeded `evals/skillopt/tasks/trajectories.jsonl` with 4 multi-turn
+        benchmark scenarios including UI sidecars, relational database migrations,
+        GraphQL schema federation, and conversational detour recovery.
+
+### Changed
+
+-   **Recursive Decision-Tree Grill Engine (`arm-new-track` Step 5)**:
+    -   Enforced mandatory in-transcript `### Decision Tree Ledger` block
+        updated on every turn to track root branches and child leaves (`[ ]`
+        OPEN, `[x]` Resolved).
+    -   Implemented **Child Leaf Spawning Invariant** (Depth $\ge 2$): selecting
+        an architectural option at the root of a branch dynamically spawns
+        all operational, failure recovery, resource bound, state transition, and
+        concurrency leaf probes that must be resolved before closing the branch.
+    -   Added **Leaf Prioritization & Pruning Heuristics**: distinguishes Tier 1
+        (Mandatory Operational Probes) from Tier 2 (Deferred Implementation
+        Details: CSS padding, micro-copy, internal helper naming) to prevent
+        interview fatigue and turn exhaustion without arbitrary numeric caps.
+    -   Enforced strict **Anti-Dictation Invariant** (Zero Un-Queried
+        Decisions): strictly bans asserting declarative implementation designs,
+        button placements, or countdown cancellation rules in markdown without
+        prior interactive confirmation via `ask_question`.
+    -   Eliminated arbitrary static quotas in favor of natural convergence
+        governed strictly by resolving all items in the Decision Tree Ledger.
+
 ## [0.19.1] - 2026-08-26
 
 ### Changed

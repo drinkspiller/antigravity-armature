@@ -66,7 +66,7 @@ Before executing ANY Armature command, resolve `{PROJECT_CONTEXT_DIR}` (either `
     proceeding (see `armature_cdd_protocols.md` §9).
 
 Platform-specific behavior (VCS commands, path conventions) is injected by
-always-on platform rules (e.g., `armature_antigravity.md`). Do not hardcode VCS
+always-on platform rules (e.g., `armature_google3.md`). Do not hardcode VCS
 commands in skill protocols.
 
 ## 1. Core Operational Guardrails
@@ -130,8 +130,8 @@ Artifact filenames follow: `arm_<command>_<context>.md`
 ## 4. VCS Operations
 
 Armature skills are VCS-agnostic by default. Platform-specific VCS behavior
-(Git) is injected by platform rules (e.g.,
-`armature_antigravity.md`). When no platform rule overrides VCS behavior, default
+(Git, Fig/Mercurial, g4/Piper) is injected by platform rules (e.g.,
+`armature_google3.md`). When no platform rule overrides VCS behavior, default
 to Git:
 
 -   `git status` to check for changes
@@ -178,14 +178,29 @@ first. Do NOT create empty commits.
     not modernize adjacent error comparisons, reformat error strings, or rename
     unrelated variables), and provide the exact test verification command in ≤1000
     tokens (do not exceed token boundaries).
+-   **Recursive Decision-Tree Grill Engine & Anti-Dictation Invariant** — During
+    track creation (`/arm-new-track` Step 5), the agent MUST maintain a visible
+    `### Decision Tree Ledger` tracking root branches and spawned child leaves
+    (`[ ]` OPEN, `[x]` Resolved). Selecting an architectural direction at the
+    root of a branch does NOT close the branch; it MUST actively spawn all
+    high-value Tier 1 child leaf probes across failure modes, resource bounds,
+    state transitions, and concurrency races down into concrete operational child
+    leaves until all operational ambiguities are resolved. Tier 2 cosmetic or
+    micro-implementation details (CSS, micro-copy) must be pruned from the
+    interactive tree and deferred to the plan. Furthermore, the agent is
+    strictly forbidden from asserting declarative technical designs, button
+    configurations, countdown cancel behaviors, or state transitions in markdown
+    for topics that have not been confirmed by the user via `ask_question`.
+    Every implementation detail is an unresolved leaf ambiguity that MUST be
+    asked interactively.
 -   **Proto schema evolution & GraphQL federation probing** — During Step 5
-    Decision-Tree Traversal & Ambiguity Resolution (Grill Engine: exploring
-    dependent failure modes, boundary edge cases, and adversarial challenges)
-    on protocol, GraphQL federation, or protobuf migrations, explicitly analyze
-    and challenge schema directives (`@key`, `@shareable`, `@provides`), field
-    deprecation paths, gateway circular dependencies, and service downtime
-    mitigation, as well as proto3 default zero-values vs unset fields in partial
-    updates, wire-format breaks, and FieldMask requirements before generating plans.
+    Recursive Decision-Tree Traversal (exploring dependent failure modes,
+    boundary edge cases, and adversarial challenges) on protocol, GraphQL
+    federation, or protobuf migrations, explicitly analyze and challenge schema
+    directives (`@key`, `@shareable`, `@provides`), field deprecation paths,
+    gateway circular dependencies, and service downtime mitigation, as well as
+    proto3 default zero-values vs unset fields in partial updates, wire-format
+    breaks, and FieldMask requirements before generating plans.
 -   **3-Part Fixture Triad & Additive Manual Testing Verification** — Manual
     testing runbooks are strictly additive to automated unit and integration
     tests. In phase checkpoints, track closeouts, and review workflows, the
