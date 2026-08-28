@@ -1,7 +1,7 @@
 # Armature: Structural Permanence for AI Coding Agents
 
 > [!NOTE]
-> **Conductor is now Armature (v0.19.2)**  
+> **Conductor is now Armature (v0.19.3)**  
 > Conductor has been officially rebranded to **Armature**. Existing repositories with a `conductor/` directory continue operating seamlessly via Transparent Dual-Discovery with zero file migrations required.
 
 
@@ -215,5 +215,5 @@ Armature preserves **transparent dual-discovery**:
 
 ## Version
 
-Current: **v0.19.1** — See [CHANGELOG.md](CHANGELOG.md) for release notes.
+Current: **v0.19.3** — See [CHANGELOG.md](CHANGELOG.md) for release notes.
 

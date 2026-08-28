@@ -12,7 +12,7 @@ task-specific logic.
 ## 0. Armature Project Directory (Dual-Root Support)
 
 The project context directory lives at `{PROJECT_ROOT}/armature/` (or legacy `{PROJECT_ROOT}/conductor/`) — the root of the
-user's project repository (NOT the Jetski brain/artifacts directory). All
+user's project repository (NOT the agent brain/artifacts directory). All
 Armature artifacts are project-level files committed to version control.
 
 ```
@@ -66,8 +66,7 @@ Before executing ANY Armature command, resolve `{PROJECT_CONTEXT_DIR}` (either `
     proceeding (see `armature_cdd_protocols.md` §9).
 
 Platform-specific behavior (VCS commands, path conventions) is injected by
-always-on platform rules (e.g., `armature_google3.md`). Do not hardcode VCS
-commands in skill protocols.
+always-on platform rules. Do not hardcode VCS commands in skill protocols.
 
 ## 1. Core Operational Guardrails
 
@@ -118,7 +117,7 @@ code change, or workflow transition:
 Whenever an Armature command produces structured output requiring user review -
 clarifying questions, reports, summaries, specs, plans, or confirmation prompts:
 
-1.  **Write as a Jetski artifact** using `write_to_file`
+1.  **Write as an artifact** using `write_to_file`
 2.  **Present via `notify_user`** with `PathsToReview` pointing to the file
 3.  **Use appropriate ArtifactType**: `walkthrough` for reports/status,
     `implementation_plan` for specs/plans, `other` for questions/prompts
@@ -130,8 +129,7 @@ Artifact filenames follow: `arm_<command>_<context>.md`
 ## 4. VCS Operations
 
 Armature skills are VCS-agnostic by default. Platform-specific VCS behavior
-(Git, Fig/Mercurial, g4/Piper) is injected by platform rules (e.g.,
-`armature_google3.md`). When no platform rule overrides VCS behavior, default
+(Git, Mercurial, or other version control systems) is injected by platform rules. When no platform rule overrides VCS behavior, default
 to Git:
 
 -   `git status` to check for changes
@@ -178,21 +176,34 @@ first. Do NOT create empty commits.
     not modernize adjacent error comparisons, reformat error strings, or rename
     unrelated variables), and provide the exact test verification command in ≤1000
     tokens (do not exceed token boundaries).
--   **Recursive Decision-Tree Grill Engine & Anti-Dictation Invariant** — During
-    track creation (`/arm-new-track` Step 5), the agent MUST maintain a visible
-    `### Decision Tree Ledger` tracking root branches and spawned child leaves
-    (`[ ]` OPEN, `[x]` Resolved). Selecting an architectural direction at the
-    root of a branch does NOT close the branch; it MUST actively spawn all
-    high-value Tier 1 child leaf probes across failure modes, resource bounds,
-    state transitions, and concurrency races down into concrete operational child
-    leaves until all operational ambiguities are resolved. Tier 2 cosmetic or
-    micro-implementation details (CSS, micro-copy) must be pruned from the
-    interactive tree and deferred to the plan. Furthermore, the agent is
-    strictly forbidden from asserting declarative technical designs, button
-    configurations, countdown cancel behaviors, or state transitions in markdown
-    for topics that have not been confirmed by the user via `ask_question`.
-    Every implementation detail is an unresolved leaf ambiguity that MUST be
-    asked interactively.
+-   **Recursive Decision-Tree Grill Engine & Post-Ledger Devil's Advocate** —
+    During track creation (`/arm-new-track` Step 5), the agent MUST maintain a
+    visible `### Decision Tree Ledger` tracking root branches and spawned child
+    leaves (`[ ]` OPEN, `[x]` Resolved). The interview operates in two strictly
+    sequenced phases:
+    1.  *Phase 5a (Dynamic Leaf Traversal & Ambiguity Elicitation)*: Selecting an
+        architectural direction at the root of a branch does NOT close the
+        branch; it actively spawns 1–2 high-value Tier 1 operational child
+        leaves derived from that specific choice. Probing depth is strictly
+        bounded to Depth <= 2 (Root Topic -> Operational Child Leaf).
+        Operational child leaf answers are terminal (`[x]`) and MUST NOT spawn
+        Level 2 grandchildren (Tier 2 styling, micro-copy, and internal helpers
+        are pruned and deferred to `plan.md`). Future root branches MUST remain
+        unexpanded stubs in the ledger until probed (Lazy Leaf Materialization);
+        pre-populating leaves under unconfirmed branches is strictly forbidden.
+        Every spawned child leaf MUST carry an Answer-Anchored Provenance Tag
+        citing the confirmed choice: `- [ ] Leaf N.M: ... (Spawned by '<choice>': ...)`.
+        Furthermore, the agent is strictly forbidden from asserting declarative
+        technical designs, button configurations, countdown cancel behaviors, or
+        state transitions in markdown for topics unconfirmed by the user via
+        `ask_question`.
+    2.  *Phase 5b (Post-Ledger Devil's Advocate Analysis)*: When every branch and
+        child leaf reaches `[x]`, the agent MUST NOT immediately converge. It
+        MUST output a structured `### Devil's Advocate Analysis` confronting the
+        user with emergent cross-cutting contradictions, operational hazards,
+        and maintainability debt across the combined choices, ending with an
+        interactive gate (`ask_question`) to reaffirm decisions or reopen a
+        branch before proceeding to `spec.md`.
 -   **Proto schema evolution & GraphQL federation probing** — During Step 5
     Recursive Decision-Tree Traversal (exploring dependent failure modes,
     boundary edge cases, and adversarial challenges) on protocol, GraphQL
