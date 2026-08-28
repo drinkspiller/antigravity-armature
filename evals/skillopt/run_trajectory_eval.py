@@ -194,13 +194,34 @@ def parse_agent_turn(turn_text: str):
           re.IGNORECASE,
       )
   )
+  has_devil_advocate = bool(
+      re.search(
+          r"###?\s*(?:Phase\s*5b:\s*)?Devil's Advocate Analysis",
+          turn_text,
+          re.IGNORECASE,
+      )
+  )
+  has_provenance = bool(
+      re.search(r"\(Spawned by ['\"].+?['\"]", turn_text, re.IGNORECASE)
+  )
 
   # Count branches and leaves in ledger if present
-  ledger_branches = re.findall(
-      r"-\s*\[([ xX])\]\s*(?:\*\*|\*|__|_)?\s*Branch\s*[\d\.]*:\s*([^\n]+)",
+  ledger_branches_raw = re.findall(
+      r"-\s*\[([ xX])\]\s*(?:\*\*|\*|__|_)?\s*Branch\s*([\d\.]*):\s*([^\n]+)",
       turn_text,
       re.IGNORECASE,
   )
+  ledger_branches = []
+  for status, bnum, btext in ledger_branches_raw:
+    clean_b = re.sub(r"[\*_]+", "", btext)
+    clean_b = re.split(
+        r"\s+\((?:Confirmed|Resolved|OPEN|UNEXPLORED)",
+        clean_b,
+        flags=re.IGNORECASE,
+    )[0].strip()
+    branch_key = f"Branch {bnum}: {clean_b}" if bnum else clean_b
+    ledger_branches.append((status, branch_key))
+
   ledger_leaves = re.findall(
       r"\s+-\s*\[([ xX])\]\s*(?:\*\*|\*|__|_)?\s*Leaf\s*[\d\.]*:\s*([^\n]+)",
       turn_text,
@@ -216,6 +237,8 @@ def parse_agent_turn(turn_text: str):
       "has_ledger": has_ledger,
       "wrote_spec": wrote_spec,
       "is_convergence": is_convergence,
+      "has_devil_advocate": has_devil_advocate,
+      "has_provenance": has_provenance,
       "ledger_branches": ledger_branches,
       "ledger_leaves": ledger_leaves,
       "open_branches_count": len(open_branches),
@@ -263,7 +286,7 @@ def run_trajectory(
   # Unconfounded system instruction: Pure skill text without redundant duplicate prompt rules
   system_instruction = (
       "You are an expert AI software architect running the Armature"
-      " context-driven development system in Google3.\nExecute the following"
+      " context-driven development system.\nExecute the following"
       f" skill instructions strictly:\n\n{skill_text}"
   )
 
@@ -281,6 +304,9 @@ def run_trajectory(
 
   root_branches_observed = set()
   child_leaves_observed = set()
+  devil_advocate_observed = False
+  prepopulation_violations = 0
+  provenance_tags_count = 0
 
   anti_dict_targets = scenario.get("anti_dictation_targets", [])
 
@@ -306,6 +332,12 @@ def run_trajectory(
     if parsed["has_ask_question"]:
       interactive_question_turns += 1
 
+    if parsed["has_devil_advocate"]:
+      devil_advocate_observed = True
+
+    if parsed["has_provenance"]:
+      provenance_tags_count += 1
+
     # Check for Decision Tree Ledger
     if parsed["has_ledger"]:
       ledger_turns += 1
@@ -313,6 +345,12 @@ def run_trajectory(
         root_branches_observed.add(bname.strip())
       for status, lname in parsed["ledger_leaves"]:
         child_leaves_observed.add(lname.strip())
+
+      # Turn 1 pre-population check: strictly bound leaves to active branch (at most 2)
+      if turn_idx == 1:
+        turn1_leaves = len(parsed["ledger_leaves"])
+        if turn1_leaves > 2:
+          prepopulation_violations += turn1_leaves - 2
 
     # Check for Anti-Dictation violations (declaring implementation targets without prior question)
     for target in anti_dict_targets:
@@ -334,10 +372,16 @@ def run_trajectory(
         for line in agent_output.splitlines():
           line_str = line.strip()
           # Skip ledger items: e.g. - [ ], - [x], * [ ], * [x], or (Resolved: ...)
-          if re.match(r"^[-*]\s*\[[ xX]\]", line_str) or "(Resolved:" in line_str:
+          if (
+              re.match(r"^[-*]\s*\[[ xX]\]", line_str)
+              or "(Resolved:" in line_str
+          ):
             continue
           # If it is a regular bullet asserting the target as fact outside the ledger
-          if re.match(r"^[-*]\s+", line_str) and target.lower() in line_str.lower():
+          if (
+              re.match(r"^[-*]\s+", line_str)
+              and target.lower() in line_str.lower()
+          ):
             dictation_violations += 1
             break
 
@@ -381,6 +425,8 @@ def run_trajectory(
   ledger_passed = ledger_fidelity >= 0.8
   premature_passed = premature_spec_writes == 0
   convergence_passed = convergence_reached
+  adversarial_passed = devil_advocate_observed
+  prepopulation_passed = prepopulation_violations == 0
 
   overall_passed = (
       depth_passed
@@ -388,6 +434,8 @@ def run_trajectory(
       and ledger_passed
       and premature_passed
       and convergence_passed
+      and adversarial_passed
+      and prepopulation_passed
   )
 
   return {
@@ -402,12 +450,17 @@ def run_trajectory(
       "ledger_fidelity": round(ledger_fidelity, 2),
       "premature_spec_writes": premature_spec_writes,
       "convergence_reached": convergence_reached,
+      "adversarial_observed": devil_advocate_observed,
+      "prepopulation_violations": prepopulation_violations,
+      "provenance_tags_count": provenance_tags_count,
       "metrics": {
           "depth_passed": depth_passed,
           "dictation_passed": dictation_passed,
           "ledger_passed": ledger_passed,
           "premature_passed": premature_passed,
           "convergence_passed": convergence_passed,
+          "adversarial_passed": adversarial_passed,
+          "prepopulation_passed": prepopulation_passed,
       },
       "passed": overall_passed,
       "transcript": transcript,
@@ -432,7 +485,7 @@ def main():
       help="Path to output results JSON",
   )
   parser.add_argument(
-      "--max_turns", type=int, default=12, help="Max turns per scenario"
+      "--max_turns", type=int, default=14, help="Max turns per scenario"
   )
   args = parser.parse_args()
 
@@ -483,7 +536,10 @@ def main():
         f"  {status_icon} | Turns: {res['total_turns']} | Q-Turns:"
         f" {res['interactive_question_turns']} | Roots: {res['num_roots']} |"
         f" Leaves: {res['num_leaves']} | Depth Ratio: {res['leaf_depth_ratio']}"
-        f" | Dictations: {res['dictation_violations']} | Ledger:"
+        f" | Pre-pop Violations: {res['prepopulation_violations']} |"
+        " Adversarial Critique:"
+        f" {'YES' if res['adversarial_observed'] else 'NO'} | Dictations:"
+        f" {res['dictation_violations']} | Ledger:"
         f" {int(res['ledger_fidelity']*100)}%",
         flush=True,
     )
@@ -509,8 +565,9 @@ def main():
   for r in results:
     icon = "✅" if r["passed"] else "❌"
     print(
-        f" {icon} {r['id']:<42} | Depth: {r['leaf_depth_ratio']:<4} | Q-Turns:"
-        f" {r['interactive_question_turns']:<2} | Dictations:"
+        f" {icon} {r['id']:<42} | Depth: {r['leaf_depth_ratio']:<4} | Pre-pop:"
+        f" {r['prepopulation_violations']} | Devil:"
+        f" {'YES' if r['adversarial_observed'] else 'NO':<3} | Dictations:"
         f" {r['dictation_violations']} | Ledger:"
         f" {int(r['ledger_fidelity']*100)}%",
         flush=True,

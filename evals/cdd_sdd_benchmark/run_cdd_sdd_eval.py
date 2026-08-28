@@ -1297,7 +1297,7 @@ def main():
   )
   parser.add_argument(
       "--artifact_dir",
-      default="/usr/local/google/home/skyebot/.gemini/antigravity/brain/2be863e0-814b-48f9-b096-79894b949469",
+      default=None,
       help="Path to conversation artifact directory to copy reports to",
   )
   parser.add_argument(

@@ -6,6 +6,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.19.3] - 2026-08-28
+
+### Added
+
+-   **Post-Ledger Devil's Advocate Analysis (Phase 5b)**:
+    -   Added a dedicated post-ledger adversarial critique step (`Phase 5b`) in
+        `arm-new-track` Step 5 executed when all decision branches and child
+        leaves reach `[x]`.
+    -   Confronts the user with a structured `### Devil's Advocate Analysis`
+        evaluating emergent cross-cutting contradictions, operational hazards,
+        and maintainability debt across confirmed choices before spec
+        materialization.
+    -   Enforces a modal confirmation gate (`ask_question`) offering options to
+        reaffirm trade-offs or reopen specific branches.
+-   **Lazy Leaf Materialization & Pre-Population Guard**:
+    -   Strictly bans pre-populating child leaves under unexplored branches in
+        the Decision Tree Ledger. Future branches must remain unexpanded stubs
+        until probed.
+    -   Added automated Turn-1 pre-population violation assertions to the
+        trajectory evaluation runner.
+-   **Answer-Anchored Provenance Tags & Depth-2 Horizon**:
+    -   Child leaves must explicitly cite the confirmed user choice that spawned
+        them: `(Spawned by '<choice>': <ambiguity>)`.
+    -   Probing depth strictly bounded to $D \le 2$ (Root Topic $\to$ Operational
+        Child Leaf), with operational leaf answers terminating at `[x]` to prevent
+        recursive turn exhaustion.
+
 ## [0.19.2] - 2026-08-28
 
 ### Added

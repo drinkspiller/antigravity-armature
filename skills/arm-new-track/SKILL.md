@@ -16,25 +16,33 @@ resolving all open branches and ambiguities.
     (`spec.md`, `plan.md`) or write code in a single autonomous turn. Every
     track requires step-by-step user alignment.
 -   **Synchronous Turn-Ending Barrier:** You MUST invoke `ask_question` and end
-    your turn at Step 5 (Leaf Probes & Convergence Gate), Step 6 (Spec
-    Approval), and Step 7 (Plan Approval). Do not proceed to subsequent steps
-    until the user responds.
+    your turn at Step 5a (Leaf Probes), Step 5b (Post-Ledger Devil's Advocate Gate),
+    Step 6 (Spec Approval), and Step 7 (Plan Approval). Do not proceed to
+    subsequent steps until the user responds.
 -   **Mandatory Decision Tree Ledger:** In EVERY turn of Step 5, you MUST output
     a visible `### Decision Tree Ledger` block showing root branches and their
     spawned child leaves with explicit `[ ]` (OPEN) and `[x]` (Resolved)
     markers.
+-   **Lazy Leaf Materialization (Pre-Population Ban):** Future root branches MUST
+    remain unexpanded stubs in the ledger (e.g., `- [ ] Branch 2: <Topic> (UNEXPLORED)`).
+    You are STRICTLY FORBIDDEN from pre-populating child leaves under a branch
+    until the user has confirmed an architectural direction for that branch.
+-   **Answer-Anchored Provenance Tags:** Every spawned child leaf MUST explicitly
+    cite the confirmed user choice that generated it:
+    `- [ ] Leaf 2.1: <Ambiguity> (Spawned by '<choice>': <question>)`. Leaves
+    without a literal proven choice from prior turns are forbidden.
 -   **Anti-Dictation Invariant (Zero Un-Queried Decisions):** You MUST NEVER
     assert or output declarative technical specifications, UI layouts, button
     behaviors, countdown cancel rules, or lifecycle state transitions in
     markdown for topics that have not been confirmed by the user. Every
     technical detail is an unresolved leaf ambiguity that MUST be posed via
     `ask_question`.
--   **Child Leaf Spawning Invariant (Hierarchical Sub-Tree Probing):** Selecting
-    an option at the root of a branch does NOT close the branch. Every
-    architectural choice MUST immediately spawn child leaf ambiguities (failure
-    modes, token/resource bounds, state transitions, concurrency races) that
-    must be probed one-by-one. A root branch CANNOT transition to `[x]` while
-    child leaves remain `[ ]`.
+-   **Child Leaf Spawning Invariant & Depth-2 Horizon:** Selecting an option at
+    the root of a branch does NOT close the branch; it actively spawns 1–2
+    high-value operational child leaves derived from that specific answer.
+    Probing depth is strictly bounded to Depth <= 2 (Root Topic -> Operational
+    Child Leaf). Operational leaf answers are terminal (`[x]`) and MUST NOT spawn
+    Level 2 grandchildren.
 -   **Compound Directive Shielding:** If the user invokes `/arm-new-track`
     alongside other instructions (e.g., `/diagnose`, `Fix`, or implementation
     tasks), you MUST explicitly refuse to write code or generate `plan.md`
@@ -45,14 +53,18 @@ resolving all open branches and ambiguities.
     while decision branches or child leaves remain `[ ]` (OPEN), you MUST NOT
     materialize `spec.md` immediately. List the remaining open leaves in the
     ledger and pose the next targeted probe via `ask_question`.
+-   **Phase 5b Post-Ledger Devil's Advocate Analysis:** When all branches and
+    dynamically spawned leaves reach `[x]`, you MUST NOT immediately converge.
+    You MUST execute Phase 5b: audit the combination of confirmed answers,
+    emit a structured `### Devil's Advocate Analysis` confronting the user with
+    emergent contradictions, operational hazards, and maintainability debt, and
+    halt with `ask_question` to reaffirm or reopen branches.
 -   **Anti-Early-Exit & Natural Convergence:** The interview concludes ONLY when
-    every branch and child leaf in the Decision Tree Ledger is marked `[x]`
-    (Resolved) with zero open items. There are zero arbitrary question quotas;
-    exhaustiveness is governed strictly by leaf resolution.
+    every branch and child leaf is marked `[x]` (Resolved) AND the user has
+    reaffirmed or resolved the Phase 5b Devil's Advocate analysis.
 -   **Pre-Materialization Hardening Barrier:** You MUST hold specification state
     in memory during Step 5. Canonical `spec.md` is only materialized on disk in
-    Step 6 after all branches and child leaves in the ledger are confirmed by
-    the user.
+    Step 6 after Phase 5b is reaffirmed and confirmed by the user.
 -   **Interruption & Detour Recovery:** If the user asks side questions,
     clarifies requirements, or explores asset tangents mid-traversal, answer the
     inquiry, update the ledger, and resume traversing open leaves. NEVER leap to
@@ -102,128 +114,139 @@ resolving all open branches and ambiguities.
     -   Use findings to inform the spec questions in the next step — questions
         must reference specific codebase context.
 
-5.  **Recursive Decision-Tree Grill Engine (Hierarchical Leaf Traversal):**
+5.  **Recursive Decision-Tree Grill Engine & Post-Ledger Devil's Advocate:**
 
-    Conduct an exhaustive, one-question-at-a-time interview with the user. The
-    interview operates as an active recursive decision tree where choosing an
-    option at the root of a branch NEVER closes the branch—it actively spawns
-    child leaf ambiguities that must be probed down into concrete operational
-    child leaves until zero ambiguity remains in that area:
+    Conduct an exhaustive, two-phase interview with the user. The interview
+    operates as an active recursive decision tree where choosing an option at
+    the root of a branch actively spawns child leaf ambiguities, followed by a
+    dedicated post-ledger adversarial critique of the settled choices:
 
-    -   **Mandatory Decision Tree Ledger Block**:
+    -   **Phase 5a: Dynamic Leaf Traversal & Ambiguity Elicitation**:
 
-        -   In EVERY turn of Step 5, you MUST output a visible `### Decision
-            Tree Ledger` block at the top of your markdown response.
-        -   Format:
+        -   **Mandatory Decision Tree Ledger Block**: In EVERY turn of Step 5,
+            you MUST output a visible `### Decision Tree Ledger` block at the
+            top of your markdown response, followed by markdown analysis of the
+            active branch, before invoking `ask_question`. You are STRICTLY
+            FORBIDDEN from emitting a bare `ask_question` tool call without
+            preceding markdown text and the ledger block. Format:
 
             ```markdown
             ### Decision Tree Ledger
-            - [x] Branch 1: <Root Topic> (<Confirmed approach>)
-              - [x] Leaf 1.1: <Failure / Error Mode> (<Confirmed decision>)
-              - [x] Leaf 1.2: <Concurrency / State Boundary> (<Confirmed decision>)
-            - [ ] Branch 2: <Root Topic> (<Confirmed approach>)
-              - [ ] Leaf 2.1: <Token / Resource Bound> (OPEN — probing now)
-              - [ ] Leaf 2.2: <Contradiction / Conflict Policy> (OPEN)
-            - [ ] Branch 3: <Root Topic> (OPEN)
+            - [x] Branch 1: <Root Topic> (Confirmed: <Confirmed approach>)
+              - [x] Leaf 1.1: <Failure / Error Mode> (Resolved: <Confirmed decision>)
+              - [x] Leaf 1.2: <Concurrency / Boundary> (Resolved: <Confirmed decision>)
+            - [ ] Branch 2: <Root Topic> (OPEN — probing now)
+              - [ ] Leaf 2.1: <Ambiguity> (Spawned by '<choice>': <question>) (OPEN — probing now)
+            - [ ] Branch 3: <Root Topic> (UNEXPLORED)
             ```
-        -   Track state accurately: `[ ]` indicates an unresolved root or child
+
+            Track state accurately: `[ ]` indicates an unresolved root or child
             leaf; `[x]` indicates a confirmed decision.
 
-    -   **Child Leaf Spawning Invariant & Pruning Heuristics (Hierarchical Sub-Tree Probing):**
+        -   **Lazy Leaf Materialization (Pre-Population Ban)**: Future root
+            branches MUST remain unexpanded stubs in the ledger (e.g., `- [ ]
+            Branch 3: Drawer State (UNEXPLORED)`). You are STRICTLY FORBIDDEN
+            from pre-populating child leaves under a branch until the user has
+            confirmed an architectural direction for that branch.
 
-        -   When the user selects an architectural direction for a root branch,
-            do NOT advance to the next root branch.
-        -   The chosen option MUST actively spawn all high-value Tier 1 child
-            leaf probes covering the operational realities of that choice until
-            all architectural ambiguities in the branch are resolved:
-            -   **Tier 1 (Mandatory Operational Probes — Interrogate
-                Interactively):**
-                -   *Failure Modes & Error Recovery*: Network drops, rater/RPC
-                    failures, timeout thresholds, degraded fallback states,
-                    retry backoff strategies, abort/cancellation cascades.
-                -   *Resource & Payload Bounds*: Token ceilings, candidate
-                    truncation, payload transport limits, rate limits, cache
-                    invalidation.
-                -   *UI Controls & State Transitions*: Visual status feedback
-                    (WIP spinners, disabled states), button layout, countdown
-                    cancel triggers, 1-click master copy actions.
-                -   *State Invariants & Concurrency*: Multi-tab broadcast races,
-                    tie-breaker handling, parallel dispatch synchronization,
-                    leader election crashes.
-                -   *Schema & Proto Evolution*: FieldMasks, optional presence vs
-                    default zero-values, circular query plans, gateway fallback
-                    nulls.
-            -   **Tier 2 (Deferred Implementation Details — Prune from
-                Interview):**
-                -   Pure cosmetic styling (exact pixel padding, hex colors, font
-                    weights).
-                -   Micro-copy or minor text wording variations.
-                -   Internal non-exported helper function naming. *Rule:* Do NOT
-                    spawn interactive interview questions for Tier 2 items.
-                    Defer them as sensible defaults in the implementation plan
-                    to prevent interview fatigue and turn exhaustion.
-        -   A root branch CANNOT be marked `[x]` while any of its Tier 1 child
-            leaves remain `[ ]` (OPEN).
+        -   **Answer-Anchored Provenance Tags**: Every spawned child leaf MUST
+            explicitly cite the confirmed user choice that generated it: `- [ ]
+            Leaf 2.1: Fallback handling (Spawned by '@switch': What renders in
+            @default if faq.id is unrecognized?)`. Leaves without a literal
+            proven choice from prior turns are forbidden.
 
-    -   **Anti-Dictation Invariant (Zero Un-Queried Decisions):**
+        -   **Child Leaf Spawning Invariant & Depth-2 Horizon (Terminality
+            Rule)**: Selecting an option at the root of a branch does NOT close
+            the branch; it actively spawns 1–2 high-value Tier 1 operational
+            child leaves derived from the specific choice made. Probing depth is
+            strictly bounded to Depth <= 2 (Root Topic -> Operational Child
+            Leaf). Operational child leaf answers are terminal (`[x]`) and MUST
+            NOT spawn Level 2 grandchildren.
 
-        -   You are STRICTLY FORBIDDEN from asserting or outputting declarative
+            -   *Tier 1 (Mandatory Operational Probes)*: Failure modes,
+                network/RPC drops, timeout thresholds, degraded fallback states,
+                payload/token bounds, multi-tab sync, concurrency races, schema
+                evolution contracts.
+            -   *Tier 2 (Deferred Implementation Details — Prune from
+                Interview)*: Pure cosmetic styling (exact pixel padding, hex
+                colors), micro-copy variations, internal helper function naming.
+                *Rule:* Do NOT spawn interactive interview questions for Tier 2
+                items. Defer them as sensible defaults in `plan.md`.
+
+        -   **Anti-Dictation Invariant (Zero Un-Queried Decisions)**: You are
+            STRICTLY FORBIDDEN from asserting or outputting declarative
             implementation designs, button placements, countdown rules, or
             lifecycle state transitions in markdown for topics that have not
-            been confirmed via `ask_question`.
-        -   If an implementation detail exists (e.g., how the countdown cancels,
-            what buttons appear on the winner card, what text the prompt
-            injects), it is an **unresolved leaf ambiguity**. It MUST be posed
-            to the user via `ask_question`, never asserted as an unconfirmed
-            fait accompli.
+            been confirmed via `ask_question`. Every technical detail is an
+            unresolved leaf ambiguity that MUST be posed via `ask_question`.
 
-    -   **Active Adversarial Probing (Devil's Advocate):**
+        -   **Testing Strategy Classification**: Classify manual testing depth:
 
-        -   Actively challenge fragile assumptions, concurrency hazards, and
-            cascading failures as child leaf probes across the active decision
-            branches until the solution is hardened against edge conditions.
-        -   Ground challenges in concrete operational risks (e.g., SVG filter
-            repaint overhead, distributed lock TTL drift, split-brain token
-            races, proto3 default zero-value collisions).
+            -   *Interactive / Stateful / Route / API Tracks*: Full
+                `manual_testing.md` runbook with environment setup, CLI reset
+                tooling, persona matrices, and sequential route test cases.
+            -   *Pure Refactor / Utility / Chore Tracks*: Lightweight
+                `manual_testing.md` with concise smoke and sanity checks
+                alongside automated unit tests. When requirements for a pure
+                refactor or utility track are already clear, formulate the
+                Testing Strategy classification and proceed directly to Phase 5b
+                without injecting redundant questioning loops.
 
-    -   **Testing Strategy Classification**: Classify manual testing depth:
-        -   *Interactive / Stateful / Route / API Tracks*: Full `manual_testing.md`
-            runbook with environment setup, CLI reset tooling, persona matrices,
-            and sequential route test cases.
-        -   *Pure Refactor / Utility / Chore Tracks*: Lightweight
-            `manual_testing.md` with concise smoke and sanity checks alongside
-            automated unit tests. When requirements for a pure refactor or
-            utility track are already clear, immediately formulate the Testing
-            Strategy classification and proceed directly to the Convergence
-            Summary without injecting redundant questioning loops.
+        -   **Questioning Mechanics**:
 
-    -   **Questioning Mechanics**:
-        -   Ask questions **strictly one at a time** using `ask_question`.
-        -   List recommended option first (`(Recommended)`) with 2–4 calibrated
-            choices.
-        -   **MANDATORY:** End your turn after each `ask_question` call to wait for
-            the user's answer.
+            -   Ask questions **strictly one at a time** using `ask_question`.
+            -   List recommended option first (`(Recommended)`) with 2–4
+                calibrated choices.
+            -   **MANDATORY:** End your turn after each `ask_question` call to
+                wait for the user's answer.
 
-    -   **Inline Design Decisions & ADRs**:
-        -   If the 3-part gate is met, offer to capture an ADR
-            (`{PROJECT_CONTEXT_DIR}/adr/NNNN-slug.md`) using `ask_question`.
-    -   **Inline Glossary Elicitation (`terms.md`)**:
-        -   If a decision introduces domain terminology, offer to record it in
+        -   **Inline Design Decisions & ADRs**: If the 3-part gate is met, offer
+            to capture an ADR (`{PROJECT_CONTEXT_DIR}/adr/NNNN-slug.md`) using
+            `ask_question`.
+
+        -   **Inline Glossary Elicitation (`terms.md`)**: If a decision
+            introduces domain terminology, offer to record it in
             `{PROJECT_CONTEXT_DIR}/terms.md`.
 
-    -   **Natural Convergence & Modal Confirmation Gate**:
+    -   **Phase 5b: Post-Ledger Devil's Advocate Analysis (Red-Teaming Confirmed
+        Answers)**:
 
-        -   There are zero arbitrary question quotas; exhaustiveness is governed
-            strictly by the Decision Tree Ledger.
-        -   The interview concludes if and only if EVERY branch and child leaf
-            in the Decision Tree Ledger is marked `[x]` (Resolved) with zero
-            open items.
-        -   ONLY THEN, present a structured **Convergence Summary** in markdown
-            synthesizing all settled decisions.
-        -   Call `ask_question`: "All decision branches and child leaves are
-            resolved. Ready to materialize the specification and manual testing
-            runbook?"
-        -   **MANDATORY:** End your turn and wait for explicit confirmation.
+        -   **Trigger**: Occurs if and only if EVERY branch and dynamically
+            spawned child leaf in the Decision Tree Ledger is marked `[x]`
+            (Resolved) with zero open items.
+        -   **Execution**:
+            1.  Audit the combination of confirmed answers across all resolved
+                branches in the ledger.
+            2.  Output a structured `### Devil's Advocate Analysis:
+                Stress-Testing Confirmed Decisions` directly beneath the
+                resolved ledger.
+            3.  Formulate 2–3 concrete adversarial challenges targeting:
+                -   *Emergent Contradictions*: Unintended friction or mismatch
+                    between separate confirmed choices.
+                -   *Operational & Maintenance Debt*: Hardcoded template markup
+                    vs headless schemas, excessive client-side state, DOM bloat.
+                -   *Failure Cascades*: Degraded network scenarios, rapid user
+                    interrupts, timeout recovery under load.
+            4.  End the turn with `ask_question`:
+                -   *Question*: "Decision tree resolved. How do you want to
+                    address the Devil's advocate findings?"
+                -   *Options*:
+                    -   "(Recommended) Reaffirm decisions — trade-offs are
+                        acceptable, proceed to spec"
+                    -   "Reopen Branch <N> — resolve <specific risk>"
+                    -   "Adjust decisions — let's revise the approach"
+            5.  **Reopening vs. Natural Convergence**:
+                -   If the user reopens a branch, flip that branch and its
+                    consequence leaf back to `[ ]` (OPEN), probe the revised
+                    ambiguity, and return to Phase 5b when re-resolved.
+                -   If the user reaffirms decisions, ONLY THEN present the
+                    structured **Convergence Summary** in markdown synthesizing
+                    all settled decisions, and call `ask_question`: "All
+                    decision branches, child leaves, and adversarial trade-offs
+                    are resolved. Ready to materialize the specification and
+                    manual testing runbook?"
+                -   **MANDATORY:** End your turn and wait for explicit user
+                    confirmation.
 
 6.  **Spec & Manual Testing Materialization & Final Confirmation:**
 
