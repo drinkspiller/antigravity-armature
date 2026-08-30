@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.20.0] - 2026-08-30
+
+### Added
+
+-   **Interactive Manual Verification Flow (`arm-review`)**:
+    -   Introduced upfront 3-way review mode selection (`Full Review`, `Interactive Testing only`, `Code Audit only`) and CLI flags (`--both`, `--manual`, `--static`).
+    -   Added Step 2.5 `Interactive Verification Phase` driven by `manual_testing.md`, parsing preconditions, setup commands, and expected barrier checks into a real-time verification ledger.
+    -   **Hybrid Smart Gate**: Automatically executes non-destructive test fixtures, local servers, and auth token minting while strictly halting and prompting before executing destructive operations (`DROP`, `DELETE`, `TRUNCATE`, `rm -rf`, `reset`, `clean`, `wipe`, `reseed`).
+    -   **Mandatory Prerequisites & Copy-Pastable URLs**: Requires a fenced code block with exact service startup commands (`npm run dev`, `./run.sh`) before navigation, and provides fully qualified URLs in separate code blocks (`http://localhost:<PORT>/<path>` and remote host interfaces).
+    -   **In-Flight Discrepancy Triage & Cascade Invalidation**: Allows developers to diagnose and apply targeted hotfixes in-flight; automatically flags previously cleared scenarios with `[~] Requires Quick Re-check`.
+    -   **Mandatory Post-Testing Reconciliation Gate**: Blocks track signoff and report generation until all logged issues are resolved, recorded as `[BLOCKING]` findings, or acknowledged as `[WARNING]` tech debt.
+    -   **Living Runbook Synchronization**: Automatically writes working, verified commands back to `manual_testing.md`.
+-   **Sequential Phase 5b Devil's Advocate Execution (`arm-new-track`)**:
+    -   Restructured Phase 5b Post-Ledger Devil's Advocate Analysis to present emergent trade-offs, hazards, and failure cascades strictly one-by-one with countermeasure options and sequential decision gates.
+-   **Benchmark & SkillOpt Calibration**:
+    -   Added multi-domain test tasks `TRAIN_26`, `VAL_20`, `VAL_21`, `VAL_22` evaluating prerequisites blocks, URL formatting, destructive command safety gates, and in-flight triage.
+
 ## [0.19.3] - 2026-08-28
 
 ### Added

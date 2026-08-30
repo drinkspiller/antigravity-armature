@@ -114,12 +114,12 @@ Armature is benchmarked against alternative Spec-Driven Development (SDD) and Co
 
 | Rank | Framework | Composite Score | Pass Rate (95% CI) | Avg Tokens / Task | Key Takeaway |
 | :---: | :--- | :---: | :---: | :---: | :--- |
-| **#1** | **Armature** *(this)* | **85 / 100** | **85.0%** (102/120, ±6.4%) | 3038 tokens | 100% drift governance, continuous decision-tree traversal, and transparent dual-discovery. |
-| **#2** | **BMAD Method** | **66 / 100** | **65.8%** (79/120, ±8.5%) | 2634 tokens | Multi-agent role separation; high coordination overhead on micro-fixes. |
-| **#3** | **GitHub Spec Kit** | **63 / 100** | **63.3%** (76/120, ±8.6%) | 2835 tokens | Spec-first rigor with Constitution gating; heavy planning ceremony for minor edits. |
-| **#4** | **Conductor** | **49 / 100** | **49.2%** (59/120, ±8.9%) | 2346 tokens | Efficient linear track orchestration; lacks multi-turn branch resolution and OCC analysis. |
-| **#5** | **OpenSpec** | **40 / 100** | **40.0%** (48/120, ±8.8%) | 1597 tokens | Lightweight change proposals; lacks destructive command safeguards. |
-| **#6** | **Memory Bank (Cline / Roo Code)** | **39 / 100** | **39.2%** (47/120, ±8.7%) | 2703 tokens | Stateful markdown memory; vulnerable to out-of-band filesystem drift. |
+| **#1** | **Armature (OSS)** *(this)* | **78.3 / 100** | **78.3%** (94/120, ±7.4%) | 3338 tokens | High drift governance (79.2%), state safety (83.3%), surgical velocity, and living runbook verification. |
+| **#2** | **BMAD Method** | **71.7 / 100** | **71.7%** (86/120, ±8.1%) | 2645 tokens | Multi-agent agile role separation; high coordination overhead and ceremony on trivial micro-fixes. |
+| **#3** | **GitHub Spec Kit** | **66.7 / 100** | **66.7%** (80/120, ±8.4%) | 3106 tokens | Spec-first rigor with Constitution gating; heavy planning ceremony for minor edits. |
+| **#4** | **Conductor (Canonical Upstream CLI)** | **51.7 / 100** | **51.7%** (62/120, ±8.9%) | 2329 tokens | Efficient linear track orchestration; lacks multi-turn branch resolution and OCC analysis. |
+| **#5** | **OpenSpec** | **49.2 / 100** | **49.2%** (59/120, ±8.9%) | 1703 tokens | Lightweight change proposals; lacks destructive command safeguards and drift tripwires. |
+| **#6** | **Memory Bank (Cline / Roo Code)** | **35.0 / 100** | **35.0%** (42/120, ±8.5%) | 2099 tokens | Stateful markdown memory; vulnerable to out-of-band filesystem drift and safety failures. |
 
 ---
 
@@ -141,7 +141,7 @@ Armature installs as a modular plugin bundle containing skills, rule protocols, 
 | `arm-new-track/` | `skills/arm-new-track/` | Armature Planner | `/arm-new-track` — Start a new feature or bug fix with continuous decision-tree elicitation |
 | `arm-implement/` | `skills/arm-implement/` | Armature Implementer | `/arm-implement` — Execute plan tasks sequentially with phase checkpoint drift audits |
 | `arm-status/` | `skills/arm-status/` | Armature Observer | `/arm-status` — View project trajectory with ambient contract health monitoring |
-| `arm-review/` | `skills/arm-review/` | Armature Reviewer | `/arm-review` — Multi-dimensional review against living runbooks and ADRs |
+| `arm-review/` | `skills/arm-review/` | Armature Reviewer | `/arm-review` — Multi-dimensional code audit and guided interactive manual verification walkthroughs |
 | `arm-revert/` | `skills/arm-revert/` | Armature Surgeon | `/arm-revert` — Surgical rollbacks with destructive operation shielding |
 | `arm-drift/` | `skills/arm-drift/` | Armature Drift Auditor | `/arm-drift` — Continuous 3-tier drift auditing across docs, interfaces, and packaging |
 | `arm-chat/` | `skills/arm-chat/` | Armature Guide | `/arm-chat` — Ceremony-free context ingestion with automatic glossary sync |
@@ -215,5 +215,5 @@ Armature preserves **transparent dual-discovery**:
 
 ## Version
 
-Current: **v0.19.3** — See [CHANGELOG.md](CHANGELOG.md) for release notes.
+Current: **v0.20.0** — See [CHANGELOG.md](CHANGELOG.md) for release notes.
 
