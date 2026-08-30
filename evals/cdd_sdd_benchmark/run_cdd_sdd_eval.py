@@ -14,7 +14,6 @@ Target Frameworks:
   - bmad_method (BMAD Method)
   - memory_bank (Memory Bank / Cline / Roo Code)
   - canonical_conductor (Canonical Conductor Extension)
-  - antigravity_armature_dev (Google3 Internal Armature)
 
 Usage:
   # Run full evaluation across all frameworks and scenarios:
@@ -747,7 +746,7 @@ def print_summary_scorecard(
     print(
         f"  {BOLD}{data['name']:<42}{RESET} Pass Rate:"
         f" {GREEN if data['pass_rate'] >= 70 else YELLOW}{data['total_passed']}/{data['total_criteria']}"
-        f" ({data['pass_rate']}%, {data.get('ci_str', '')}){RESET} 
+        f" ({data['pass_rate']}%, {data.get('ci_str', '')}){RESET} | Avg"
         f" Tokens: {data['avg_tokens']}"
     )
   print(
@@ -817,21 +816,21 @@ def generate_markdown_report(
 
 ## Executive Summary & Scorecard
 
-
-
+| Framework | Paradigm | Criteria Passed | Pass Rate (95% CI) | Avg Tokens / Task | Scenarios |
+| :--- | :--- | :---: | :---: | :---: | :---: |
 """
   for fw_key, data in sort_framework_summary(summary):
     display_name = data["name"]
     if (
-        fw_key in ["antigravity_armature_dev", "antigravity_conductor_dev", "conductor_enterprise_ref"]
+        fw_key in ["armature_oss"]
         and "(this)" not in display_name
     ):
       display_name += " (this)"
     ci_str = data.get("ci_str", f"{data['pass_rate']}%")
     md += (
-        f"
-        f" / {data['total_criteria']}** 
-        f" {data['avg_tokens']} tokens 
+        f"| **{display_name}** | {data['paradigm']} | **{data['total_passed']}"
+        f" / {data['total_criteria']}** | **{data['pass_rate']}%** ({ci_str}) |"
+        f" {data['avg_tokens']} tokens | {data['scenarios_run']} |\n"
     )
 
   if meta_analysis:
@@ -850,8 +849,8 @@ def generate_markdown_report(
 
 ### Overall Composite Scorecard
 
-
-
+| Rank | Framework | Composite Score (0–100) | Key Strength | Primary Architectural Trade-off |
+| :---: | :--- | :---: | :--- | :--- |
 """
     sorted_scores = sorted(
         composite_scores.items(),
@@ -865,13 +864,13 @@ def generate_markdown_report(
         weakness = score_data.get("primary_weakness", "-")
         display_fw_name = fw_name
         if (
-            any(k in fw_name.lower() for k in ["armature_oss", "antigravity"])
+            ("armature" in fw_name.lower())
             and "(this)" not in display_fw_name
         ):
           display_fw_name += " (this)"
         md += (
-            f"
-            f" {strength} 
+            f"| **#{rank}** | **{display_fw_name}** | **{score} / 100** |"
+            f" {strength} | {weakness} |\n"
         )
 
     md += f"""
@@ -899,25 +898,25 @@ def generate_markdown_report(
       if sid not in scen_ids:
         scen_ids.append(sid)
 
-  header_cols = " 
-  sep_cols = " 
-  md += f"
-  md += f"
+  header_cols = " | ".join(sid.replace("SCEN_", "S_") for sid in scen_ids)
+  sep_cols = " | ".join([":---:"] * len(scen_ids))
+  md += f"| Framework | {header_cols} |\n"
+  md += f"| :--- | {sep_cols} |\n"
 
   for fw_key, _ in sort_framework_summary(summary):
     fw_data = detailed.get(fw_key)
     if not fw_data:
       continue
-    row = f"
+    row = f"| **{fw_data['name']}** | "
     for sid in scen_ids:
       if sid in fw_data.get("scenarios", {}):
         scen_res = fw_data["scenarios"][sid]
         passed = scen_res.get("passed_count", 0)
         total = scen_res.get("total_criteria", 0)
         score_val = scen_res.get("score", 0.0)
-        row += f"{passed}/{total} ({int(score_val*100)}%) 
+        row += f"{passed}/{total} ({int(score_val*100)}%) | "
       else:
-        row += "N/A 
+        row += "N/A | "
     md += row + "\n"
 
   md += """
@@ -936,8 +935,8 @@ def generate_markdown_report(
           f" ({int(scen_res['score']*100)}%)\n"
       )
       md += (
-          f"- **Tokens:** {scen_res['total_tokens']} 
-          f" {scen_res['turn_count']} 
+          f"- **Tokens:** {scen_res['total_tokens']} | **Turn Count:**"
+          f" {scen_res['turn_count']} | **Latency:**"
           f" {scen_res['elapsed_seconds']}s\n\n"
       )
       md += "**Assertion Breakdown:**\n\n"
@@ -970,19 +969,19 @@ def generate_markdown_report(
     if history_runs:
       md += "\n---\n\n## Historical Run Comparison\n\n"
       md += (
-          "
+          "| Timestamp | Target Model | Judge Model | Top-Ranked Framework |"
           " Pass Rates |\n"
       )
-      md += "
+      md += "| :--- | :---: | :---: | :--- | :--- |\n"
       for h in history_runs:
         h_summary = h.get("summary", {})
-        h_scores = " 
+        h_scores = " | ".join(
             f"{k}: {v.get('pass_rate', 0)}%"
             for k, v in list(h_summary.items())[:3]
         )
         md += (
-            f"
-            f" `{h.get('judge_model', '-')}` 
+            f"| {h.get('timestamp', '-')} | `{h.get('target_model', '-')}` |"
+            f" `{h.get('judge_model', '-')}` | **{h.get('winner', '-')}** |"
             f" {h_scores} |\n"
         )
 
@@ -1016,7 +1015,7 @@ def generate_html_report(
     score_data = composite_scores.get(fw_key, {})
     fw_name = fw_info.get("name", fw_key)
     if (
-        fw_key in ["antigravity_armature_dev", "antigravity_conductor_dev", "conductor_enterprise_ref"]
+        fw_key in ["armature_oss"]
         and "(this)" not in fw_name
     ):
       fw_name += " (this)"
@@ -1297,7 +1296,7 @@ def main():
   )
   parser.add_argument(
       "--artifact_dir",
-      default=None,
+      default="/usr/local/google/home/skyebot/.gemini/jetski/brain/2be863e0-814b-48f9-b096-79894b949469",
       help="Path to conversation artifact directory to copy reports to",
   )
   parser.add_argument(
@@ -1467,8 +1466,8 @@ def main():
       score_color = GREEN if passed == tot else (YELLOW if passed > 0 else RED)
       print(
           f"    -> Score: {score_color}{passed}/{tot} criteria passed"
-          f" ({int(eval_res['score']*100)}%){RESET} 
-          f" {rollout['total_tokens']} 
+          f" ({int(eval_res['score']*100)}%){RESET} | Tokens:"
+          f" {rollout['total_tokens']} | Latency: {rollout['elapsed_seconds']}s"
       )
       for ev in eval_res["evaluations"]:
         mark = f"{GREEN}✓{RESET}" if ev.get("passed") else f"{RED}✗{RESET}"

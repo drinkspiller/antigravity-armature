@@ -197,13 +197,19 @@ first. Do NOT create empty commits.
         technical designs, button configurations, countdown cancel behaviors, or
         state transitions in markdown for topics unconfirmed by the user via
         `ask_question`.
-    2.  *Phase 5b (Post-Ledger Devil's Advocate Analysis)*: When every branch and
-        child leaf reaches `[x]`, the agent MUST NOT immediately converge. It
-        MUST output a structured `### Devil's Advocate Analysis` confronting the
-        user with emergent cross-cutting contradictions, operational hazards,
-        and maintainability debt across the combined choices, ending with an
-        interactive gate (`ask_question`) to reaffirm decisions or reopen a
-        branch before proceeding to `spec.md`.
+    2.  *Phase 5b (Post-Ledger Devil's Advocate Analysis — Sequential
+        Single-Finding Execution)*: When every branch and child leaf reaches
+        `[x]`, the agent MUST NOT immediately converge and MUST NOT dump all
+        emergent findings into a single compound prompt. It MUST output `###
+        Devil's Advocate Analysis: Stress-Testing Confirmed Decisions`
+        presenting each emergent cross-cutting contradiction, operational
+        hazard, and maintainability debt finding **one-by-one**. For each
+        finding, the agent MUST state the specific risk, offer concrete
+        countermeasure options, and pause execution for human decision via
+        `ask_question` individually before presenting subsequent findings. Only
+        after all devil's advocate findings have been evaluated individually
+        does the agent present the final convergence gate before proceeding to
+        `spec.md`.
 -   **Proto schema evolution & GraphQL federation probing** — During Step 5
     Recursive Decision-Tree Traversal (exploring dependent failure modes,
     boundary edge cases, and adversarial challenges) on protocol, GraphQL
@@ -220,10 +226,43 @@ first. Do NOT create empty commits.
     state changes are involved, the runbook must explicitly document all three
     commands in sequence: $$\text{Migration Command} \longrightarrow \text{Seed
     / Fixture Setup} \longrightarrow \text{Teardown / Reset Script}$$
--   **Documentation-only fixture policy** — Manual testing runbooks must specify
-    exact setup, SQL mutation, and reset commands, but the agent must NEVER
+-   **Documentation-only fixture policy & Hybrid Smart Gate** — Manual testing
+    runbooks must specify exact setup, SQL mutation, and reset commands. During
+    autonomous phase checkpoints (`/arm-implement`), the agent must NEVER
     execute mutative database, environment reset, or teardown commands
-    autonomously during phase checkpoints.
+    autonomously (documentation-only policy). However, during user-authorized
+    interactive manual testing sessions (`/arm-review`), the agent operates
+    under the **Hybrid Smart Gate**: standard, non-destructive fixture commands
+    (inserting test records, generating auth tokens, starting local servers,
+    exporting test environment variables) execute automatically and stream their
+    status, while potentially destructive commands (flagged by keywords in
+    commands or script names/arguments: `DROP`, `DELETE`, `TRUNCATE`, `rm -rf`,
+    `reset`, `clean`, `wipe`, `reseed`, `kill`) MUST prompt the user with the
+    exact command for explicit confirmation via `ask_question` before running.
+-   **Interactive Manual Testing Protocol & Living Runbook Sync** — When guided
+    manual testing is selected during `/arm-review`, the agent executes the
+    scenarios documented in
+    `{PROJECT_CONTEXT_DIR}/tracks/<track_id>/manual_testing.md` sequentially.
+    For each scenario, the agent prepares the environment via the Hybrid Smart
+    Gate. Before directing the user to navigate, the agent MUST output an
+    explicit `##### Prerequisites` section providing exact server startup
+    commands (e.g., `./run.sh`, `npm run dev`, background daemon scripts) inside
+    a fenced code block, instructing the user to ensure the service stack is
+    running. Furthermore, all target destinations MUST be presented as complete,
+    fully qualified URLs inside code blocks (providing both
+    `http://localhost:<PORT>/<path>` and
+    `http://<HOST_IP_OR_DOMAIN>:<PORT>/<path>`), never bare partial
+    routes. The agent guides the user with exact navigation steps and expected
+    outcomes, and validates results via `ask_question`. If a discrepancy occurs,
+    the agent offers in-flight triage (fix now vs. log and continue). If an
+    in-flight hotfix modifies code, the agent applies **Cascade Invalidation
+    Tracking**, flagging previously verified scenarios for quick re-checking. A
+    **Mandatory Post-Testing Reconciliation Gate** strictly enforces that all
+    logged discrepancies are resolved, recorded as `[BLOCKING]` review findings,
+    or accepted as `[WARNING]` tech debt before track approval. The agent injects
+    the verified results into `review.md` (`## Interactive Verification Log`)
+    and synchronizes refined commands back to
+    `{PROJECT_CONTEXT_DIR}/tracks/<track_id>/manual_testing.md`.
 -   **Safe Key and Secret Rotation** — For credentials, keys, or JWT rotations,
     strictly refuse immediate deletion of legacy keys to prevent service or session
     disruption. Propose a dual-key verification grace period (sign with new, verify

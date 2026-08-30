@@ -227,24 +227,31 @@ resolving all open branches and ambiguities.
                     vs headless schemas, excessive client-side state, DOM bloat.
                 -   *Failure Cascades*: Degraded network scenarios, rapid user
                     interrupts, timeout recovery under load.
-            4.  End the turn with `ask_question`:
-                -   *Question*: "Decision tree resolved. How do you want to
-                    address the Devil's advocate findings?"
-                -   *Options*:
-                    -   "(Recommended) Reaffirm decisions — trade-offs are
-                        acceptable, proceed to spec"
-                    -   "Reopen Branch <N> — resolve <specific risk>"
-                    -   "Adjust decisions — let's revise the approach"
+            4.  **Sequential Single-Finding Presentation (Strict One-at-a-Time
+                Rule)**:
+                -   Present each adversarial challenge **strictly one by one**
+                    in sequential turns.
+                -   For each challenge:
+                    -   Report the concrete trade-off, specific hazard, and 2–3
+                        actionable countermeasure options in markdown first.
+                    -   Call `ask_question` with options formatted in the user's
+                        voice (e.g., "(Recommended) Apply countermeasure:
+                        <specific fix>", "Reopen Branch <N> to revise approach",
+                        "Accept trade-off as acceptable debt").
+                    -   **MANDATORY:** End your turn and collect the user's
+                        decision for that specific finding before presenting any
+                        subsequent challenge.
             5.  **Reopening vs. Natural Convergence**:
-                -   If the user reopens a branch, flip that branch and its
-                    consequence leaf back to `[ ]` (OPEN), probe the revised
-                    ambiguity, and return to Phase 5b when re-resolved.
-                -   If the user reaffirms decisions, ONLY THEN present the
-                    structured **Convergence Summary** in markdown synthesizing
-                    all settled decisions, and call `ask_question`: "All
-                    decision branches, child leaves, and adversarial trade-offs
-                    are resolved. Ready to materialize the specification and
-                    manual testing runbook?"
+                -   If the user selects to reopen a branch during any finding,
+                    flip that branch and its consequence leaf back to `[ ]`
+                    (OPEN), probe the revised ambiguity, and return to Phase 5b
+                    when re-resolved.
+                -   Once all challenges have been resolved individually, ONLY
+                    THEN present the structured **Convergence Summary** in
+                    markdown synthesizing all settled decisions, and call
+                    `ask_question`: "All decision branches, child leaves, and
+                    adversarial trade-offs are resolved. Ready to materialize
+                    the specification and manual testing runbook?"
                 -   **MANDATORY:** End your turn and wait for explicit user
                     confirmation.
 
