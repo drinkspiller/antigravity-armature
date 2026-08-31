@@ -75,6 +75,9 @@ always-on platform rules. Do not hardcode VCS commands in skill protocols.
 -   **Tool Validation:** You MUST validate the success of every tool call. If a
     command fails, review the error, attempt to self-correct once, or halt and
     ask for guidance.
+-   **File Path Sanitization:** When resolving `{PROJECT_ROOT}` or passing paths
+    to file tools, you MUST aggressively strip any `file://` prefix. Use standard
+    absolute or relative paths to prevent filesystem tool execution errors.
 -   **Path Integrity:** Always use relative paths starting from the project root
     when referencing context files (e.g., `armature/index.md` or `conductor/index.md`).
 -   **Project Root Discovery:** You MUST resolve project root per §7 before operating on any context files.

@@ -12,6 +12,8 @@ resolving all open branches and ambiguities.
 
 ## Mandatory Execution Guardrails
 
+-   **File Path Sanitization:** When resolving `{PROJECT_ROOT}` or constructing file paths for tools (e.g., `write_to_file`, `read_file`), you MUST aggressively strip any `file://` prefix. Use standard absolute or relative paths to prevent tool execution errors (e.g., use `/home/user/project/...` instead of `file:///home/user/project/...`). NEVER pass a `file://` URI to a file operation tool.
+-   **Raw/Truncated Input Handling:** If the user request contains raw JSON, HTML snippets, or truncated text dumps (e.g., `{"activeScroller": "HTML", "mainScrollbarWidth": 15, "mainScrollHeight": 4095}` or linter warning traces), treat it purely as contextual description. Do not crash, do not attempt to parse it as a command, and do not fail if it is malformed. If the description is incomplete, gracefully ask for clarification via `ask_question` before proceeding.
 -   **Strict Interactive Discipline:** You MUST NEVER generate track artifacts
     (`spec.md`, `plan.md`) or write code in a single autonomous turn. Every
     track requires step-by-step user alignment.
@@ -73,7 +75,7 @@ resolving all open branches and ambiguities.
 ## Protocol
 
 1.  **Context Resolution & Setup Check:**
-    -   Resolve `{PROJECT_ROOT}` and `{PROJECT_CONTEXT_DIR}` (armature or conductor) per `armature_protocol.md` §7.
+    -   Resolve `{PROJECT_ROOT}` and `{PROJECT_CONTEXT_DIR}` (armature or conductor) per `armature_protocol.md` §7. **CRITICAL:** Strip any `file://` prefix from `{PROJECT_ROOT}` before using it in any file operations (e.g., use `/home/user/project/...` instead of `file:///home/user/project/...`).
     -   Verify that the following files exist:
         -   `{PROJECT_ROOT}/{PROJECT_CONTEXT_DIR}/product.md`
         -   `{PROJECT_ROOT}/{PROJECT_CONTEXT_DIR}/tech-stack.md`
@@ -83,7 +85,7 @@ resolving all open branches and ambiguities.
 
 2.  **Get Description & Infer Type:**
 
-    -   If a description was provided in the initial prompt, use it.
+    -   If a description was provided in the initial prompt, use it. (Note: Handle raw JSON, HTML snippets, or truncated text dumps gracefully as context. Do not crash or fail on malformed input like `{"activeScroller": "HTML", ...}` or truncated error traces).
     -   If no description was provided, ask via `ask_question`: "What feature or
         bug would you like to work on? Describe it in 1-2 sentences."
     -   Analyze the description to infer the track type (Feature vs. Bug/Chore).
@@ -296,3 +298,5 @@ resolving all open branches and ambiguities.
 -   **Turn-Ending Barriers**: Enforce strict synchronous pauses at Step 5, Step 6, and Step 7 via `ask_question`.
 -   **Pre-Materialization Barrier**: Hold `spec.md` in memory during Step 5.
 -   **Continuous Decision-Tree Traversal & Ambiguity Resolution**: Never conclude an interview turn while decision branches, dependencies, failure modes, or architectural ambiguities remain unresolved.
+-   **File Path Sanitization**: Always strip `file://` prefixes from paths before using file tools (e.g., `/home/user/project/...` instead of `file:///home/user/project/...`).
+-   **Raw/Truncated Input**: Treat malformed JSON/HTML or truncated text dumps as contextual descriptions, not commands.
