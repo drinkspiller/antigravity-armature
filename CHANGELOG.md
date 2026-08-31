@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.20.1] - 2026-08-31
+
+### Added
+
+-   **File Path Sanitization (`arm-new-track`, `armature_protocol.md`)**:
+    -   Enforced mandatory stripping of `file://` URI prefixes from `{PROJECT_ROOT}` and file path parameters prior to invoking filesystem tools.
+-   **Robust Raw & Truncated Input Handling (`arm-new-track`)**:
+    -   Instructs the agent to treat raw JSON, HTML snippets, or truncated state dumps (e.g., DOM scrollbar metrics or lint logs) as contextual reference rather than failing, crashing, or misinterpreting them as imperative commands.
+
 ## [0.20.0] - 2026-08-30
 
 ### Added
