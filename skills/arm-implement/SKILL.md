@@ -163,7 +163,7 @@ Synchronization has been handled.
     -   *Options:*
         *   `"(Recommended) Test the implementation with the manual testing
             guide ([<domain>.md](file://...))"`
-        *   `"Upload CL to Code Review / Push changes"`
+        *   `"Push changes to remote / Open PR"`
         *   `"Run full code review (/arm-review)"`
         *   `"Archive completed track and finish"`
         *   `"Keep track active and finish"`
@@ -172,8 +172,8 @@ Synchronization has been handled.
     -   If **Test with Manual Testing Guide**: Present the specific verification
         scenarios from `{PROJECT_ROOT}/{PROJECT_CONTEXT_DIR}/manual_testing/<domain>.md`
         with CLI setup/reset commands and walk the user through testing.
-    -   If **Upload CL / Push**: Execute formatting checks (`hg fix`), verify
-        `hg status`, and upload to Code Review via `hg upload` (or git push).
+    -   If **Push / Create PR**: Execute project formatters/linters, verify
+        clean working tree status, and push changes to remote or open a pull request for review.
     -   If **Review**: Transition directly into `/arm-review`.
     -   If **Archive**: Move track folder to `{PROJECT_CONTEXT_DIR}/archive/`, remove from
         `tracks.md`, and commit.
@@ -189,5 +189,5 @@ Synchronization has been handled.
 -   **Mandatory Completion Next-Steps Barrier**: When all plan tasks are `[x]`
     and document synchronization is complete, you MUST NOT go silent after
     printing summaries or draft CL descriptions. You MUST invoke `ask_question`
-    to offer the user clear next steps (Manual testing with the guide, Uploading
-    the CL / Pushing, Running `/arm-review`, or Archiving the track).
+    to offer the user clear next steps (Manual testing with the guide, Pushing
+    changes / Opening a PR, Running `/arm-review`, or Archiving the track).
