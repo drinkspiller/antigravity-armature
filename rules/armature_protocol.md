@@ -143,6 +143,18 @@ to Git:
 **IMPORTANT:** Before creating any commit, ALWAYS check for actual changes
 first. Do NOT create empty commits.
 
+### Commit Message Standards
+
+When committing changes:
+
+-   Include a clear summary focusing on high-level architectural intent and
+    user-visible behavior (avoid low-level code mechanics or nuts-and-bolts file
+    lists).
+-   Synthesize changes into 3–5 punchy bullet points focused on system state
+    transitions and capabilities.
+-   Preserve durable issue tracking references and design rationale while
+    discarding granular diff accounting from earlier drafts.
+
 ## 5. Armature Guardrails
 
 -   **Never modify context files outside the active track** — only update
