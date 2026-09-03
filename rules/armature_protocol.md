@@ -108,10 +108,25 @@ code change, or workflow transition:
     spec generation loops, ask questions strictly one at a time. Present a
     single question, pause execution, and collect user confirmation before
     generating subsequent questions.
--   **Structured Choices:** When gathering information or asking for decisions,
-    provide single-choice or multiple-choice options with context-aware
-    suggestions. If a specific option is preferred based on project standards,
-    list it first and tag it with a recommended label.
+-   **Structured Choices & Option Trade-Off Analysis:** When gathering information
+    or asking for decisions across all Armature skills, provide 2–4 calibrated
+    domain choices. Precede the `ask_question` call with a punchy, itemized
+    bulleted trade-off breakdown:
+    -   *Candidate Approaches:* For each option, list 1–2 punchy, substantive
+        `Pros` and 1–2 `Cons`. Avoid vague generalities or superficial one-word
+        clauses.
+    -   *Recommendation Rationale:* Conclude with a 1–2 sentence declarative
+        justification explaining why the recommended option was chosen, grounded in
+        codebase constraints, failure resilience, schema evolution, or latency bounds.
+    -   *On-Demand Elaboration Option:* In the `ask_question` tool call, list the
+        recommended option first with `(Recommended)`, followed by alternative
+        approaches, and append a trailing choice: `"Elaborate on trade-offs and
+        failure modes between these options"`. (Note: The UI modal natively
+        provides a write-in text field for custom input; never add a manual
+        "Other" option).
+    -   *Elaboration Detour:* If the user selects the elaboration option, output a
+        deep-dive analysis (comparative trade-off matrix, failure cascades, memory
+        bounds, migration costs) and re-prompt the concrete choices.
 -   **Human-Readable Navigation:** Always refer to process steps and documents
     by their human-readable names. Do not expose internal section numbers.
 
@@ -224,7 +239,30 @@ When committing changes:
         `ask_question` individually before presenting subsequent findings. Only
         after all devil's advocate findings have been evaluated individually
         does the agent present the final convergence gate before proceeding to
-        `spec.md`.
+        Phase 5c.
+    3.  *Phase 5c (ADR Candidate Triage Gate — Dual-Stage Lifecycle)*:
+        Immediately after Phase 5b Devil's Advocate concludes and before
+        materializing `spec.md`, the agent MUST audit all settled decisions (`[x]`)
+        in the Decision Tree Ledger against the **3-Pillar Invariant Taxonomy**:
+        - *Pillar 1 (Cross-Cutting Invariant):* Establishes a convention, contract,
+          or state invariant that constrains future tracks or touches multiple
+          components (e.g., optimistic UI rollback rules, error-envelope schemas).
+        - *Pillar 2 (Architecture / Dependency Binding):* Binds the repository to a
+          storage engine, transport protocol, or third-party library that would be
+          costly to rip out later (e.g., SQLite WAL, WebSocket vs. SSE).
+        - *Pillar 3 (Negative Constraint / Discarded Alternative):* Rejects an
+          obvious, standard pattern due to a subtle project gotcha or race condition
+          (e.g., forbidding `sessionStorage` because it does not sync across tabs).
+        - *Silent Zero-Candidate Bypass:* If zero settled decisions meet the 3-Pillar
+          Taxonomy (i.e. all decisions are localized UI layouts, styling, route slugs,
+          or chore configs), the agent MUST silently transition directly to Step 6
+          Spec Confirmation without generating an extra modal prompt or noise.
+        - *Interactive Triage Gate:* If one or more decisions qualify, the agent
+          MUST output an `### ADR Candidate Triage Table` mapping each candidate
+          decision to its qualification pillar, proposed title, and rationale. The
+          agent halts execution with a multi-select `ask_question` allowing the user
+          to confirm which ADRs to materialize. For each confirmed ADR, the agent
+          drafts `{PROJECT_CONTEXT_DIR}/adr/NNNN-slug.md` in standard MADR format.
 -   **Proto schema evolution & GraphQL federation probing** — During Step 5
     Recursive Decision-Tree Traversal (exploring dependent failure modes,
     boundary edge cases, and adversarial challenges) on protocol, GraphQL

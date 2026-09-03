@@ -6,6 +6,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.21.0] - 2026-09-03
+
+### Added
+
+-   **Option Trade-Off Analysis Engine (`armature_protocol.md` §2, `arm-new-track` Step 5a)**:
+    -   Itemized bulleted hierarchy for all presented candidate choices with 1–2 punchy `Pros` and 1–2 `Cons`.
+    -   Mandatory `Recommendation Rationale` (1–2 sentences) explicitly justifying why the recommended option was chosen based on codebase constraints, failure resilience, schema evolution, or latency bounds.
+    -   Appended trailing option `"Elaborate on trade-offs and failure modes between these options"` triggering a deep-dive comparative matrix detour before re-prompting concrete choices.
+    -   Preserved native write-in text field without injecting redundant manual "Other" options into `ask_question`.
+-   **Dual-Stage Architectural Decision Record (ADR) Lifecycle**:
+    -   **Phase 5c Pre-Spec ADR Candidate Triage Gate (`arm-new-track` Step 5c, `armature_protocol.md` §5, `armature_cdd_protocols.md` §10)**:
+        -   Pre-spec triage gate auditing all settled decisions (`[x]`) against the **3-Pillar Invariant Taxonomy**:
+            1.  *Pillar 1 (Cross-Cutting Invariant)*: Conventions, contracts, or state invariants constraining future tracks or spanning multiple components.
+            2.  *Pillar 2 (Architecture / Dependency Binding)*: Choices binding the repository to storage engines, transport protocols, or libraries costly to replace.
+            3.  *Pillar 3 (Negative Constraint / Discarded Alternative)*: Rejected standard patterns due to subtle gotchas or race conditions.
+        -   Renders an `### ADR Candidate Triage Table` mapping qualifying decisions to candidate title, pillar, and rationale.
+        -   Interactive multi-select modal (`ask_question`) enabling developers to confirm ADR creation before `spec.md` is materialized.
+        -   Autonomous drafting of confirmed ADRs in standard MADR format (`NNNN-slug.md`) under `{PROJECT_CONTEXT_DIR}/adr/`.
+        -   **Silent Zero-Candidate Bypass**: Silently transitions directly to Step 6 Spec Confirmation when no decisions qualify, avoiding extraneous prompts.
+    -   **Stage 2 Living ADR Reconciliation & Code Diff Harvest (`arm-implement` Step 5.1, `armature_cdd_protocols.md` §10)**:
+        -   Proactively audits final VCS diff, public API surface (`.api_surface_cache.json`), and verified runbooks during track closeout.
+        -   Extracts emergent architectural invariants and captures new ADRs or updates existing records.
+-   **SkillOpt Multi-Turn Trajectory Benchmark Suite**:
+    -   Added single-turn criteria `TRAIN_27_ADR_TRIAGE_DISCRIMINATION` and `VAL_23_OPTION_TRADEOFF_SYMMETRY`.
+    -   Enhanced `evals/skillopt/run_trajectory_eval.py` with multi-turn consumption tracking and robust phase-aware convergence detection.
+    -   Verified 100% full-trajectory pass rate with zero sequence barrier violations and zero dictation violations across the entire benchmark battery.
+
 ## [0.20.2] - 2026-09-01
 
 ### Added

@@ -62,12 +62,23 @@ Autonomous coding agents move fast when given an execution loop, but velocity wi
 ### The Grill Engine (`/arm-new-track`)
 Most AI coding agents jump straight from a short prompt into file edits. When given underspecified requirements, models make silent assumptions about architecture, pick the first familiar pattern that emerges in their context window, and begin generating code without probing failure modes.
 
-The Grill Engine enforces a structured decision-tree interview before any implementation plan is drafted. It systematically traverses edge cases, concurrency boundaries, error recovery, security scope, and verification strategy. By resolving design ambiguities and surfacing hidden trade-offs up front, Armature ensures the implementation plan is grounded in concrete technical constraints rather than unvetted assumptions.
+The Grill Engine enforces a structured decision-tree interview before any implementation plan is drafted:
+- **Option Trade-Off Analysis Engine**: Every candidate approach is presented with an itemized hierarchy of 1–2 punchy `Pros` and `Cons`, capped with a declarative `Recommendation Rationale` and an on-demand elaboration detour before prompting.
+- **Dynamic Leaf Traversal**: Traverses edge cases, concurrency boundaries, error recovery, and security scope up to Depth 2 without unconfirmed dictation.
+- **Post-Ledger Devil's Advocate (Phase 5b)**: When all leaves resolve, stress-tests the confirmed design against emergent contradictions, operational hazards, and failure cascades one-by-one.
+- **Pre-Spec ADR Triage Gate (Phase 5c)**: Audits settled decisions against the 3-Pillar Invariant Taxonomy before drafting `spec.md`, offering immediate formalization.
 
 ### Architectural Decision Records (`adr/`)
 Code only records the implementation that survived; it never records the alternatives that were considered and rejected. Without a record of past architectural decisions, an AI agent examining a codebase sees an un-cached database query, a missing abstraction, or a manual loop and assumes it is an oversight—often re-implementing the exact pattern the team intentionally discarded.
 
-Armature captures architectural trade-offs, rationale, and negative constraints as version-controlled markdown records in `adr/`. Each record includes an active verification checklist that is automatically injected into implementation tasks. When an agent plans or executes work, it is evaluated against these historical constraints, preventing regression into known architectural dead ends.
+Armature captures architectural trade-offs, rationale, and negative constraints as version-controlled markdown records in `adr/` via a **Dual-Stage Lifecycle**:
+1. **Pre-Spec Triage Gate (Stage 1)**: Interactively triages settled track decisions against the **3-Pillar Invariant Taxonomy**:
+   - *Cross-Cutting Invariants*: Conventions, contracts, or state invariants constraining future tracks.
+   - *Architecture / Dependency Bindings*: Storage engines, transport protocols, or libraries costly to replace.
+   - *Negative Constraints*: Rejected standard patterns due to subtle gotchas or race conditions.
+2. **Closeout Diff Harvest (Stage 2)**: Proactively scans the final VCS diff, public API surface cache, and verified runbooks during track closeout (`/arm-implement`) to capture emergent invariants.
+
+Each record includes an active verification checklist that is automatically injected into implementation tasks, preventing regression into known architectural dead ends.
 
 ### Domain Glossary (`terms.md`)
 As codebases grow and multiple agent sessions touch different files, terminology naturally fragments. One agent may refer to a core entity as a `workspace`, another as a `board`, and a third as a `canvas`. This vocabulary drift breaks semantic search, degrades codebase grep accuracy, and forces human developers to write increasingly verbose disambiguation prompts.

@@ -142,18 +142,25 @@ synchronize documentation):
 This step occurs **only** after all plan tasks are marked `[x]` and Document
 Synchronization has been handled.
 
-1.  **Retrospective ADR Review**:
-    -   Review the completed track's `spec.md` under "## Design Decisions" for
-        any decisions recorded in the spec that were not captured as standalone
-        ADRs.
-    -   If unwritten decisions exist:
-        -   **Print Candidates First**: Output all candidate decisions with
-            rationale and spec quotes in chat FIRST.
-        -   Then invoke `ask_question` with `is_multi_select: true` using
-            neutral retrospective phrasing ("Some decisions from this track
-            weren't captured as ADRs. Looking back, should any of these be
-            recorded?").
-        -   Write selected ADRs using the template and commit them.
+1.  **Stage 2 Living ADR Reconciliation & Code Diff Harvest**:
+    -   Audit the final code diff (`git diff`), touched directories,
+        and completed `spec.md` against the **3-Pillar Invariant Taxonomy**:
+        1.  *Cross-Cutting Invariant:* New conventions, state invariants, or
+            safety guards extending beyond this track.
+        2.  *Architecture / Dependency Binding:* Unplanned dependencies or storage
+            patterns introduced during implementation.
+        3.  *Negative Constraint:* Discarded patterns or discovered gotchas.
+    -   Reconcile active ADRs: Audit checkboxes under `## Confirmation` in
+        existing ADRs affected by this track, checking off satisfied rules.
+    -   If qualifying emergent invariants were introduced that lack an ADR:
+        -   **Print Candidates First**: Output the candidate decisions, citing
+            concrete code diff lines, file paths, and qualification pillars in chat.
+        -   Then invoke `ask_question` with `is_multi_select: true` to confirm:
+            "The implementation established new architectural invariants. Record them as ADRs?"
+        -   For accepted items, draft `{PROJECT_ROOT}/{PROJECT_CONTEXT_DIR}/adr/NNNN-slug.md`
+            and commit.
+    -   *Silent Bypass:* If all decisions are already captured or local-only,
+        proceed silently without adding an extra modal prompt.
 2.  **Next Steps Elicitation Gate (Mandatory Turn Barrier)**:
     -   You MUST invoke `ask_question` to ask the user what they want to do
         next. Do NOT end the turn with a static summary or draft CL description

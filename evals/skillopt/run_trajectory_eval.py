@@ -186,20 +186,32 @@ def parse_agent_turn(turn_text: str):
           re.IGNORECASE,
       )
   )
-  is_convergence = bool(
-      re.search(
-          r"All.*branches.*resolved|Ready to"
-          r" materialize.*spec|Confirm.*spec|Convergence Summary",
-          turn_text,
-          re.IGNORECASE,
-      )
-  )
   has_devil_advocate = bool(
       re.search(
           r"###?\s*(?:Phase\s*5b:\s*)?Devil's Advocate Analysis",
           turn_text,
           re.IGNORECASE,
       )
+  )
+  has_phase_5c_triage = bool(
+      re.search(
+          r"###?\s*(?:Phase\s*5c:\s*)?ADR Candidate Triage|ADR Candidate Triage Table",
+          turn_text,
+          re.IGNORECASE,
+      )
+  )
+  has_pros = bool(re.search(r"[-*#]\s+\*{0,2}Pros\*{0,2}:?", turn_text, re.IGNORECASE))
+  has_cons = bool(re.search(r"[-*#]\s+\*{0,2}Cons\*{0,2}:?", turn_text, re.IGNORECASE))
+  has_recommendation_rationale = bool(
+      re.search(
+          r"(?:###|####|\*{0,2})\s*Recommendation Rationale\*{0,2}:?",
+          turn_text,
+          re.IGNORECASE,
+      )
+  )
+  has_option_trade_offs = has_pros and has_cons and has_recommendation_rationale
+  has_elaboration_option = bool(
+      re.search(r"Elaborate on (?:the )?trade-offs", turn_text, re.IGNORECASE)
   )
   has_provenance = bool(
       re.search(r"\(Spawned by ['\"].+?['\"]", turn_text, re.IGNORECASE)
@@ -232,12 +244,30 @@ def parse_agent_turn(turn_text: str):
   open_branches = [b for status, b in ledger_branches if status.strip() == ""]
   open_leaves = [l for status, l in ledger_leaves if status.strip() == ""]
 
+  is_convergence = (
+      not has_devil_advocate
+      and not has_phase_5c_triage
+      and len(open_branches) == 0
+      and len(open_leaves) == 0
+      and bool(
+          re.search(
+              r"###?\s*(?:Step\s*6:\s*)?Convergence Summary|Ready to materialize (?:the )?(?:track )?spec|Confirm and materialize|Final Confirmation.*spec",
+              turn_text,
+              re.IGNORECASE,
+          )
+      )
+  )
+
   return {
       "has_ask_question": has_ask_question,
       "has_ledger": has_ledger,
       "wrote_spec": wrote_spec,
       "is_convergence": is_convergence,
       "has_devil_advocate": has_devil_advocate,
+      "has_phase_5c_triage": has_phase_5c_triage,
+      "has_option_trade_offs": has_option_trade_offs,
+      "has_recommendation_rationale": has_recommendation_rationale,
+      "has_elaboration_option": has_elaboration_option,
       "has_provenance": has_provenance,
       "ledger_branches": ledger_branches,
       "ledger_leaves": ledger_leaves,
@@ -248,20 +278,87 @@ def parse_agent_turn(turn_text: str):
 
 
 def get_user_response(
-    scenario: dict, turn_idx: int, agent_output: str, history: list
+    scenario: dict,
+    turn_idx: int,
+    agent_output: str,
+    history: list,
+    used_indices: set = None,
+    parsed: dict = None,
 ) -> str:
   """Retrieves scripted user response or simulates dynamic engineer reply."""
+  if used_indices is None:
+    used_indices = set()
   user_script = scenario.get("user_responses", [])
   agent_lower = agent_output.lower()
 
-  for item in user_script:
+  # Identify special phase indices
+  triage_indices = [
+      i
+      for i, item in enumerate(user_script)
+      if any(
+          m in ["triage", "adr", "candidate", "record adr"]
+          for m in item.get("matches", [])
+      )
+  ]
+  devil_indices = [
+      i
+      for i, item in enumerate(user_script)
+      if any(
+          m in ["devil", "reaffirm", "address the devil"]
+          for m in item.get("matches", [])
+      )
+  ]
+  convergence_indices = [
+      i
+      for i, item in enumerate(user_script)
+      if any(
+          m in ["ready", "materialize", "convergence", "summary", "spec"]
+          for m in item.get("matches", [])
+      )
+  ]
+  special_indices = set(triage_indices + devil_indices + convergence_indices)
+
+  # Check special phases first
+  if parsed:
+    if (
+        parsed.get("has_phase_5c_triage")
+        or "adr candidate triage" in agent_lower
+    ):
+      for idx in triage_indices:
+        if idx not in used_indices:
+          used_indices.add(idx)
+          return user_script[idx]["response"]
+
+    if parsed.get("has_devil_advocate") or "devil's advocate" in agent_lower:
+      for idx in devil_indices:
+        if idx not in used_indices:
+          used_indices.add(idx)
+          return user_script[idx]["response"]
+
+    if (
+        parsed.get("is_convergence")
+        or "materialize spec" in agent_lower
+        or "ready to materialize" in agent_lower
+    ):
+      for idx in convergence_indices:
+        if idx not in used_indices:
+          used_indices.add(idx)
+          return user_script[idx]["response"]
+
+  # For standard interview turns, match against unconsumed regular items
+  for idx, item in enumerate(user_script):
+    if idx in used_indices or idx in special_indices:
+      continue
     matches = item.get("matches", [])
     if any(m.lower() in agent_lower for m in matches):
+      used_indices.add(idx)
       return item["response"]
 
-  # Fallback to next chronological scripted response if turn within range
-  if turn_idx - 1 < len(user_script):
-    return user_script[turn_idx - 1]["response"]
+  # Fallback to next unconsumed regular scripted response
+  for idx, item in enumerate(user_script):
+    if idx not in used_indices and idx not in special_indices:
+      used_indices.add(idx)
+      return item["response"]
 
   # Fallback simulator model call if scripted responses exhausted
   sim_prompt = f"""You are a senior software engineer participating in a requirements interview with an AI architect.
@@ -301,10 +398,15 @@ def run_trajectory(
   dictation_violations = 0
   premature_spec_writes = 0
   convergence_reached = False
+  used_response_indices = set()
 
   root_branches_observed = set()
   child_leaves_observed = set()
   devil_advocate_observed = False
+  phase_5c_triage_observed = False
+  sequence_barrier_violations = 0
+  option_trade_off_turns = 0
+  question_turns_total = 0
   prepopulation_violations = 0
   provenance_tags_count = 0
 
@@ -331,9 +433,27 @@ def run_trajectory(
 
     if parsed["has_ask_question"]:
       interactive_question_turns += 1
+      if (
+          not parsed["is_convergence"]
+          and not parsed["has_devil_advocate"]
+          and not parsed["has_phase_5c_triage"]
+      ):
+        question_turns_total += 1
+        if parsed["has_option_trade_offs"]:
+          option_trade_off_turns += 1
 
     if parsed["has_devil_advocate"]:
       devil_advocate_observed = True
+
+    if parsed["has_phase_5c_triage"]:
+      phase_5c_triage_observed = True
+
+    # Sequence barrier check: spec must not be written before devil's advocate and phase 5c
+    if parsed["wrote_spec"]:
+      if not devil_advocate_observed or (
+          not phase_5c_triage_observed and not parsed["has_phase_5c_triage"]
+      ):
+        sequence_barrier_violations += 1
 
     if parsed["has_provenance"]:
       provenance_tags_count += 1
@@ -401,14 +521,21 @@ def run_trajectory(
     )
     history.append({"turn": turn_idx, "role": "AGENT", "content": agent_output})
 
-    # Natural convergence is confirmed when convergence summary / confirmation is emitted AND no open leaves remain
-    if parsed["is_convergence"] and parsed["has_ask_question"]:
+    # Natural convergence is confirmed when convergence summary / confirmation is emitted
+    if parsed["is_convergence"]:
       convergence_reached = True
+
+    if parsed["wrote_spec"]:
       break
 
     # Get next simulated user reply
     current_prompt = get_user_response(
-        scenario, turn_idx, agent_output, history
+        scenario,
+        turn_idx,
+        agent_output,
+        history,
+        used_indices=used_response_indices,
+        parsed=parsed,
     )
 
   # Compute Metrics
@@ -427,6 +554,8 @@ def run_trajectory(
   convergence_passed = convergence_reached
   adversarial_passed = devil_advocate_observed
   prepopulation_passed = prepopulation_violations == 0
+  phase_5c_passed = phase_5c_triage_observed
+  sequence_barrier_passed = sequence_barrier_violations == 0
 
   overall_passed = (
       depth_passed
@@ -436,6 +565,8 @@ def run_trajectory(
       and convergence_passed
       and adversarial_passed
       and prepopulation_passed
+      and phase_5c_passed
+      and sequence_barrier_passed
   )
 
   return {
@@ -451,6 +582,10 @@ def run_trajectory(
       "premature_spec_writes": premature_spec_writes,
       "convergence_reached": convergence_reached,
       "adversarial_observed": devil_advocate_observed,
+      "phase_5c_triage_observed": phase_5c_triage_observed,
+      "sequence_barrier_violations": sequence_barrier_violations,
+      "option_trade_off_turns": option_trade_off_turns,
+      "question_turns_total": question_turns_total,
       "prepopulation_violations": prepopulation_violations,
       "provenance_tags_count": provenance_tags_count,
       "metrics": {
@@ -461,6 +596,8 @@ def run_trajectory(
           "convergence_passed": convergence_passed,
           "adversarial_passed": adversarial_passed,
           "prepopulation_passed": prepopulation_passed,
+          "phase_5c_passed": phase_5c_passed,
+          "sequence_barrier_passed": sequence_barrier_passed,
       },
       "passed": overall_passed,
       "transcript": transcript,
@@ -538,7 +675,9 @@ def main():
         f" Leaves: {res['num_leaves']} | Depth Ratio: {res['leaf_depth_ratio']}"
         f" | Pre-pop Violations: {res['prepopulation_violations']} |"
         " Adversarial Critique:"
-        f" {'YES' if res['adversarial_observed'] else 'NO'} | Dictations:"
+        f" {'YES' if res['adversarial_observed'] else 'NO'} | Phase 5c Triage:"
+        f" {'YES' if res['phase_5c_triage_observed'] else 'NO'} | Seq Violations:"
+        f" {res['sequence_barrier_violations']} | Dictations:"
         f" {res['dictation_violations']} | Ledger:"
         f" {int(res['ledger_fidelity']*100)}%",
         flush=True,
@@ -567,7 +706,9 @@ def main():
     print(
         f" {icon} {r['id']:<42} | Depth: {r['leaf_depth_ratio']:<4} | Pre-pop:"
         f" {r['prepopulation_violations']} | Devil:"
-        f" {'YES' if r['adversarial_observed'] else 'NO':<3} | Dictations:"
+        f" {'YES' if r['adversarial_observed'] else 'NO':<3} | P5c:"
+        f" {'YES' if r['phase_5c_triage_observed'] else 'NO':<3} | SeqViol:"
+        f" {r['sequence_barrier_violations']:<2} | Dictations:"
         f" {r['dictation_violations']} | Ledger:"
         f" {int(r['ledger_fidelity']*100)}%",
         flush=True,
