@@ -49,25 +49,47 @@ Architectural decisions and non-negotiable behavioral contracts (ordering
 constraints, null-check requirements, state guards, initialization rules)
 must be recorded in `{PROJECT_ROOT}/{PROJECT_CONTEXT_DIR}/adr/NNNN-slug.md`.
 
+### 3-Pillar Invariant Taxonomy
+
+To prevent both missed architectural records (spec enclosure) and ADR hyper-inflation (bloat), decisions must satisfy at least one of three qualification pillars:
+
+1.  **Cross-Cutting Invariant:** Establishes a convention, contract, or state
+    invariant that constrains future tracks or touches multiple components
+    (e.g., optimistic UI rollback rules, error-envelope schemas, multi-tab sync).
+2.  **Architecture / Dependency Binding:** Binds the repository to a storage
+    engine, transport protocol, or third-party library that would be costly to
+    rip out later (e.g., SQLite WAL, WebSocket vs. SSE, Protobuf vs. JSON).
+3.  **Negative Constraint (Discarded Alternative):** Rejects an obvious, standard
+    pattern due to a subtle project gotcha or race condition (e.g., forbidding
+    `sessionStorage` because it does not sync across tabs).
+
+Decisions failing all three (local component markup, single route slugs, error strings, styling) are classified as `[Track Spec Only]`.
+
 ### Capture Triggers
 
-ADR capture can fire at five points in the Armature lifecycle:
+ADR capture operates across a dual-stage lifecycle alongside targeted in-flight hooks:
 
-1.  **During spec generation** (`/arm-new-track` Step 9 — Devil's
-    Advocate): when a challenge reveals an architectural trade-off or ordering
-    assumption.
-2.  **During design decisions** (`/arm-new-track` Step 5): when an interview
-    decision establishes a project-wide pattern or technology choice.
-3.  **During implementation** (`/arm-implement` Step 3): when the agent
-    writes a guard, assertion, or safety constraint that extends beyond the
-    active track.
-4.  **During review** (`/arm-review` § 2.4): when a correctness finding
-    implies an architectural rule or race condition fix.
+1.  **Phase 5c Pre-Spec ADR Triage Gate** (`/arm-new-track` Step 5c): Immediately
+    after Phase 5b Devil's Advocate resolves, the agent audits all settled ledger
+    decisions (`[x]`) against the 3-Pillar Taxonomy.
+    -   *Silent Zero-Candidate Bypass:* If zero decisions qualify, the agent
+        silently transitions to Step 6 without an extra modal turn.
+    -   *Interactive Triage Table:* If candidates qualify, outputs `### ADR
+        Candidate Triage Table` and prompts via a multi-select `ask_question`
+        modal in a single turn.
+2.  **Stage 2 Track Closeout Harvest** (`/arm-implement` Step 4): During living
+    documentation sync, the agent scans the final diff and verified test
+    runbooks for emergent invariants introduced during implementation, offering
+    to capture them or update ADR confirmation checklists.
+3.  **During implementation** (`/arm-implement` Step 3): when the agent writes a
+    guard, assertion, or safety constraint that extends beyond the active track.
+4.  **During review** (`/arm-review` § 2.4): when a correctness finding implies an
+    architectural rule or race condition fix.
 5.  **User-initiated**: when the user explicitly states a non-negotiable rule.
 
-### Capture Interaction
+### In-Flight Capture Interaction
 
-At each trigger point, the agent follows this protocol:
+At in-flight trigger points (triggers 3–5), the agent follows this protocol:
 
 1.  Identify the architectural decision or behavioral contract (ordering
     constraint, state guard, initialization requirement).

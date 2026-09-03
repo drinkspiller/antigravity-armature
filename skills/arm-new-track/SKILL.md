@@ -194,17 +194,37 @@ resolving all open branches and ambiguities.
                 Testing Strategy classification and proceed directly to Phase 5b
                 without injecting redundant questioning loops.
 
-        -   **Questioning Mechanics**:
+        -   **Questioning Mechanics & Option Trade-Off Analysis**:
 
-            -   Ask questions **strictly one at a time** using `ask_question`.
-            -   List recommended option first (`(Recommended)`) with 2–4
-                calibrated choices.
+            -   **Report First, Ask Second:** In EVERY turn where choices are
+                presented, you MUST output the markdown analysis and candidate
+                breakdown BEFORE calling `ask_question`.
+            -   **Itemized Bulleted Hierarchy:** Format candidate approaches
+                using punchy, high-signal bullets:
+                -   `**Option 1: <Name>** *(Recommended)*`
+                    -   `*Pros:*` 1–2 punchy, substantive bullet points.
+                    -   `*Cons:*` 1–2 punchy, substantive bullet points.
+                -   `**Option 2: <Name>**`
+                    -   `*Pros:*` 1–2 punchy, substantive bullet points.
+                    -   `*Cons:*` 1–2 punchy, substantive bullet points.
+            -   **Recommendation Rationale:** Conclude with 1–2 declarative
+                sentences explaining why the recommended option was chosen,
+                grounded in codebase constraints, latency, memory budgets,
+                schema migrations, or failure resilience.
+            -   **Modal Parameters (`ask_question`):**
+                -   Ask questions **strictly one at a time**.
+                -   List the recommended option first with `(Recommended)` and
+                    provide 2–4 calibrated domain options.
+                -   Append a trailing on-demand elaboration option:
+                    `"Elaborate on trade-offs and failure modes between these options"`.
+                -   **Native Write-In Field:** Never add a manual "Other" option;
+                    the UI modal natively provides a write-in text field.
+            -   **Elaboration Detour:** If the user selects the elaboration
+                option, output a deep-dive analysis (comparative trade-off matrix,
+                failure cascades, memory bounds, migration costs) and re-prompt the
+                concrete choices.
             -   **MANDATORY:** End your turn after each `ask_question` call to
                 wait for the user's answer.
-
-        -   **Inline Design Decisions & ADRs**: If the 3-part gate is met, offer
-            to capture an ADR (`{PROJECT_CONTEXT_DIR}/adr/NNNN-slug.md`) using
-            `ask_question`.
 
         -   **Inline Glossary Elicitation (`terms.md`)**: If a decision
             introduces domain terminology, offer to record it in
@@ -250,12 +270,57 @@ resolving all open branches and ambiguities.
                     when re-resolved.
                 -   Once all challenges have been resolved individually, ONLY
                     THEN present the structured **Convergence Summary** in
-                    markdown synthesizing all settled decisions, and call
-                    `ask_question`: "All decision branches, child leaves, and
-                    adversarial trade-offs are resolved. Ready to materialize
-                    the specification and manual testing runbook?"
-                -   **MANDATORY:** End your turn and wait for explicit user
-                    confirmation.
+                    markdown synthesizing all settled decisions, and proceed to
+                    **Phase 5c: ADR Candidate Triage Gate**.
+
+    -   **Phase 5c: ADR Candidate Triage Gate (Dual-Stage Lifecycle)**:
+
+        -   **Trigger**: Occurs immediately after Phase 5b concludes and all
+            adversarial challenges are resolved, before Step 6 (`spec.md`
+            materialization).
+        -   **3-Pillar Invariant Taxonomy Audit**: Audit all settled decisions
+            (`[x]`) in the Decision Tree Ledger against the three qualification
+            pillars:
+            1.  *Cross-Cutting Invariant:* Establishes a convention, contract,
+                or state invariant that constrains future tracks or touches
+                multiple components (e.g., optimistic UI rollback rules,
+                error-envelope schemas, multi-tab sync).
+            2.  *Architecture / Dependency Binding:* Binds the repository to a
+                storage engine, transport protocol, or third-party library that
+                would be costly to rip out later (e.g., SQLite WAL, WebSocket vs.
+                SSE, Protobuf vs. JSON).
+            3.  *Negative Constraint (Discarded Alternative):* Rejects an
+                obvious, standard pattern due to a subtle project gotcha or race
+                condition (e.g., forbidding `sessionStorage` because it does not
+                sync across tabs).
+            -   Decisions failing all three (local component markup, single route
+                slugs, error strings, styling) are classified as `[Track Spec
+                Only]`.
+        -   **Silent Zero-Candidate Bypass**:
+            -   If zero settled decisions qualify under the 3-Pillar Taxonomy,
+                the agent MUST silently bypass Phase 5c directly to Step 6 Spec
+                Materialization without generating an extra modal prompt or
+                callout note.
+        -   **Interactive Triage Gate (when $\ge 1$ candidates qualify)**:
+            -   Render an `### ADR Candidate Triage Table` mapping each qualifying
+                decision to its pillar, proposed title, and one-line rationale:
+
+                ```markdown
+                ### ADR Candidate Triage Table
+                | Decision | Scope & Pillar | Proposed ADR Title | Recommendation |
+                | :--- | :--- | :--- | :--- |
+                | Branch 1: In-Memory LRU Cache | Pillar 2: Architecture Binding | Use In-Memory LRU with TTL for Client Asset Caching | [ADR Candidate] |
+                | Leaf 1.1: 100-Item / 25MB Cap | Pillar 1: Cross-Cutting Invariant | Enforce 25MB Fixed Heap Budget on In-Memory Caches | [ADR Candidate] |
+                ```
+            -   Call `ask_question` with a multi-select prompt allowing the user
+                to confirm which ADRs to materialize:
+                -   `question`: "Confirm which architectural decisions to record as ADRs:"
+                -   `options`: Checkboxes for each candidate ADR (e.g., `"(Recommended) Record ADR: Use In-Memory LRU with TTL"`, `"(Recommended) Record ADR: Enforce 25MB Fixed Heap Budget"`, `"Skip ADR creation — keep track-specific only"`).
+            -   **MANDATORY:** End your turn and wait for the user's response.
+            -   For each confirmed candidate:
+                -   Determine the next sequential number (e.g., `adr/0004-slug.md`).
+                -   Draft the ADR in standard MADR format (`Status: ACCEPTED`, `Context`, `Decision`, `Consequences`, `Confirmation` checklist).
+                -   Write to `{PROJECT_ROOT}/{PROJECT_CONTEXT_DIR}/adr/NNNN-slug.md` using `write_to_file`.
 
 6.  **Spec & Manual Testing Materialization & Final Confirmation:**
 
