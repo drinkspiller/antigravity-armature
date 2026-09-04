@@ -215,8 +215,8 @@ resolving all open branches and ambiguities.
                 -   Ask questions **strictly one at a time**.
                 -   List the recommended option first with `(Recommended)` and
                     provide 2–4 calibrated domain options.
-                -   Append a trailing on-demand elaboration option:
-                    `"Elaborate on trade-offs and failure modes between these options"`.
+                -   **Trailing Elaboration Option (Systems & Architecture Only):**
+                    Append a trailing on-demand elaboration option (`"Compare technical trade-offs and failure modes in detail"`) **ONLY** when evaluating complex systems, data model, or infrastructure architecture decisions where deep-dive performance or failure analysis adds value. **NEVER** append an elaboration option to `ask_question` for UX copywriting, visual presentation, layout styling, or simple product preferences.
                 -   **Native Write-In Field:** Never add a manual "Other" option;
                     the UI modal natively provides a write-in text field.
             -   **Elaboration Detour:** If the user selects the elaboration

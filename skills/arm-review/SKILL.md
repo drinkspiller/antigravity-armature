@@ -177,6 +177,7 @@ Evaluate the changed code against the following criteria:
             -   `"(Recommended) Verified: <brief expected result observed>"`
             -   `"Didn't match expectation (I will describe what occurred)"`
             -   `"Skip to next scenario"`
+        -   *Guardrail (Empirical Verification Only):* Verification gates test empirical application state, not architectural trade-offs. Do **NOT** output Pros/Cons matrices or append the `"Elaborate on trade-offs..."` option to scenario verification prompts.
     -   **In-Flight Discrepancy Triage:**
 
         -   If the user reports a mismatch, enter diagnostic mode: inspect
