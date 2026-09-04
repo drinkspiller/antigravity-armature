@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.22.0] - 2026-09-04
+
+### Added
+
+-   **Non-Blocking Armature Update Available Mechanism (`check-update.sh`, `rules/armature_protocol.md` §0a Step 11, `install.sh`)**:
+    -   **Canonical Deployment (`check-update.sh`)**: Deploys `~/.cache/armature/check-update.sh` with `INSTALLED_VERSION` stamped during installation.
+    -   **State Machine & Resilience (`~/.cache/armature/update_check.json`)**: Enforces a 24-hour check TTL (`86400s`), a 24-hour notification frequency cap (`last_notified_timestamp`), a hard 2-second timeout (`curl --max-time 2`), and a 1-hour failure backoff window (`3600s`) so offline or network hiccups never stall `/arm-*` command startup.
+    -   **Semantic Version Comparison**: Implements POSIX `awk` numeric semver comparison (`UPSTREAM > INSTALLED`) to suppress false downgrade prompts on unreleased local development branches.
+    -   **Chat Notification UX**: When `UPDATE_AVAILABLE|<old_ver>|<new_ver>|<upgrade_cmd>` is emitted, `armature_protocol.md` §0a Step 11 prepends a non-blocking `> [!TIP]` banner with the copy-pastable upgrade command and an offer to run the upgrade automatically if the user replies `"upgrade armature"`.
+
 ## [0.21.2] - 2026-09-04
 
 ### Fixed

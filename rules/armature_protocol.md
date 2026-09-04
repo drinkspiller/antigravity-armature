@@ -64,6 +64,14 @@ Before executing ANY Armature command, resolve `{PROJECT_CONTEXT_DIR}` (either `
     Cross-reference changed files against ADR scopes, local rules, and manual
     testing runbooks. Flag contradictions or invoke `/arm-drift` before
     proceeding (see `armature_cdd_protocols.md` §9).
+11. **Non-blocking update check:** Run `bash ~/.cache/armature/check-update.sh 2>/dev/null || true`.
+    If stdout outputs `UPDATE_AVAILABLE|<old_ver>|<new_ver>|<upgrade_cmd>`, prepend
+    a compact `> [!TIP]` banner at the very top of your chat response:
+    `> [!TIP]`
+    `> **Armature Update Available (v<old_ver> → v<new_ver>)**`
+    `> Run <upgrade_cmd> in your terminal, or reply "upgrade armature" to have me run it for you.`
+    Never block command execution or invoke `ask_question` for the update check. If stdout is empty, output zero update banners.
+    If the user replies `"upgrade armature"`, execute the `<upgrade_cmd>` via `run_command`, verify exit code `0`, and confirm the upgraded version.
 
 Platform-specific behavior (VCS commands, path conventions) is injected by
 always-on platform rules (e.g., `armature_enterprise.md`). Do not hardcode VCS
