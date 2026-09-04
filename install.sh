@@ -103,7 +103,7 @@ DEFINE_bool release_notes false "Show release notes for the current version"
 parse_flags "$@"
 
 
-VERSION="0.21.2"
+VERSION="0.22.0"
 
 # --- Resolve source directory (relative to this script) ---
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -720,6 +720,28 @@ else
   echo "$VERSION" > "${TARGET_PLUGIN_DIR}/.armature_version"
   msg_success "Wrote version stamp: ${GREEN}v${VERSION}${NC}"
 fi
+
+# --- Deploy check-update.sh to canonical user cache path ---
+install_update_checker() {
+  local cache_dir="${HOME}/.cache/armature"
+  local target_script="${cache_dir}/check-update.sh"
+  local source_script="${SCRIPT_DIR}/check-update.sh"
+
+  if [[ ! -f "${source_script}" ]]; then
+    return 0
+  fi
+
+  if [[ "${FLAGS_dry_run}" -eq "${FLAGS_TRUE}" ]]; then
+    msg_info "${YELLOW}[dry-run]${NC} Would deploy update checker to ${GREEN}${target_script}${NC} (v${VERSION})"
+    return 0
+  fi
+
+  mkdir -p "${cache_dir}" 2>/dev/null || true
+  sed "s/^INSTALLED_VERSION=.*/INSTALLED_VERSION=\"${VERSION}\"/" "${source_script}" > "${target_script}"
+  chmod +x "${target_script}" 2>/dev/null || true
+  msg_success "Deployed update checker: ${GREEN}${target_script}${NC} (v${VERSION})"
+}
+install_update_checker
 
 # --- Manifests & Docs ---
 section "📦 Installing Armature Plugin Manifests & Docs"
