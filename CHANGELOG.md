@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.21.2] - 2026-09-04
+
+### Fixed
+
+-   **Clean Markdown Termination & Native `ask_question` Tool Invocation (`rules/armature_antigravity.md`, `rules/armature_protocol.md` §2, `skills/arm-new-track/SKILL.md` Step 5a)**:
+    -   Enforced strict **Clean Markdown Termination (Zero Trailing Narration)**: models must end their markdown response immediately after the `Recommendation Rationale` paragraph with a clean newline, explicitly prohibiting transitional self-narration sentences (e.g., *"I will now ask for your decision on..."*) that concatenate onto `call:ask_question` and break structured tool parsing.
+    -   Enforced **Native Structured Tool Invocation Only**: explicitly barred emitting raw `call:ask_question{...}` text strings inside markdown responses.
+-   **SkillOpt Evaluation Harnesses (`evals/skillopt/run_optimizer.py`, `evals/skillopt/run_trajectory_eval.py`)**:
+    -   Upgraded `run_optimizer.py` to pass native `tools` (`functionDeclarations` for `ask_question` and `write_to_file`) during task rollouts (`use_tools=True`), replacing simulated prose descriptions of tool invocations with actual API `functionCall` parts.
+    -   Added deterministic protocol-level checks (`[PROTOCOL_VIOLATION: RAW_TOOL_TEXT_LEAK_DETECTED]` and `[PROTOCOL_VIOLATION: TRAILING_NARRATION_DETECTED]`) to both `run_optimizer.py` and `run_trajectory_eval.py`.
+    -   Added regression tasks (`TRAIN_28_CLEAN_TERMINATION_NATIVE_ASK_QUESTION` and `VAL_24_CLEAN_TERMINATION_NATIVE_ASK_QUESTION`) and verified 100.0% pass rate (`4/4` train, `4/4` held-out val) with zero raw text leakage.
+
 ## [0.21.1] - 2026-09-04
 
 ### Fixed

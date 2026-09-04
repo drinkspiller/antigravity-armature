@@ -12,27 +12,29 @@ resolving all open branches and ambiguities.
 
 ## Mandatory Execution Guardrails
 
--   **File Path Sanitization:** When resolving `{PROJECT_ROOT}` or constructing file paths for tools (e.g., `write_to_file`, `read_file`), you MUST aggressively strip any `file://` prefix. Use standard absolute or relative paths to prevent tool execution errors (e.g., use `/home/user/project/...` instead of `file:///home/user/project/...`). NEVER pass a `file://` URI to a file operation tool.
--   **Raw/Truncated Input Handling:** If the user request contains raw JSON, HTML snippets, or truncated text dumps (e.g., `{"activeScroller": "HTML", "mainScrollbarWidth": 15, "mainScrollHeight": 4095}` or linter warning traces), treat it purely as contextual description. Do not crash, do not attempt to parse it as a command, and do not fail if it is malformed. If the description is incomplete, gracefully ask for clarification via `ask_question` before proceeding.
+-   **File Path Sanitization:** When resolving `{PROJECT_ROOT}` or constructing file paths for tools (e.g., `write_to_file`, `read_file`), you MUST aggressively strip any `file://` prefix. Use standard absolute or relative paths to prevent tool execution errors (e.g., use `/path/to/project or `/usr/local/go...` instead of `file:///path/to/project or `file:///usr/local/go...`). NEVER pass a `file://` URI to a file operation tool.
+-   **Raw/Truncated Input Handling:** If the user request contains raw JSON, HTML snippets, or truncated text dumps (e.g., `{"activeScroller": "HTML", "mainScrollbarWidth": 15, "mainScrollHeight":` or `@[Quote] nalyzer description: Lint warnings. Owner: [linter-team@google.com](mailto:l)`), treat it purely as contextual description. Do not crash, do not attempt to parse it as a command, and do not fail if it is malformed. If the description is incomplete, gracefully ask for clarification via `ask_question` before proceeding.
 -   **Strict Interactive Discipline:** You MUST NEVER generate track artifacts
     (`spec.md`, `plan.md`) or write code in a single autonomous turn. Every
     track requires step-by-step user alignment.
 -   **Synchronous Turn-Ending Barrier:** You MUST invoke `ask_question` and end
-    your turn at Step 5a (Leaf Probes), Step 5b (Post-Ledger Devil's Advocate Gate),
-    Step 6 (Spec Approval), and Step 7 (Plan Approval). Do not proceed to
-    subsequent steps until the user responds.
+    your turn at Step 5a (Leaf Probes), Step 5b (Post-Ledger Devil's Advocate
+    Gate), Step 5c (ADR Candidate Triage Gate, when candidates qualify), Step 6
+    (Spec Approval), and Step 7 (Plan Approval). Do not proceed to subsequent
+    steps until the user responds.
 -   **Mandatory Decision Tree Ledger:** In EVERY turn of Step 5, you MUST output
     a visible `### Decision Tree Ledger` block showing root branches and their
     spawned child leaves with explicit `[ ]` (OPEN) and `[x]` (Resolved)
     markers.
--   **Lazy Leaf Materialization (Pre-Population Ban):** Future root branches MUST
-    remain unexpanded stubs in the ledger (e.g., `- [ ] Branch 2: <Topic> (UNEXPLORED)`).
-    You are STRICTLY FORBIDDEN from pre-populating child leaves under a branch
-    until the user has confirmed an architectural direction for that branch.
--   **Answer-Anchored Provenance Tags:** Every spawned child leaf MUST explicitly
-    cite the confirmed user choice that generated it:
-    `- [ ] Leaf 2.1: <Ambiguity> (Spawned by '<choice>': <question>)`. Leaves
-    without a literal proven choice from prior turns are forbidden.
+-   **Lazy Leaf Materialization (Pre-Population Ban):** Future root branches
+    MUST remain unexpanded stubs in the ledger (e.g., `- [ ] Branch 2: <Topic>
+    (UNEXPLORED)`). You are STRICTLY FORBIDDEN from pre-populating child leaves
+    under a branch until the user has confirmed an architectural direction for
+    that branch.
+-   **Answer-Anchored Provenance Tags:** Every spawned child leaf MUST
+    explicitly cite the confirmed user choice that generated it: `- [ ] Leaf
+    2.1: <Ambiguity> (Spawned by '<choice>': <question>)`. Leaves without a
+    literal proven choice from prior turns are forbidden.
 -   **Anti-Dictation Invariant (Zero Un-Queried Decisions):** You MUST NEVER
     assert or output declarative technical specifications, UI layouts, button
     behaviors, countdown cancel rules, or lifecycle state transitions in
@@ -43,8 +45,25 @@ resolving all open branches and ambiguities.
     the root of a branch does NOT close the branch; it actively spawns 1–2
     high-value operational child leaves derived from that specific answer.
     Probing depth is strictly bounded to Depth <= 2 (Root Topic -> Operational
-    Child Leaf). Operational leaf answers are terminal (`[x]`) and MUST NOT spawn
-    Level 2 grandchildren.
+    Child Leaf). Operational leaf answers are terminal (`[x]`) and MUST NOT
+    spawn Level 2 grandchildren.
+-   **Option Trade-Off Formatting & Clean Tool Termination:** In EVERY turn of
+    Step 5 where choices are presented, you MUST precede `ask_question` with a
+    punchy, itemized bulleted trade-off breakdown detailing 1–2 concise `Pros`
+    and 1–2 `Cons` per candidate approach, followed by a 1–2 sentence
+    `Recommendation Rationale`. End your markdown response immediately after the
+    `Recommendation Rationale` paragraph with a clean newline. NEVER append
+    transitional self-narration sentences at the end of your text (e.g., *"I will
+    now ask for your decision on..."* or *"Let's call ask_question..."*), which
+    cause token concatenation and break tool parsing. Invoke `ask_question`
+    exclusively as a native structured tool call—never emit raw
+    `call:ask_question{...}` strings in the markdown stream. In
+    `ask_question`, list the recommended choice first with `(Recommended)` and
+    append a trailing choice: `"Elaborate on trade-offs and failure modes between
+    these options"` strictly for systems/architecture choices. Never add a manual
+    "Other" option (the UI modal natively provides a write-in field). If the user
+    selects elaboration, provide a deep-dive analysis and re-prompt the concrete
+    options.
 -   **Compound Directive Shielding:** If the user invokes `/arm-new-track`
     alongside other instructions (e.g., `/diagnose`, `Fix`, or implementation
     tasks), you MUST explicitly refuse to write code or generate `plan.md`
@@ -57,16 +76,24 @@ resolving all open branches and ambiguities.
     ledger and pose the next targeted probe via `ask_question`.
 -   **Phase 5b Post-Ledger Devil's Advocate Analysis:** When all branches and
     dynamically spawned leaves reach `[x]`, you MUST NOT immediately converge.
-    You MUST execute Phase 5b: audit the combination of confirmed answers,
-    emit a structured `### Devil's Advocate Analysis` confronting the user with
+    You MUST execute Phase 5b: audit the combination of confirmed answers, emit
+    a structured `### Devil's Advocate Analysis` confronting the user with
     emergent contradictions, operational hazards, and maintainability debt, and
     halt with `ask_question` to reaffirm or reopen branches.
+-   **Phase 5c ADR Candidate Triage Gate (Dual-Stage Lifecycle):** Immediately
+    following Phase 5b, audit all settled ledger decisions against the 3-Pillar
+    Invariant Taxonomy (Cross-Cutting Invariant, Architecture Binding, Negative
+    Constraint). If zero decisions qualify, silently bypass directly to Step 6.
+    If candidates qualify, render an `### ADR Candidate Triage Table` and obtain
+    explicit user confirmation via a multi-select modal in a single turn before
+    drafting ADRs.
 -   **Anti-Early-Exit & Natural Convergence:** The interview concludes ONLY when
-    every branch and child leaf is marked `[x]` (Resolved) AND the user has
-    reaffirmed or resolved the Phase 5b Devil's Advocate analysis.
+    every branch and child leaf is marked `[x]` (Resolved), Phase 5b Devil's
+    Advocate analysis is resolved, and Phase 5c ADR triage has concluded.
 -   **Pre-Materialization Hardening Barrier:** You MUST hold specification state
     in memory during Step 5. Canonical `spec.md` is only materialized on disk in
-    Step 6 after Phase 5b is reaffirmed and confirmed by the user.
+    Step 6 after Phase 5b is reaffirmed, Phase 5c triage concludes, and the user
+    approves drafting.
 -   **Interruption & Detour Recovery:** If the user asks side questions,
     clarifies requirements, or explores asset tangents mid-traversal, answer the
     inquiry, update the ledger, and resume traversing open leaves. NEVER leap to
@@ -75,7 +102,7 @@ resolving all open branches and ambiguities.
 ## Protocol
 
 1.  **Context Resolution & Setup Check:**
-    -   Resolve `{PROJECT_ROOT}` and `{PROJECT_CONTEXT_DIR}` (armature or conductor) per `armature_protocol.md` §7. **CRITICAL:** Strip any `file://` prefix from `{PROJECT_ROOT}` before using it in any file operations (e.g., use `/home/user/project/...` instead of `file:///home/user/project/...`).
+    -   Resolve `{PROJECT_ROOT}` and `{PROJECT_CONTEXT_DIR}` (armature or conductor) per `armature_protocol.md` §7. **CRITICAL:** Strip any `file://` prefix from `{PROJECT_ROOT}` before using it in any file operations (e.g., `/path/to/project or `/usr/local/go...`).
     -   Verify that the following files exist:
         -   `{PROJECT_ROOT}/{PROJECT_CONTEXT_DIR}/product.md`
         -   `{PROJECT_ROOT}/{PROJECT_CONTEXT_DIR}/tech-stack.md`
@@ -85,7 +112,7 @@ resolving all open branches and ambiguities.
 
 2.  **Get Description & Infer Type:**
 
-    -   If a description was provided in the initial prompt, use it. (Note: Handle raw JSON, HTML snippets, or truncated text dumps gracefully as context. Do not crash or fail on malformed input like `{"activeScroller": "HTML", ...}` or truncated error traces).
+    -   If a description was provided in the initial prompt, use it. (Note: Handle raw JSON, HTML, or truncated text dumps gracefully as context. Do not fail on malformed input like `{"activeScroller": "HTML"...` or `@[Quote] nalyzer...`).
     -   If no description was provided, ask via `ask_question`: "What feature or
         bug would you like to work on? Describe it in 1-2 sentences."
     -   Analyze the description to infer the track type (Feature vs. Bug/Chore).
@@ -211,6 +238,14 @@ resolving all open branches and ambiguities.
                 sentences explaining why the recommended option was chosen,
                 grounded in codebase constraints, latency, memory budgets,
                 schema migrations, or failure resilience.
+            -   **Clean Markdown Termination (Zero Trailing Narration):** End your
+                markdown response immediately after the `Recommendation Rationale`
+                paragraph. NEVER append transitional self-narration sentences at
+                the end of your prose (e.g., *"I will now ask for your decision
+                on..."* or *"Let's call ask_question..."*), which cause token
+                concatenation and break tool parsing. Invoke `ask_question`
+                exclusively as a native structured tool call—never emit raw
+                `call:ask_question{...}` text in the markdown stream.
             -   **Modal Parameters (`ask_question`):**
                 -   Ask questions **strictly one at a time**.
                 -   List the recommended option first with `(Recommended)` and
@@ -363,5 +398,5 @@ resolving all open branches and ambiguities.
 -   **Turn-Ending Barriers**: Enforce strict synchronous pauses at Step 5, Step 6, and Step 7 via `ask_question`.
 -   **Pre-Materialization Barrier**: Hold `spec.md` in memory during Step 5.
 -   **Continuous Decision-Tree Traversal & Ambiguity Resolution**: Never conclude an interview turn while decision branches, dependencies, failure modes, or architectural ambiguities remain unresolved.
--   **File Path Sanitization**: Always strip `file://` prefixes from paths before using file tools (e.g., `/home/user/project/...` instead of `file:///home/user/project/...`).
+-   **File Path Sanitization**: Always strip `file://` prefixes from paths before using file tools (e.g., `/path/to/project `/usr/local/go...`).
 -   **Raw/Truncated Input**: Treat malformed JSON/HTML or truncated text dumps as contextual descriptions, not commands.

@@ -33,6 +33,15 @@ syntax displays as raw characters. Follow these rules:
     would say.
 4.  **Go beyond binary.** Prefer 3-4 meaningful options over Yes/No.
 5.  **No explicit 'Other' option needed** - the UI always provides a write-in.
+6.  **Clean markdown termination (Zero trailing meta-narration).** End your
+    markdown response immediately after the final analysis or rationale
+    paragraph. NEVER append transitional self-narration sentences at the end of
+    your prose (e.g., *"I will now ask for your decision on..."* or *"Let's call
+    ask_question..."*), which cause inline token concatenation and break tool
+    parsing.
+7.  **Native structured tool invocation only.** Invoke `ask_question` exclusively
+    as a structured tool call. NEVER output raw `call:ask_question{...}`
+    strings inside the markdown text stream.
 
 ### Examples
 
