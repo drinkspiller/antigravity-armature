@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.21.1] - 2026-09-04
+
+### Fixed
+
+-   **Scoped Option Trade-Off Analysis Engine (`armature_protocol.md` §2, `arm-new-track/SKILL.md` Step 5a, `arm-review/SKILL.md`)**:
+    -   **Markdown Chat Response ("Report First")**: Preserved itemized `Pros`/`Cons` hierarchy and `Recommendation Rationale` across all design, UX, layout, copywriting, and architectural decision prompts.
+    -   **Modal Parameters ("Ask Second")**: Restricted the trailing elaboration choice (`"Compare technical trade-offs and failure modes in detail"`) strictly to **complex systems, data model, or infrastructure architecture decisions**.
+    -   **Modal & Gate Exemptions**: Explicitly barred trailing elaboration options in `ask_question` modals for UX copywriting, visual formatting, layout styling, empirical QA verification checkpoints (`/arm-review`), safety confirmations (Hybrid Smart Gate), and procedural workflow approvals (`spec.md`/`plan.md` confirmation, ADR multi-select triage).
+    -   Added explicit guardrail under `Verification Gate (ask_question)` in `arm-review/SKILL.md`.
+    -   Verified 100.0% pass rate (20/20 criteria across systems architecture, UX copy/layout, and QA verification tasks) via `/skill-opt` evaluation battery.
+
 ## [0.21.0] - 2026-09-03
 
 ### Added

@@ -108,25 +108,19 @@ code change, or workflow transition:
     spec generation loops, ask questions strictly one at a time. Present a
     single question, pause execution, and collect user confirmation before
     generating subsequent questions.
--   **Structured Choices & Option Trade-Off Analysis:** When gathering information
-    or asking for decisions across all Armature skills, provide 2–4 calibrated
-    domain choices. Precede the `ask_question` call with a punchy, itemized
-    bulleted trade-off breakdown:
-    -   *Candidate Approaches:* For each option, list 1–2 punchy, substantive
-        `Pros` and 1–2 `Cons`. Avoid vague generalities or superficial one-word
-        clauses.
-    -   *Recommendation Rationale:* Conclude with a 1–2 sentence declarative
-        justification explaining why the recommended option was chosen, grounded in
-        codebase constraints, failure resilience, schema evolution, or latency bounds.
-    -   *On-Demand Elaboration Option:* In the `ask_question` tool call, list the
-        recommended option first with `(Recommended)`, followed by alternative
-        approaches, and append a trailing choice: `"Elaborate on trade-offs and
-        failure modes between these options"`. (Note: The UI modal natively
-        provides a write-in text field for custom input; never add a manual
-        "Other" option).
-    -   *Elaboration Detour:* If the user selects the elaboration option, output a
-        deep-dive analysis (comparative trade-off matrix, failure cascades, memory
-        bounds, migration costs) and re-prompt the concrete choices.
+-   **Structured Choices & Option Trade-Off Analysis:**
+    When presenting competing technical designs, architectural directions, UX layouts, or copywriting choices (e.g., during `/arm-new-track` Step 5a/5b or `/arm-setup`), provide 2–4 calibrated domain choices:
+    -   *Markdown Trade-Off Breakdown (All Design, UX & Architecture Choices):* Precede the `ask_question` call with a punchy, itemized bulleted trade-off breakdown in chat:
+        -   *Candidate Approaches:* For each option, list 1–2 punchy, substantive `Pros` and 1–2 `Cons`. Avoid vague generalities or superficial one-word clauses.
+        -   *Recommendation Rationale:* Conclude with a 1–2 sentence declarative justification explaining why the recommended option was chosen, grounded in domain constraints (e.g., cognitive load, dialog footprint, latency bounds, or failure resilience).
+    -   *Modal Parameters (`ask_question`):*
+        -   List the recommended option first with `(Recommended)`, followed by alternative approaches phrased cleanly in the user's voice.
+        -   *Trailing Elaboration Option (Systems & Architecture Only):* Append a trailing choice (`"Compare technical trade-offs and failure modes in detail"`) **ONLY** for complex systems, data model, or infrastructure architecture decisions where deep-dive performance or failure analysis adds value. **NEVER** append an elaboration option to `ask_question` for UX copywriting, visual presentation, layout styling, empirical QA verification checks, safety confirmations, or procedural approvals.
+    -   *Strict Exemption for Empirical & Procedural Gates:* Do **NOT** generate Pros/Cons breakdowns or append elaboration options for:
+        1. **Empirical QA Verification Checkpoints** (`/arm-review` scenario checks: *"Did Scenario N meet the expected outcome?"* where choices are `Verified`, `Didn't match expectation`, `Skip`).
+        2. **Safety & Environment Confirmations** (Hybrid Smart Gate destructive command prompts).
+        3. **Lifecycle & Procedural Approvals** (`spec.md`/`plan.md` confirmation gates, ADR multi-select triage checkboxes).
+        For these gates, present crisp context followed by direct status or action options.
 -   **Human-Readable Navigation:** Always refer to process steps and documents
     by their human-readable names. Do not expose internal section numbers.
 
