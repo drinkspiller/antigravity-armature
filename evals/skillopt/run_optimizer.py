@@ -45,6 +45,7 @@ def call_gemini(
     system_instruction: str = None,
     temperature: float = 0.2,
     max_retries: int = 5,
+    use_tools: bool = False,
 ) -> str:
   if not API_KEY:
     raise RuntimeError(
@@ -78,6 +79,53 @@ def call_gemini(
   if system_instruction:
     payload["systemInstruction"] = {"parts": [{"text": system_instruction}]}
 
+  if use_tools:
+    payload["tools"] = [{
+        "functionDeclarations": [
+            {
+                "name": "ask_question",
+                "description": (
+                    "Ask the user one or more multiple-choice questions."
+                ),
+                "parameters": {
+                    "type": "OBJECT",
+                    "properties": {
+                        "questions": {
+                            "type": "ARRAY",
+                            "items": {
+                                "type": "OBJECT",
+                                "properties": {
+                                    "question": {"type": "STRING"},
+                                    "options": {
+                                        "type": "ARRAY",
+                                        "items": {"type": "STRING"},
+                                    },
+                                    "is_multi_select": {"type": "BOOLEAN"},
+                                },
+                                "required": ["question", "options"],
+                            },
+                        }
+                    },
+                    "required": ["questions"],
+                },
+            },
+            {
+                "name": "write_to_file",
+                "description": (
+                    "Write specification or code content to a target file path."
+                ),
+                "parameters": {
+                    "type": "OBJECT",
+                    "properties": {
+                        "TargetFile": {"type": "STRING"},
+                        "CodeContent": {"type": "STRING"},
+                    },
+                    "required": ["TargetFile", "CodeContent"],
+                },
+            },
+        ]
+    }]
+
   data = json.dumps(payload).encode("utf-8")
 
   for attempt in range(1, max_retries + 1):
@@ -92,7 +140,21 @@ def call_gemini(
           first = candidates[0]
           if "content" in first:
             parts = first["content"].get("parts", [])
-            return "".join(p.get("text", "") for p in parts)
+            output_blocks = []
+            for p in parts:
+              if "text" in p and p["text"]:
+                t = p["text"]
+                if re.search(r"call:(?:[a-zA-Z0-9_]+:)?ask_question|ask_question\s*\{", t):
+                  t += "\n[PROTOCOL_VIOLATION: RAW_TOOL_TEXT_LEAK_DETECTED]"
+                if re.search(r"I will now ask[^\n]*$", t.strip()):
+                  t += "\n[PROTOCOL_VIOLATION: TRAILING_NARRATION_DETECTED]"
+                output_blocks.append(t)
+              elif "functionCall" in p:
+                fc = p["functionCall"]
+                output_blocks.append(
+                    f"\n[NATIVE_FUNCTION_CALL: {fc.get('name')}({json.dumps(fc.get('args', {}))})]\n"
+                )
+            return "".join(output_blocks)
           else:
             finish_reason = first.get("finishReason", "UNKNOWN")
             print(
@@ -178,9 +240,9 @@ def evaluate_task(task: dict, default_skill_text: str, default_skill_name: str):
 
   rollout_prompt = (
       "Execute the following user request and"
-      f" scenario:\n\n{task['prompt']}\n\nDetail every action, step number,"
-      " tool invocation (e.g. ask_question, write_to_file, etc.), and the"
-      " exact output/questions you present to the user."
+      f" scenario:\n\n{task['prompt']}\n\nRespond to the user following all"
+      " skill rules and invoke native tool calls (e.g. ask_question,"
+      " write_to_file) when required."
   )
 
   try:
@@ -189,6 +251,7 @@ def evaluate_task(task: dict, default_skill_text: str, default_skill_name: str):
         rollout_prompt,
         system_instruction=system_instruction,
         temperature=0.1,
+        use_tools=True,
     )
   except Exception as e:
     print(f"  [Rollout Error] Task {task['id']} failed: {e}", flush=True)

@@ -12,7 +12,7 @@ task-specific logic.
 ## 0. Armature Project Directory (Dual-Root Support)
 
 The project context directory lives at `{PROJECT_ROOT}/armature/` (or legacy `{PROJECT_ROOT}/conductor/`) — the root of the
-user's project repository (NOT the agent brain/artifacts directory). All
+user's project repository (NOT the Antigravity brain/artifacts directory). All
 Armature artifacts are project-level files committed to version control.
 
 ```
@@ -66,7 +66,8 @@ Before executing ANY Armature command, resolve `{PROJECT_CONTEXT_DIR}` (either `
     proceeding (see `armature_cdd_protocols.md` §9).
 
 Platform-specific behavior (VCS commands, path conventions) is injected by
-always-on platform rules. Do not hardcode VCS commands in skill protocols.
+always-on platform rules (e.g., `armature_enterprise.md`). Do not hardcode VCS
+commands in skill protocols.
 
 ## 1. Core Operational Guardrails
 
@@ -75,9 +76,6 @@ always-on platform rules. Do not hardcode VCS commands in skill protocols.
 -   **Tool Validation:** You MUST validate the success of every tool call. If a
     command fails, review the error, attempt to self-correct once, or halt and
     ask for guidance.
--   **File Path Sanitization:** When resolving `{PROJECT_ROOT}` or passing paths
-    to file tools, you MUST aggressively strip any `file://` prefix. Use standard
-    absolute or relative paths to prevent filesystem tool execution errors.
 -   **Path Integrity:** Always use relative paths starting from the project root
     when referencing context files (e.g., `armature/index.md` or `conductor/index.md`).
 -   **Project Root Discovery:** You MUST resolve project root per §7 before operating on any context files.
@@ -113,6 +111,7 @@ code change, or workflow transition:
     -   *Markdown Trade-Off Breakdown (All Design, UX & Architecture Choices):* Precede the `ask_question` call with a punchy, itemized bulleted trade-off breakdown in chat:
         -   *Candidate Approaches:* For each option, list 1–2 punchy, substantive `Pros` and 1–2 `Cons`. Avoid vague generalities or superficial one-word clauses.
         -   *Recommendation Rationale:* Conclude with a 1–2 sentence declarative justification explaining why the recommended option was chosen, grounded in domain constraints (e.g., cognitive load, dialog footprint, latency bounds, or failure resilience).
+        -   *Clean Markdown Termination (Zero Trailing Narration):* End your markdown response immediately after the `Recommendation Rationale` paragraph. NEVER append transitional self-narration sentences at the end of your prose (e.g., *"I will now ask for your decision on..."* or *"Let's call ask_question..."*), which cause token concatenation and break tool parsing. Invoke `ask_question` exclusively as a native structured tool call—never emit raw `call:ask_question{...}` text in the markdown stream.
     -   *Modal Parameters (`ask_question`):*
         -   List the recommended option first with `(Recommended)`, followed by alternative approaches phrased cleanly in the user's voice.
         -   *Trailing Elaboration Option (Systems & Architecture Only):* Append a trailing choice (`"Compare technical trade-offs and failure modes in detail"`) **ONLY** for complex systems, data model, or infrastructure architecture decisions where deep-dive performance or failure analysis adds value. **NEVER** append an elaboration option to `ask_question` for UX copywriting, visual presentation, layout styling, empirical QA verification checks, safety confirmations, or procedural approvals.
@@ -129,7 +128,7 @@ code change, or workflow transition:
 Whenever an Armature command produces structured output requiring user review -
 clarifying questions, reports, summaries, specs, plans, or confirmation prompts:
 
-1.  **Write as an artifact** using `write_to_file`
+1.  **Write as a Antigravity artifact** using `write_to_file`
 2.  **Present via `notify_user`** with `PathsToReview` pointing to the file
 3.  **Use appropriate ArtifactType**: `walkthrough` for reports/status,
     `implementation_plan` for specs/plans, `other` for questions/prompts
@@ -141,7 +140,8 @@ Artifact filenames follow: `arm_<command>_<context>.md`
 ## 4. VCS Operations
 
 Armature skills are VCS-agnostic by default. Platform-specific VCS behavior
-(Git, Mercurial, or other version control systems) is injected by platform rules. When no platform rule overrides VCS behavior, default
+(Git, Mercurial, Mercurial/SVN) is injected by platform rules (e.g.,
+`armature_enterprise.md`). When no platform rule overrides VCS behavior, default
 to Git:
 
 -   `git status` to check for changes
@@ -151,18 +151,6 @@ to Git:
 
 **IMPORTANT:** Before creating any commit, ALWAYS check for actual changes
 first. Do NOT create empty commits.
-
-### Commit Message Standards
-
-When committing changes:
-
--   Include a clear summary focusing on high-level architectural intent and
-    user-visible behavior (avoid low-level code mechanics or nuts-and-bolts file
-    lists).
--   Synthesize changes into 3–5 punchy bullet points focused on system state
-    transitions and capabilities.
--   Preserve durable issue tracking references and design rationale while
-    discarding granular diff accounting from earlier drafts.
 
 ## 5. Armature Guardrails
 
@@ -205,8 +193,8 @@ When committing changes:
     visible `### Decision Tree Ledger` tracking root branches and spawned child
     leaves (`[ ]` OPEN, `[x]` Resolved). The interview operates in two strictly
     sequenced phases:
-    1.  *Phase 5a (Dynamic Leaf Traversal & Ambiguity Elicitation)*: Selecting an
-        architectural direction at the root of a branch does NOT close the
+    1.  *Phase 5a (Dynamic Leaf Traversal & Ambiguity Elicitation)*: Selecting
+        an architectural direction at the root of a branch does NOT close the
         branch; it actively spawns 1–2 high-value Tier 1 operational child
         leaves derived from that specific choice. Probing depth is strictly
         bounded to Depth <= 2 (Root Topic -> Operational Child Leaf).
@@ -216,11 +204,11 @@ When committing changes:
         unexpanded stubs in the ledger until probed (Lazy Leaf Materialization);
         pre-populating leaves under unconfirmed branches is strictly forbidden.
         Every spawned child leaf MUST carry an Answer-Anchored Provenance Tag
-        citing the confirmed choice: `- [ ] Leaf N.M: ... (Spawned by '<choice>': ...)`.
-        Furthermore, the agent is strictly forbidden from asserting declarative
-        technical designs, button configurations, countdown cancel behaviors, or
-        state transitions in markdown for topics unconfirmed by the user via
-        `ask_question`.
+        citing the confirmed choice: `- [ ] Leaf N.M: ... (Spawned by
+        '<choice>': ...)`. Furthermore, the agent is strictly forbidden from
+        asserting declarative technical designs, button configurations,
+        countdown cancel behaviors, or state transitions in markdown for topics
+        unconfirmed by the user via `ask_question`.
     2.  *Phase 5b (Post-Ledger Devil's Advocate Analysis — Sequential
         Single-Finding Execution)*: When every branch and child leaf reaches
         `[x]`, the agent MUST NOT immediately converge and MUST NOT dump all
@@ -296,9 +284,9 @@ When committing changes:
     commands (e.g., `./run.sh`, `npm run dev`, background daemon scripts) inside
     a fenced code block, instructing the user to ensure the service stack is
     running. Furthermore, all target destinations MUST be presented as complete,
-    fully qualified URLs inside code blocks (providing both
+    fully qualified, copy-pastable URLs inside code blocks (providing both
     `http://localhost:<PORT>/<path>` and
-    `http://<HOST_IP_OR_DOMAIN>:<PORT>/<path>`), never bare partial
+    `http://<HOSTNAME>.dev.local:<PORT>/<path>`), never bare partial
     routes. The agent guides the user with exact navigation steps and expected
     outcomes, and validates results via `ask_question`. If a discrepancy occurs,
     the agent offers in-flight triage (fix now vs. log and continue). If an
@@ -306,9 +294,9 @@ When committing changes:
     Tracking**, flagging previously verified scenarios for quick re-checking. A
     **Mandatory Post-Testing Reconciliation Gate** strictly enforces that all
     logged discrepancies are resolved, recorded as `[BLOCKING]` review findings,
-    or accepted as `[WARNING]` tech debt before track approval. The agent injects
-    the verified results into `review.md` (`## Interactive Verification Log`)
-    and synchronizes refined commands back to
+    or accepted as `[WARNING]` tech debt before track approval. The agent
+    injects the verified results into `review.md` (`## Interactive Verification
+    Log`) and synchronizes refined commands back to
     `{PROJECT_CONTEXT_DIR}/tracks/<track_id>/manual_testing.md`.
 -   **Safe Key and Secret Rotation** — For credentials, keys, or JWT rotations,
     strictly refuse immediate deletion of legacy keys to prevent service or session

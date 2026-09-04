@@ -103,7 +103,7 @@ DEFINE_bool release_notes false "Show release notes for the current version"
 parse_flags "$@"
 
 
-VERSION="0.21.1"
+VERSION="0.21.2"
 
 # --- Resolve source directory (relative to this script) ---
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -532,8 +532,8 @@ migrate_to_v0_12_0() {
   )
   for base_dir in "${rule_dirs[@]}"; do
     for rf in "${RULE_FILE_NAMES[@]}" "${REFERENCE_FILE_NAMES[@]}" \
-              "geppetto_protocol.md" "geppetto_antigravity.md" "geppetto_google3.md" "geppetto_adr_preflight.md" "geppetto_cdd_protocols.md" \
-              "conductor_protocol.md" "conductor_antigravity.md" "conductor_google3.md" "conductor_adr_preflight.md" "conductor_cdd_protocols.md"; do
+              "geppetto_protocol.md" "geppetto_antigravity.md" "geppetto_enterprise.md" "geppetto_adr_preflight.md" "geppetto_cdd_protocols.md" \
+              "conductor_protocol.md" "conductor_antigravity.md" "conductor_enterprise.md" "conductor_adr_preflight.md" "conductor_cdd_protocols.md"; do
       local target_file="${base_dir}/${rf}"
       if [[ -f "$target_file" ]] && [[ "$target_file" != "${TARGET_RULES_ROOT}/${rf}" ]]; then
         found_legacy+=("$target_file")

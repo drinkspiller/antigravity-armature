@@ -136,7 +136,12 @@ def call_gemini(
           texts = []
           for p in parts:
             if "text" in p and p["text"]:
-              texts.append(p["text"])
+              t = p["text"]
+              if re.search(r"call:(?:[a-zA-Z0-9_]+:)?ask_question|ask_question\s*\{", t):
+                t += "\n[PROTOCOL_VIOLATION: RAW_TOOL_TEXT_LEAK_DETECTED]"
+              if re.search(r"I will now ask[^\n]*$", t.strip()):
+                t += "\n[PROTOCOL_VIOLATION: TRAILING_NARRATION_DETECTED]"
+              texts.append(t)
             elif "functionCall" in p:
               fc = p["functionCall"]
               texts.append(
@@ -165,12 +170,10 @@ def call_gemini(
 
 def parse_agent_turn(turn_text: str):
   """Extracts tool calls, ledger presence, questions, and potential dictations from an agent turn."""
-  has_ask_question = "ask_question" in turn_text or bool(
-      re.search(
-          r"###\s*Question|Question\s*\d*:|options:\s*\[",
-          turn_text,
-          re.IGNORECASE,
-      )
+  has_protocol_violation = "[PROTOCOL_VIOLATION:" in turn_text
+  has_ask_question = (
+      not has_protocol_violation
+      and "[TOOL_CALL: ask_question" in turn_text
   )
   has_ledger = bool(
       re.search(
@@ -383,7 +386,7 @@ def run_trajectory(
   # Unconfounded system instruction: Pure skill text without redundant duplicate prompt rules
   system_instruction = (
       "You are an expert AI software architect running the Armature"
-      " context-driven development system.\nExecute the following"
+      " context-driven development system in enterprise monorepo.\nExecute the following"
       f" skill instructions strictly:\n\n{skill_text}"
   )
 
