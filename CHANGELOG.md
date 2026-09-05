@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.22.2] - 2026-09-05
+
+### Added
+
+-   **Wayfinder Integration into CDD vs SDD Comparative Benchmark Battery (`evals/cdd_sdd_benchmark/configs/frameworks.json`, `eval_results.json`, `cdd_sdd_live_benchmark_results.md`)**:
+    -   **Authentic Baseline Configuration**: Integrated Wayfinder (Matt Pocock's decision-mapping and frontier tracking methodology) into the open-source comparative evaluation harness across all 30 stratified engineering scenarios (120 criteria across 5 pillars).
+    -   **Empirical Scorecard (Rank #4 of 7 Public Frameworks)**: Wayfinder achieved an overall pass rate of **62.5%** (75/120 criteria passed, 95% CI: 53.8%–71.2%, 4,481 avg tokens / task), demonstrating strong Specification Gating (79.2%, 19/24) and Detour Resilience (91.7%, 22/24), but penalized on Surgical Velocity (16.7%, 4/24) due to its core "decisions, not deliverables" mandate refusing code diffs on single-line fixes.
+    -   **Documentation Synchronization**: Synchronized the main `README.md` benchmark scorecard matrix and key takeaways to reflect all 7 public frameworks sorted in strict descending order of criteria passed.
+
 ## [0.22.1] - 2026-09-05
 
 ### Fixed

@@ -67,5 +67,16 @@
       "memory-bank/activeContext.md": "# Active Context\nRefactoring user endpoints and migrating service interfaces.",
       "memory-bank/progress.md": "# Progress\n- [x] Initial service scaffolding\n- [ ] Endpoint migration"
     }
+  },
+  "wayfinder": {
+    "name": "Wayfinder",
+    "slug": "wayfinder",
+    "paradigm": "Issue-Driven Decision Mapping",
+    "description": "Planning skill that charts complex efforts as a shared map of decision tickets on an issue tracker, resolving questions one at a time until the route is clear ('Plan, don't do').",
+    "system_instruction": "You are an AI coding assistant following the Wayfinder methodology.\n\nCORE PRINCIPLES:\n1. Plan, Don't Do: Wayfinder is planning by default. Each ticket resolves a decision, not slices of a build. Produce decisions, not deliverables. The map is done when the way is clear, with nothing left to decide before someone goes and does the work.\n2. The Shared Map: Maintain a single canonical map issue (labelled wayfinder:map) containing Destination (what reaching the end looks like), Notes (domain rules, skills, preferences), Decisions So Far (one-line gist per closed ticket linking to detail), Not Yet Specified (fog of war sketch for in-scope questions not yet sharp enough to ticket), and Out of Scope (work ruled beyond destination).\n3. Decision Tickets: Child issues of the map. Each ticket's body is a single question sized to one agent session. Ticket types: research, prototype, grilling, task.\n4. Frontier & Blocking: Unblocked tickets form the active frontier (open, unblocked, unclaimed children). Claim a ticket before working it. Resolve one ticket per session.\n5. Fog of War vs. Tickets: Ticket when the question can be stated precisely now, even if blocked. Keep in Not Yet Specified when foggy. Fog graduates into tickets as the frontier advances. Out-of-scope work never graduates.\n6. Breadth-First Mapping: Grill breadth-first across the whole problem space to surface open decisions and first steps. If this surfaces no fog (journey is small and clear for one session), do not create a map; stop and ask the user how to proceed.\n7. Refer by Name: Refer to maps and tickets by their human-readable title/name, never bare IDs or numbers.",
+    "context_files": {
+      "issues/map.md": "# Map: User Management Service Modernization\n\n## Destination\nA clear technical decision path for migrating user profile endpoints to gRPC with zero downtime.\n\n## Notes\n- Tech: Go, gRPC, SQL\n- Skill: Wayfinding planning\n\n## Decisions so far\n- [Define Target gRPC Service](issues/1.md): Agreed on UserService proto schema.\n\n## Not yet specified\n- Auth token validation strategy during cutover.\n\n## Out of scope\n- Deprecating legacy mobile client versions.",
+      "issues/1.md": "# Define Target gRPC Service\n\n## Question\nWhat service contract should replace the legacy REST UserController?\n\n## Resolution\nAdopt UserService with GetUserProfile and UpdateSettings RPCs."
+    }
   }
 }

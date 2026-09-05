@@ -128,9 +128,10 @@ Armature is benchmarked against alternative Spec-Driven Development (SDD) and Co
 | **#1** | **Armature (OSS)** *(this)* | **78.3 / 100** | **78.3%** (94/120, ±7.4%) | 3338 tokens | High drift governance (79.2%), state safety (83.3%), surgical velocity, and living runbook verification. |
 | **#2** | **BMAD Method** | **71.7 / 100** | **71.7%** (86/120, ±8.1%) | 2645 tokens | Multi-agent agile role separation; high coordination overhead and ceremony on trivial micro-fixes. |
 | **#3** | **GitHub Spec Kit** | **66.7 / 100** | **66.7%** (80/120, ±8.4%) | 3106 tokens | Spec-first rigor with Constitution gating; heavy planning ceremony for minor edits. |
-| **#4** | **Conductor (Canonical Upstream CLI)** | **51.7 / 100** | **51.7%** (62/120, ±8.9%) | 2329 tokens | Efficient linear track orchestration; lacks multi-turn branch resolution and OCC analysis. |
-| **#5** | **OpenSpec** | **49.2 / 100** | **49.2%** (59/120, ±8.9%) | 1703 tokens | Lightweight change proposals; lacks destructive command safeguards and drift tripwires. |
-| **#6** | **Memory Bank (Cline / Roo Code)** | **35.0 / 100** | **35.0%** (42/120, ±8.5%) | 2099 tokens | Stateful markdown memory; vulnerable to out-of-band filesystem drift and safety failures. |
+| **#4** | **Wayfinder** | **62.5 / 100** | **62.5%** (75/120, ±8.7%) | 4481 tokens | Breadth-first frontier decision mapping; strong detour resilience (91.7%), but high ceremony on hotfixes (16.7%). |
+| **#5** | **Conductor (Canonical Upstream CLI)** | **51.7 / 100** | **51.7%** (62/120, ±8.9%) | 2329 tokens | Efficient linear track orchestration; lacks multi-turn branch resolution and OCC analysis. |
+| **#6** | **OpenSpec** | **49.2 / 100** | **49.2%** (59/120, ±8.9%) | 1703 tokens | Lightweight change proposals; lacks destructive command safeguards and drift tripwires. |
+| **#7** | **Memory Bank (Cline / Roo Code)** | **35.0 / 100** | **35.0%** (42/120, ±8.5%) | 2099 tokens | Stateful markdown memory; vulnerable to out-of-band filesystem drift and safety failures. |
 
 ---
 
@@ -226,5 +227,5 @@ Armature preserves **transparent dual-discovery**:
 
 ## Version
 
-Current: **v0.22.1** — See [CHANGELOG.md](CHANGELOG.md) for release notes.
+Current: **v0.22.2** — See [CHANGELOG.md](CHANGELOG.md) for release notes.
 
