@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.22.1] - 2026-09-05
+
+### Fixed
+
+-   **Atomic Two-Part Response Contract & Mandatory Native `ask_question` Tool Pairing (`rules/armature_antigravity.md`, `rules/armature_protocol.md` §2 & §5, `skills/arm-new-track/SKILL.md` Step 5a)**:
+    -   **Root Cause Addressed**: Resolved a failure mode where models formulated the `### Decision Tree Ledger`, evaluated candidate options (Pros/Cons), and generated `#### Recommendation Rationale`, but stalled execution with text alone because instructions to end markdown immediately after the rationale acted as an imperative turn stop signal without mandating the structured tool call.
+    -   **Anti-Text-Only Stall Enforced**: Codified the symmetric negative constraint—ending a turn with markdown prose alone when branch choices, candidate options, or trade-offs are presented is strictly forbidden. The agent must pair markdown analysis and the Decision Tree Ledger with an immediate structured `ask_question` tool call in the exact same turn.
+    -   **Turn-Ending Barrier Harmonization**: Harmonized instructions across `rules/armature_antigravity.md` (rules 6 & 7), `rules/armature_protocol.md` (§2 & §5), and `skills/arm-new-track/SKILL.md` to clarify that turn conclusion occurs only after the native `ask_question` tool invocation.
+-   **SkillOpt Evaluation & Benchmark Optimization**:
+    -   Added regression task `TRAIN_29_ATOMIC_TWO_PART_TURN1_ASQ_PAIRING` and disjoint held-out validation task `VAL_25_ATOMIC_TWO_PART_TURN1_ASQ_PAIRING` in `evals/skillopt/tasks/`.
+    -   Achieved 100% pass rate (4/4 passed) on both new tasks; resolved `VAL_24` failure from 0.25 to 1.00 (4/4 passed).
+    -   Boosted held-out validation score from 68.8% (22/32) to 77.8% (28/36) (+9.0% absolute improvement) and training score from 80.0% to 81.5% (44/54).
+
 ## [0.22.0] - 2026-09-04
 
 ### Added

@@ -119,7 +119,17 @@ code change, or workflow transition:
     -   *Markdown Trade-Off Breakdown (All Design, UX & Architecture Choices):* Precede the `ask_question` call with a punchy, itemized bulleted trade-off breakdown in chat:
         -   *Candidate Approaches:* For each option, list 1–2 punchy, substantive `Pros` and 1–2 `Cons`. Avoid vague generalities or superficial one-word clauses.
         -   *Recommendation Rationale:* Conclude with a 1–2 sentence declarative justification explaining why the recommended option was chosen, grounded in domain constraints (e.g., cognitive load, dialog footprint, latency bounds, or failure resilience).
-        -   *Clean Markdown Termination (Zero Trailing Narration):* End your markdown response immediately after the `Recommendation Rationale` paragraph. NEVER append transitional self-narration sentences at the end of your prose (e.g., *"I will now ask for your decision on..."* or *"Let's call ask_question..."*), which cause token concatenation and break tool parsing. Invoke `ask_question` exclusively as a native structured tool call—never emit raw `call:ask_question{...}` text in the markdown stream.
+        -   *Clean Markdown Termination & Mandatory Tool Call Pair (Zero Trailing Narration & Zero Text-Only Stalls):*
+            End your markdown response immediately after the `Recommendation
+            Rationale` paragraph. NEVER append transitional self-narration
+            sentences at the end of your prose (e.g., *"I will now ask for your
+            decision on..."* or *"Let's call ask_question..."*), which cause
+            token concatenation and break tool parsing. Immediately invoke
+            `ask_question` exclusively as a native structured tool call in the
+            same turn—never emit raw `call:ask_question{...}` text in the
+            markdown stream, and NEVER end your turn after markdown without
+            invoking `ask_question` when choices, branches, or trade-offs are
+            presented.
     -   *Modal Parameters (`ask_question`):*
         -   List the recommended option first with `(Recommended)`, followed by alternative approaches phrased cleanly in the user's voice.
         -   *Trailing Elaboration Option (Systems & Architecture Only):* Append a trailing choice (`"Compare technical trade-offs and failure modes in detail"`) **ONLY** for complex systems, data model, or infrastructure architecture decisions where deep-dive performance or failure analysis adds value. **NEVER** append an elaboration option to `ask_question` for UX copywriting, visual presentation, layout styling, empirical QA verification checks, safety confirmations, or procedural approvals.
@@ -216,7 +226,11 @@ first. Do NOT create empty commits.
         '<choice>': ...)`. Furthermore, the agent is strictly forbidden from
         asserting declarative technical designs, button configurations,
         countdown cancel behaviors, or state transitions in markdown for topics
-        unconfirmed by the user via `ask_question`.
+        unconfirmed by the user via `ask_question`. Every turn presenting choices
+        MUST pair markdown analysis and the Decision Tree Ledger with an immediate
+        native `ask_question` tool call in the exact same turn; ending a turn with
+        text alone when choices are presented or emitting bare `ask_question`
+        without markdown text are both strictly forbidden.
     2.  *Phase 5b (Post-Ledger Devil's Advocate Analysis — Sequential
         Single-Finding Execution)*: When every branch and child leaf reaches
         `[x]`, the agent MUST NOT immediately converge and MUST NOT dump all

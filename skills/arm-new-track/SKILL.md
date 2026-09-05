@@ -47,23 +47,24 @@ resolving all open branches and ambiguities.
     Probing depth is strictly bounded to Depth <= 2 (Root Topic -> Operational
     Child Leaf). Operational leaf answers are terminal (`[x]`) and MUST NOT
     spawn Level 2 grandchildren.
--   **Option Trade-Off Formatting & Clean Tool Termination:** In EVERY turn of
-    Step 5 where choices are presented, you MUST precede `ask_question` with a
-    punchy, itemized bulleted trade-off breakdown detailing 1–2 concise `Pros`
-    and 1–2 `Cons` per candidate approach, followed by a 1–2 sentence
-    `Recommendation Rationale`. End your markdown response immediately after the
-    `Recommendation Rationale` paragraph with a clean newline. NEVER append
-    transitional self-narration sentences at the end of your text (e.g., *"I will
-    now ask for your decision on..."* or *"Let's call ask_question..."*), which
-    cause token concatenation and break tool parsing. Invoke `ask_question`
-    exclusively as a native structured tool call—never emit raw
-    `call:ask_question{...}` strings in the markdown stream. In
-    `ask_question`, list the recommended choice first with `(Recommended)` and
-    append a trailing choice: `"Elaborate on trade-offs and failure modes between
-    these options"` strictly for systems/architecture choices. Never add a manual
-    "Other" option (the UI modal natively provides a write-in field). If the user
-    selects elaboration, provide a deep-dive analysis and re-prompt the concrete
-    options.
+-   **Option Trade-Off Formatting & Mandatory Tool Pairing (Zero Text-Only Stalls):**
+    In EVERY turn of Step 5 where choices are presented, you MUST pair a punchy,
+    itemized bulleted trade-off breakdown (1–2 concise `Pros` and 1–2 `Cons` per
+    candidate approach, plus a 1–2 sentence `Recommendation Rationale`) with an
+    immediate native `ask_question` tool call in the exact same turn. End your
+    markdown response immediately after the `Recommendation Rationale` paragraph
+    with a clean newline. NEVER append transitional self-narration sentences at
+    the end of your text (e.g., *"I will now ask for your decision on..."* or
+    *"Let's call ask_question..."*), which cause token concatenation and break
+    tool parsing. Invoke `ask_question` exclusively as a native structured tool
+    call in that exact same turn—never emit raw `call:ask_question{...}` strings
+    in the markdown stream, and NEVER end your turn after markdown without calling
+    `ask_question`. In `ask_question`, list the recommended choice first with
+    `(Recommended)` and append a trailing choice: `"Elaborate on trade-offs and
+    failure modes between these options"` (systems and architecture decisions
+    only). Never add a manual "Other" option (the UI modal natively provides a
+    write-in field). If the user selects elaboration, provide a deep-dive
+    analysis and re-prompt the concrete options.
 -   **Compound Directive Shielding:** If the user invokes `/arm-new-track`
     alongside other instructions (e.g., `/diagnose`, `Fix`, or implementation
     tasks), you MUST explicitly refuse to write code or generate `plan.md`
@@ -152,12 +153,16 @@ resolving all open branches and ambiguities.
 
     -   **Phase 5a: Dynamic Leaf Traversal & Ambiguity Elicitation**:
 
-        -   **Mandatory Decision Tree Ledger Block**: In EVERY turn of Step 5,
-            you MUST output a visible `### Decision Tree Ledger` block at the
-            top of your markdown response, followed by markdown analysis of the
-            active branch, before invoking `ask_question`. You are STRICTLY
-            FORBIDDEN from emitting a bare `ask_question` tool call without
-            preceding markdown text and the ledger block. Format:
+        -   **Mandatory Decision Tree Ledger Block & Atomic Two-Part Turn**:
+            In EVERY turn of Step 5, you MUST output a visible `### Decision
+            Tree Ledger` block at the top of your markdown response, followed by
+            markdown analysis and candidate approaches for the active branch,
+            and IMMEDIATELY invoke the native `ask_question` tool call in that
+            same turn before concluding. You are STRICTLY FORBIDDEN from
+            emitting a bare `ask_question` tool call without preceding markdown
+            text and the ledger block, AND you are EQUALLY STRICTLY FORBIDDEN
+            from outputting markdown analysis or ledger branches without calling
+            `ask_question` in that exact same turn (Zero Text-Only Stalls). Format:
 
             ```markdown
             ### Decision Tree Ledger
@@ -238,14 +243,17 @@ resolving all open branches and ambiguities.
                 sentences explaining why the recommended option was chosen,
                 grounded in codebase constraints, latency, memory budgets,
                 schema migrations, or failure resilience.
-            -   **Clean Markdown Termination (Zero Trailing Narration):** End your
-                markdown response immediately after the `Recommendation Rationale`
-                paragraph. NEVER append transitional self-narration sentences at
-                the end of your prose (e.g., *"I will now ask for your decision
-                on..."* or *"Let's call ask_question..."*), which cause token
-                concatenation and break tool parsing. Invoke `ask_question`
-                exclusively as a native structured tool call—never emit raw
-                `call:ask_question{...}` text in the markdown stream.
+            -   **Clean Markdown Termination & Mandatory Native Tool Call Pairing (Zero Trailing Narration & Zero Text-Only Stalls):**
+                End your markdown prose immediately after the `Recommendation
+                Rationale` paragraph. NEVER append transitional self-narration
+                sentences at the end of your prose (e.g., *"I will now ask for
+                your decision on..."* or *"Let's call ask_question..."*), which
+                cause token concatenation and break tool parsing. Immediately
+                invoke `ask_question` exclusively as a native structured tool
+                call in the same turn—never emit raw `call:ask_question{...}`
+                text in the markdown stream, and NEVER end your turn after
+                markdown without calling `ask_question` when presenting choices,
+                branches, or trade-offs.
             -   **Modal Parameters (`ask_question`):**
                 -   Ask questions **strictly one at a time**.
                 -   List the recommended option first with `(Recommended)` and
@@ -259,7 +267,8 @@ resolving all open branches and ambiguities.
                 failure cascades, memory bounds, migration costs) and re-prompt the
                 concrete choices.
             -   **MANDATORY:** End your turn after each `ask_question` call to
-                wait for the user's answer.
+                wait for the user's answer. Never end your turn before calling
+                `ask_question` when choices, branches, or decisions are presented.
 
         -   **Inline Glossary Elicitation (`terms.md`)**: If a decision
             introduces domain terminology, offer to record it in
