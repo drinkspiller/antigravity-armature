@@ -7,7 +7,7 @@
 
 set -e
 
-INSTALLED_VERSION="0.22.0"
+INSTALLED_VERSION="0.22.1"
 
 # --- Upstream Configuration ---
 UPSTREAM_MODE="github_raw"
